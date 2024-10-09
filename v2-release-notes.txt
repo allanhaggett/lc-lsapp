@@ -1,0 +1,15 @@
+# LSApp Version 2 Release Notes
+
+I started to do a little bit to update the course change request form on 
+Friday afternoon and once I fell down the rabbit hole of redesigning the 
+course page, it avalanched on me from there to obbessively spending the
+whole weekend giving the whole thing a facelift and adding numerous new
+features and simplifications.
+
+* Updated to Bootstrap 5.3 from BC Gov Bootstrap based on 4.3; badges pose particular hassle. Loss of BC Sans font and color scheme for now.
+* New course taxonomies supported from main course index page, through to quick update tools on the index and the course page itself.
+* Complete visual overhaul to simplify and move away from "cards".
+* Course page redesign for re-organization and only showing in-progress change requests
+    * 
+* Dashboard complete re-design obviates need for main admin dashboard, exposing much more information in a more compact and efficient way.
+* Footer added with links.
