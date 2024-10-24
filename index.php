@@ -1,5 +1,5 @@
 <?php
-
+// testing commits
 require('inc/lsapp.php');
 // Get the full course list
 $courses = getCourses();
