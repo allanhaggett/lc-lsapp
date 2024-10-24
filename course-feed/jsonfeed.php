@@ -32,7 +32,7 @@ if (($handle = fopen("data/courses.csv", "r")) !== FALSE) {
 
 $json = '{' . PHP_EOL;
 $json .= '"version": "https://jsonfeed.org/version/1",' . PHP_EOL;
-$json .= '"title": "PSA Learning System Courses",' . PHP_EOL;
+$json .= '"title": "BC Gov Corporate Learning Courses",' . PHP_EOL;
 $json .= '"home_page_url": "https://learningcentre.gww.gov.bc.ca/learninghub/",' . PHP_EOL;
 $json .= '"feed_url": "https://learn.bcpublicservice.gov.bc.ca/learning-hub/learning-partner-courses.json",' . PHP_EOL;
 $json .= '"items": [' . PHP_EOL;
@@ -49,7 +49,7 @@ foreach($datas as $course) {
         $json .= '"title":"' . $course['Course Name'] . '",' . PHP_EOL;
         $json .= '"summary":"'. $desc . '",' . PHP_EOL;
         $json .= '"content_text":"' . $course['Course Name'] . '",' . PHP_EOL;
-        $json .= '"content_html":"<h1>' . $course['Course Name'] . '</h1>",' . PHP_EOL;
+        $json .= '"content_html":"<div>' . $course['Course Name'] . '</div>",' . PHP_EOL;
         $json .= '"delivery_method":"' . $course['Delivery Method'] . '",' . PHP_EOL;
         $json .= '"_available_classes":"' . $course['Available Classes'] . '",' . PHP_EOL;
         $json .= '"_course_id":"' . $course['Course ID'] . '",' . PHP_EOL;
@@ -59,6 +59,7 @@ foreach($datas as $course) {
         $json .= '"_topic":"' . $course['Topic'] . '",' . PHP_EOL;
         //$json .= '"duration":"' . $course['Days'] . '",' . PHP_EOL;
         $json .= '"_learning_partner":"' . $course['Course Owner Org'] . '",' . PHP_EOL;
+        $json .= '"_external_system":"PSA Learning System",' . PHP_EOL;
         $json .= '"author":"' . $course['Course Owner Org'] . '",' . PHP_EOL;
         $json .= '"date_published":"2020-05-13T14:00:00",' . PHP_EOL;
         $json .= '"date_modified":"' . $newDate . '",' . PHP_EOL;
