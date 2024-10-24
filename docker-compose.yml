@@ -1,0 +1,16 @@
+version: '3'
+services:
+  web:
+    image: lsapp
+    ports:
+      - "8080:8080"
+    volumes:
+      - app-data:/Users/ahaggett/Public/lsappdata  # Mount the PVC
+
+volumes:
+  app-data:
+    driver: local
+    driver_opts:
+      o: bind
+      type: none
+      device: data  # Host path to the PVC

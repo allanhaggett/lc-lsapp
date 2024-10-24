@@ -58,8 +58,6 @@ $newaudit = Array(
             'CurrentOrganizationalMeasureBaseline' => $_POST['CurrentOrganizationalMeasureBaseline'],
             'LearningMetric' => $_POST['LearningMetric'],
             'SupportChangingSkills' => $_POST['SupportChangingSkills'],
-            'AlignOrganizationalGoals' => $_POST['AlignOrganizationalGoals'],
-
 
             'BCPSPrincipleLearnerCentre' => $_POST['BCPSPrincipleLearnerCentre'],
             'BCPSPrincipleLearnerCentreSupportYes' => $_POST['BCPSPrincipleLearnerCentreSupportYes'],

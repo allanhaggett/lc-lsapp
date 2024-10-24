@@ -100,32 +100,12 @@ RUN { \
 		echo 'error_log=/var/log/php_errors.log'; \
 	} > /usr/local/etc/php/conf.d/opcache-recommended.ini
 
-RUN php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');" && \
-	php composer-setup.php && \
-	mv composer.phar /usr/local/bin/composer && \
-	php -r "unlink('composer-setup.php');"
-
 WORKDIR /var/www/html
 COPY . /var/www/html
 RUN mkdir /var/www/html/logs
 RUN chmod 777 /var/www/html/logs
 
-ENV COMPOSER_MEMORY_LIMIT=-1
-RUN composer install --optimize-autoloader --no-interaction
-
-# RUN mkdir -p /var/www/html/vendor/CakeDC/Auth/Social/Mapper
-# RUN mkdir -p /var/www/html/vendor/cakedc/users/src/Controller/Traits
-# RUN mkdir -p /var/www/html/vendor/cakedc/users/src/Model/Table
-# RUN mkdir -p /var/www/html/vendor/cakedc/users/src/Model/Behavior
-# RUN mkdir -p /var/www/html/vendor/cakedc/users/src/Model/Entity
-# RUN cp /var/www/html/config/tocopy/AzureMapper.php /var/www/html/vendor/cakedc/auth/src/Social/Mapper/Azure.php
-# RUN cp /var/www/html/config/tocopy/ProfileTrait.php /var/www/html/vendor/cakedc/users/src/Controller/Traits/ProfileTrait.php
-# RUN cp /var/www/html/config/tocopy/Azure.php /var/www/html/vendor/thenetworg/oauth2-azure/src/Provider/Azure.php
-# RUN cp /var/www/html/config/tocopy/UsersTable.php /var/www/html/vendor/cakedc/users/src/Model/Table/UsersTable.php
-# RUN cp /var/www/html/config/tocopy/SocialBehavior.php /var/www/html/vendor/cakedc/users/src/Model/Behavior/SocialBehavior.php
-# RUN cp /var/www/html/config/tocopy/SimpleCrudTrait.php /var/www/html/vendor/cakedc/users/src/Controller/Traits/SimpleCrudTrait.php
-# RUN cp /var/www/html/config/tocopy/UserEntities.php /var/www/html/vendor/cakedc/users/src/Model/Entity/User.php
-# RUN chown -R www-data:www-data *
+RUN chown -R www-data:www-data /var/www/html
 
 USER root
 
@@ -146,5 +126,4 @@ EXPOSE 8080
 RUN sed -i 's/80/8080/g' /etc/apache2/ports.conf
 RUN cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
 RUN apt-get update
-RUN apt-get install -y netcat
 RUN service apache2 restart

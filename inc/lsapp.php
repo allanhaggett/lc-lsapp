@@ -21,7 +21,7 @@ $loggedinuser = stripIDIR($_SERVER["REMOTE_USER"]);
 // Last synchronization message for everywhere
 $today = date('Y-m-d');
 $lastsyncmessage = '';
-$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\data\elm.csv';
+$path = $_SERVER['DOCUMENT_ROOT'] . '/data/elm.csv';
 $lastsync = date ("Y-m-d", filemtime($path));
 if($lastsync != $today) {
 	$lastsyncmessage = '<span class="badge bg-dark text-white d-inline-block me-2"';
@@ -127,7 +127,7 @@ function getELMClasses() {
 // Return all classes for a given courseID
 //
 function getCourseClasses($courseid) {
-	$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\data\classes.csv';
+	$path = $_SERVER['DOCUMENT_ROOT'] . '/data/classes.csv';
 	$f = fopen($path, 'r');
 	$list = array();
 	while ($row = fgetcsv($f)) {
@@ -153,7 +153,7 @@ function getCourseClasses($courseid) {
 // Return all classes for a given courseID
 //
 function getCourseAudits($courseid) {
-	$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\data\backups\audits.csv';
+	$path = $_SERVER['DOCUMENT_ROOT'] . '/data/backups\audits.csv';
 	$f = fopen($path, 'r');
 	$list = array();
 	while ($row = fgetcsv($f)) {
@@ -171,7 +171,7 @@ function getCourseAudits($courseid) {
 // Return just the next class for a given courseID
 //
 function getCourseNextClass($courseid) {
-	$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\data\classes.csv';
+	$path = $_SERVER['DOCUMENT_ROOT'] . '/data/classes.csv';
 	$f = fopen($path, 'r');
 	$list = array();
 	while ($row = fgetcsv($f)) {
@@ -274,7 +274,7 @@ function getVenueRooms($venueid) {
 function getUserReviews($idir) {
 	
 	
-	$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\data\backups\audits.csv';
+	$path = $_SERVER['DOCUMENT_ROOT'] . '/data/backups\audits.csv';
 	$f = fopen($path, 'r');
 	$list = array();
 	while ($row = fgetcsv($f)) {
@@ -545,7 +545,7 @@ function getCoursesClaimed($idir) {
 // courseID's are the courses' item code from ELM
 //
 function getCourse($cid) {
-	$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\data\courses.csv';
+	$path = $_SERVER['DOCUMENT_ROOT'] . '/data/courses.csv';
 	$f = fopen($path, 'r');
 	$course = '';
 	while ($row = fgetcsv($f)) {
@@ -562,7 +562,7 @@ function getCourse($cid) {
 // as the keys
 //
 function getCourseDeets($cid) {
-	$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\data\courses.csv';
+	$path = $_SERVER['DOCUMENT_ROOT'] . '/data/courses.csv';
 	$f = fopen($path, 'r');
 	$course = '';
 	while ($row = fgetcsv($f)) {
@@ -579,7 +579,7 @@ function getCourseDeets($cid) {
 //
 function getCourseByAbbreviation($cid) {
 	
-	$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\data\courses.csv';
+	$path = $_SERVER['DOCUMENT_ROOT'] . '/data/courses.csv';
 	$f = fopen($path, 'r');
 	$course = '';
 	while ($row = fgetcsv($f)) {
@@ -598,7 +598,7 @@ function getCourseByAbbreviation($cid) {
 // a million functions in here.
 function getCourses() {
 	
-	$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\data\courses.csv';
+	$path = $_SERVER['DOCUMENT_ROOT'] . '/data/courses.csv';
 	$f = fopen($path, 'r');
 	
 	$list = array();
@@ -624,7 +624,7 @@ function getCourses() {
 
 
 function getPartnersNew() {
-	$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\data\learning_partners.json';
+	$path = $_SERVER['DOCUMENT_ROOT'] . '/data/learning_partners.json';
 	$p = file_get_contents($path);
 	$list = json_decode($p);
 	return $list;
@@ -640,7 +640,7 @@ function getPartnersNew() {
 // a million functions in here.
 function getPartners() {
 	
-	$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\data\learning-hub-partners.csv';
+	$path = $_SERVER['DOCUMENT_ROOT'] . '/data/learning-hub-partners.csv';
 	$f = fopen($path, 'r');
 	
 	$list = array();
@@ -658,7 +658,7 @@ function getPartners() {
 // a million functions in here.
 function getPartnerDetails($partnername) {
 	
-	$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\data\learning-hub-partners.csv';
+	$path = $_SERVER['DOCUMENT_ROOT'] . '/data/learning-hub-partners.csv';
 	$f = fopen($path, 'r');
 	
 	$list = '';
@@ -676,7 +676,7 @@ function getPartnerDetails($partnername) {
 //
 function getCoursesByPartnerName($partnername) {
 	
-	$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\data\courses.csv';
+	$path = $_SERVER['DOCUMENT_ROOT'] . '/data/courses.csv';
 	$f = fopen($path, 'r');
 	
 	$list = array();
@@ -711,7 +711,7 @@ function getCoursesByPartnerName($partnername) {
 // a million functions in here.
 function getCoursesActive() {
 	
-	$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\data\courses.csv';
+	$path = $_SERVER['DOCUMENT_ROOT'] . '/data/courses.csv';
 	$f = fopen($path, 'r');
 	
 	$list = array();
@@ -747,7 +747,7 @@ function getCourseList() {
 //
 function getCoursesByCategory($category) {
 	
-	$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\data\courses.csv';
+	$path = $_SERVER['DOCUMENT_ROOT'] . '/data/courses.csv';
 	$f = fopen($path, 'r');
 	$list = array();
 	while ($row = fgetcsv($f)) {
@@ -767,7 +767,7 @@ function getCoursesByCategory($category) {
 //
 function getCoursesByTopic($topic) {
 	
-	$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\data\courses.csv';
+	$path = $_SERVER['DOCUMENT_ROOT'] . '/data/courses.csv';
 	$f = fopen($path, 'r');
 	$list = array();
 	while ($row = fgetcsv($f)) {
@@ -784,7 +784,7 @@ function getCoursesByTopic($topic) {
 //
 function getCoursesByAudience($audience) {
 	
-	$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\data\courses.csv';
+	$path = $_SERVER['DOCUMENT_ROOT'] . '/data/courses.csv';
 	$f = fopen($path, 'r');
 	$list = array();
 	while ($row = fgetcsv($f)) {
@@ -802,7 +802,7 @@ function getCoursesByAudience($audience) {
 //
 function getCoursesByLevels($levels) {
 	
-	$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\data\courses.csv';
+	$path = $_SERVER['DOCUMENT_ROOT'] . '/data/courses.csv';
 	$f = fopen($path, 'r');
 	$list = array();
 	while ($row = fgetcsv($f)) {
@@ -820,7 +820,7 @@ function getCoursesByLevels($levels) {
 //
 function getCoursesByReporting($level) {
 	
-	$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\data\courses.csv';
+	$path = $_SERVER['DOCUMENT_ROOT'] . '/data/courses.csv';
 	$f = fopen($path, 'r');
 	$list = array();
 	while ($row = fgetcsv($f)) {
@@ -840,7 +840,7 @@ function getCoursesByReporting($level) {
 // Return all course categories in a simple array
 //
 function getCategories() {
-	$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\data\categories.csv';
+	$path = $_SERVER['DOCUMENT_ROOT'] . '/data/categories.csv';
 	$f = fopen($path, 'r');
 	fgetcsv($f);
 	$list = array();
@@ -854,7 +854,7 @@ function getCategories() {
 // Return all course categories in a simple array
 //
 function getCategory($category_name) {
-	$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\data\categories.csv';
+	$path = $_SERVER['DOCUMENT_ROOT'] . '/data/categories.csv';
 	$f = fopen($path, 'r');
 	fgetcsv($f);
 	
@@ -1025,7 +1025,7 @@ function getTips() {
 // Get a list of colleagues
 //
 function getPeopleAll() {
-	$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\data\people.csv';
+	$path = $_SERVER['DOCUMENT_ROOT'] . '/data/people.csv';
 	$f = fopen($path, 'r');
 	fgetcsv($f); // Pop off the header
 	$list = array();
@@ -1578,7 +1578,7 @@ function getAV($avid) {
 // Get the link list for the Resources drop-down in the header
 // 
 function getLinks() {
-	$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\data\links.csv';
+	$path = $_SERVER['DOCUMENT_ROOT'] . '/data/links.csv';
 	$f = fopen($path, 'r');
 	$links = array();
 	fgetcsv($f);
@@ -1904,7 +1904,7 @@ function getAudits() {
 //
 function canAccess() {
 	$user = stripIDIR($_SERVER["REMOTE_USER"]);
-	$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\data\people.csv';
+	$path = $_SERVER['DOCUMENT_ROOT'] . '/data/people.csv';
 	$f = fopen($path, 'r');
 	$yup = 0;
 	while ($row = fgetcsv($f)) {
@@ -1921,7 +1921,7 @@ function canAccess() {
 //
 function isAdmin() {
 	$user = stripIDIR($_SERVER["REMOTE_USER"]);
-	$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\data\people.csv';
+	$path = $_SERVER['DOCUMENT_ROOT'] . '/data/people.csv';
 	$f = fopen($path, 'r');
 	$yup = 0;
 	while ($row = fgetcsv($f)) {
@@ -1938,7 +1938,7 @@ function isAdmin() {
 //
 function isSuper() {
 	$user = stripIDIR($_SERVER["REMOTE_USER"]);
-	$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\data\people.csv';
+	$path = $_SERVER['DOCUMENT_ROOT'] . '/data/people.csv';
 	$f = fopen($path, 'r');
 	$yup = 0;
 	while	($row = fgetcsv($f)) {
@@ -2017,7 +2017,8 @@ function getAllTopics () {
 		'Leadership',
 		'Policy and Regulation',
 		'Procurement and Contract Management',
-		'Project Management'
+		'Project Management',
+		'Respectful Workplaces'
 	];
 }
 

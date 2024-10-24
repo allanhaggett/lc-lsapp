@@ -1,6 +1,6 @@
 <?php 
 
-$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\inc\lsapp.php';
+$path = $_SERVER['DOCUMENT_ROOT'] . '/inc/lsapp.php';
 require($path);
 $topicid = (isset($_GET['topic'])) ? $_GET['topic'] : 0;
 $topic = urldecode($topicid); 
