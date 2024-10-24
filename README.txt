@@ -70,32 +70,7 @@ Dashboards
 	- Person dashboards list every pertinent thing for that person
 
 ##ROADMAP
-Categories, Regions
-Role refinements
-	- e.g. External folks can't see facilitators?
-Enhanced venues management
-	- Change requests
-	- Notes
-Enhanced materials inventory
-	- Published file attached (w/versioning)
-	- Change requests
-	- New orders support
-Enhanced Checklist management
-	- Change requests
-Basic Kiosk for front door display
-Email support e.g. automatically send emails on requests; notes; changes etc
-Dark mode switch :)
-Improve error handling
-Improve custom work flows
-Export class dates older than 12 months(?) to different file(s)
-**Export all requests to ELM XML import file; import all classes automatically**
-Calendar support? Outlook subscribe
-Map support
-Better rich text support (Markdown?)
-@Work Course Catalog export/sync
-Fully integrated Purolator workflow for waybill/label creation
-Migrate this all to a proper relational database and proper programming framework
-If shipment hasn't gone out in critical time frame, send email alert
+
 
 Note: naming all this stuff is NO FUN. Both "session" and "class" are, like, protected words in programming.
 
@@ -118,6 +93,7 @@ Prerequisites,Keywords,Category,Method,elearning,WeShip,ProjectNumber,Responsibi
 //38-Topics,39-Audience,40-Levels,41-Reporting
 //42-PathLAN,43-PathStaging,44-PathLive,45-PathNIK,46-PathTeams
 // 47-isMoodle,48-TaxProcessed,49-TaxProcessedBy,50-ELMCourseID,51-Modified
+// 52-HUBInclude, 53-
 
 
 

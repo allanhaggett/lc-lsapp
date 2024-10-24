@@ -169,7 +169,6 @@ if (($handle = fopen("data/GBC_LEARNINGHUB_SYNC2.csv", "r")) !== FALSE) {
         
         $method = $course['Delivery Method'];
 
-
         if(strlen($course['Category']) > 0) {
             
             $taxtype = $course['Short Name'];
@@ -187,7 +186,10 @@ if (($handle = fopen("data/GBC_LEARNINGHUB_SYNC2.csv", "r")) !== FALSE) {
             $cats = rtrim($cats,',');
 
         } else {
-
+            // #TODO This is basically failing silently; this is a missed opportunity to 
+            // validate the info as it's coming though and throw warnings when it's wrong.
+            // Every course must have an audience, a group, and a topic set. Something is 
+            // wrong if they don't.
             $cats = '';
             $audience = '';
             $group = '';
@@ -288,6 +290,11 @@ foreach($newcourses as $c) {
     }
 }
 
+// These are the columns directly from the ELM query CSV export:
+// "Course Code","Course Name","Course Description","Delivery Method","Category","Learner Group",
+// "Days","Hours","Minutes","Available Classes","Course ID","Course Last Modified","Course Owner Org","Link to ELM Search","Short Name"
+// #TODO doesn't make much sense to mirror the structure from the ELM query.
+
 $final_cols = ['Course Code',
                 'Course Name',
                 'Course Description',
@@ -321,7 +328,8 @@ foreach ($courz as $fields) {
 // Close the file
 fclose($fp);
 // Redirect 
-header('Location: jsonfeed.php');
+// header('Location: jsonfeed.php');
+header('Location: lhub-course-sync.php');
 
 
 

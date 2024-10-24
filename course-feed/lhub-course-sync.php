@@ -107,7 +107,8 @@ foreach($hubcourses as $hc) {
 
 	}
 }
-header('Location: index.php?message=Success');
+// header('Location: index.php?message=Success');
+header('Location: jsonfeed.php');
 ?>
 <?php else: ?>
 <?php include('templates/noaccess.php') ?>

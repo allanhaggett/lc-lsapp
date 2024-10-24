@@ -85,4 +85,5 @@ if (!copy($jsoname, $newfile)) {
     exit;
 }
 
-header('Location: lhub-course-sync.php');
+// header('Location: lhub-course-sync.php');
+header('Location: index.php?message=Success');
