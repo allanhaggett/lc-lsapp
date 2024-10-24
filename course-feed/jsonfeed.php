@@ -1,4 +1,5 @@
 <?php 
+
 opcache_reset();
 
 if (($handle = fopen("data/courses.csv", "r")) !== FALSE) {
@@ -32,7 +33,7 @@ if (($handle = fopen("data/courses.csv", "r")) !== FALSE) {
 
 $json = '{' . PHP_EOL;
 $json .= '"version": "https://jsonfeed.org/version/1",' . PHP_EOL;
-$json .= '"title": "BC Gov Corporate Learning Courses",' . PHP_EOL;
+$json .= '"title": "BC Gov Corporate Learning Courses - Forward!",' . PHP_EOL;
 $json .= '"home_page_url": "https://learningcentre.gww.gov.bc.ca/learninghub/",' . PHP_EOL;
 $json .= '"feed_url": "https://learn.bcpublicservice.gov.bc.ca/learning-hub/learning-partner-courses.json",' . PHP_EOL;
 $json .= '"items": [' . PHP_EOL;
