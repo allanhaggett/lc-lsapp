@@ -4,10 +4,6 @@ opcache_reset();
 //
 // Learning Support Administration Application (LSAPP)
 //
-// Look, I know this is not a great way to write code. I did it right the first
-// time.  This time was fast and dirty; very dirty. The plan isn't really to 
-// spend a ton of time refactoring any of this. This should all be replaced as 
-// soon as it's practical to do so with a proper database and framework
 
 date_default_timezone_set('America/Los_Angeles');
 
