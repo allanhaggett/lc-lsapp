@@ -11,7 +11,7 @@ if(isAdmin()):
 	if(isset($_POST['ELMStatus'])) {
 		$elm = $_POST['ELMStatus'];
 	}
-	$user = stripIDIR($_SERVER["REMOTE_USER"]);
+	$user = LOGGED_IN_IDIR;
 	$f = fopen('data/classes.csv','r');
 	$temp_table = fopen('data/classes-temp.csv','w');
 	$headers = fgetcsv($f);

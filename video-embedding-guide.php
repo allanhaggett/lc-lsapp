@@ -1,6 +1,6 @@
 <?php 
 require('inc/lsapp.php');
-$idir = stripIDIR($_SERVER["REMOTE_USER"]);
+$idir = LOGGED_IN_IDIR;
 $person = getPerson($idir);
 $keplerpeople = getKeplerPeople();
 $istorepeople = getiStoreDesignees();

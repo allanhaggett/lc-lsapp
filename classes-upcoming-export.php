@@ -12,7 +12,7 @@ require('phpexcel/PHPExcel.php');
 $fulldate = date('Y-m-d');
 
 $desc = "LSApp Export";
-$modifiedby = stripIDIR($_SERVER["REMOTE_USER"]);
+$modifiedby = LOGGED_IN_IDIR;
 $phpxl = new PHPExcel();
 $phpxl->getProperties()->setCreator("Allan Haggett")
 				 ->setLastModifiedBy($modifiedby)

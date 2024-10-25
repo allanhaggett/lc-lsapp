@@ -5,7 +5,7 @@ require('inc/lsapp.php');
 
 if(canAccess()):
 
-$currentuser = stripIDIR($_SERVER["REMOTE_USER"]);
+$currentuser = LOGGED_IN_IDIR;
 $now = date('YmdHis');
 $ccode = $_POST['CourseCode'];
 $course = getCourse($ccode);
@@ -115,7 +115,7 @@ foreach ($allclasses as $fields) {
 }
 fclose($fp);
 //header('Location: /lsapp/course.php?courseid=' . $course[0]);
-header('Location: /lsapp/person.php?idir=' . stripIDIR($_SERVER["REMOTE_USER"]));
+header('Location: /lsapp/person.php?idir=' . LOGGED_IN_IDIR);
 
 else:
 	include('templates/noaccess.php');

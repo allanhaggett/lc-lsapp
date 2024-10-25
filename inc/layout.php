@@ -300,8 +300,8 @@ function getNavigation($context = NULL) {
 		    <?php endif; // canAccess? ?>
       </ul>
 	  <?php if(canAccess() && $context != 'footer'): ?>
-	<?php $user = stripIDIR($_SERVER["REMOTE_USER"]) ?>
-	Welcome,&nbsp;<a class="nav-link ml-1" href="/lsapp/person.php?idir=<?= $user ?>"><?= $user ?></a>. <?php echo date('D M dS') ?>&nbsp; <span id="clock"></span>
+
+	Welcome,&nbsp;<a class="nav-link ml-1" href="/lsapp/person.php?idir=<?= $user ?>"><?= LOGGED_IN_IDIR ?></a>. <?php echo date('D M dS') ?>&nbsp; <span id="clock"></span>
 	<a role="button" class="btn btn-sm btn-primary ms-3" href="/lsapp/requests.php">Requests</a>
 	<?php endif ?>
     </div>

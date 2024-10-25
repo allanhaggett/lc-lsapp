@@ -12,7 +12,7 @@ fputcsv($temp_table,$headers);
 	
 $orderid = h($fromform['OrderID']);
 $modified = date('Y-m-d');
-$modifiedby = stripIDIR($_SERVER["REMOTE_USER"]);
+$modifiedby = LOGGED_IN_IDIR;
 $matid = h($fromform['MaterialID']);
 
 //OrderID,MaterialID,MaterialName,MaterialQTY,MaterialDetails,PerCourse,CurrentQTY

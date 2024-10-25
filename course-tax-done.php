@@ -2,7 +2,7 @@
 require('inc/lsapp.php');
 if(isAdmin()):
 	$cid = $_GET['cid'];
-	$user = stripIDIR($_SERVER["REMOTE_USER"]);
+	$user = LOGGED_IN_IDIR;
 	$f = fopen('data/courses.csv','r');
 	$temp_table = fopen('data/courses-temp.csv','w');
 	$headers = fgetcsv($f);

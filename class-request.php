@@ -44,9 +44,9 @@ class date to the schedule for administrative processing.</p>
 <input class="ClassID" type="hidden" name="ClassID" value="">
 
 <input class="Requested" type="hidden" name="Requested" value="<?php echo date('Y-m-d-H:i') ?>">
-<input class="RequestedBy" type="hidden" name="RequestedBy" value="<?php echo stripIDIR($_SERVER["REMOTE_USER"]) ?>">
+<input class="RequestedBy" type="hidden" name="RequestedBy" value="<?php echo LOGGED_IN_IDIR ?>">
 <input class="Modified" type="hidden" name="Modified" value="<?php echo date('Y-m-d-H:i') ?>">
-<input class="ModifiedBy" type="hidden" name="ModifiedBy" value="<?php echo stripIDIR($_SERVER["REMOTE_USER"]) ?>">
+<input class="ModifiedBy" type="hidden" name="ModifiedBy" value="<?php echo LOGGED_IN_IDIR ?>">
 
 <input class="Region" type="hidden" name="Region" value="">
 <input class="ItemCode" type="hidden" name="ItemCode" value="">

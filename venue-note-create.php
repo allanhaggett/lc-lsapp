@@ -4,7 +4,7 @@ require('inc/lsapp.php');
 if(canAccess()):
 	$fromform = $_POST;
 	
-	$requestor = stripIDIR($_SERVER["REMOTE_USER"]);
+	$requestor = LOGGED_IN_IDIR;
 	$now = date('Y-m-d H:i:s');
 	$noteID = date('YmdHis');
 	$newnote = Array($noteID,

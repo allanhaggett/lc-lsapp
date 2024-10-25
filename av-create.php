@@ -3,7 +3,7 @@ require('inc/lsapp.php');
 if(isAdmin()):
 if($_POST):
 	$fromform = $_POST;
-	$avid = stripIDIR($_SERVER["REMOTE_USER"]) . '-' . date('Ymd-His');
+	$avid = LOGGED_IN_IDIR . '-' . date('Ymd-His');
 	
 	$av = Array($avid,
 				'',

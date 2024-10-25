@@ -1,5 +1,5 @@
 <?php require('inc/lsapp.php') ?>
-<?php $user = stripIDIR($_SERVER["REMOTE_USER"]) ?>
+<?php $user = LOGGED_IN_IDIR ?>
 <?php getHeader() ?>
 
 <title>Suggest a Venue</title>

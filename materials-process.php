@@ -10,7 +10,7 @@ if(isAdmin()):
 	} else {
 		$restock = FALSE;
 	}
-	$user = stripIDIR($_SERVER["REMOTE_USER"]);
+	$user = LOGGED_IN_IDIR;
 	$notadmin = 0;
 	$f = fopen('data/materials.csv','r');
 	$temp_table = fopen('data/materials-temp.csv','w');

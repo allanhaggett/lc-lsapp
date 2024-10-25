@@ -4,9 +4,9 @@ require('inc/lsapp.php');
 if(isAdmin()):
 	$fromform = $_POST;
 	// creqID,ClassID,Date,NotedBy,Note
-	$requestor = stripIDIR($_SERVER["REMOTE_USER"]);
+	$requestor = LOGGED_IN_IDIR;
 	$now = date('Y-m-d H:i:s');
-	//$noteID = stripIDIR($_SERVER["REMOTE_USER"]) . '-' . date('Ymd-His');
+	//$noteID = LOGGED_IN_IDIR . '-' . date('Ymd-His');
 	$noteID = date('Ymd-His');
 	$newinquiry = Array(
 					$noteID,

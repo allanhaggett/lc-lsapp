@@ -2,9 +2,9 @@
 require('inc/lsapp.php');
 $fromform = $_POST;
 //commentID,creqID,CourseID,CourseName,created,Comment,Commenter
-$commenter = stripIDIR($_SERVER["REMOTE_USER"]);
+$commenter = LOGGED_IN_IDIR;
 $now = date('Y-m-d H:i:s');
-$commentID = stripIDIR($_SERVER["REMOTE_USER"]) . '-' . date('Ymd-His');
+$commentID = LOGGED_IN_IDIR . '-' . date('Ymd-His');
 $newcomment = Array(
 				$commentID,
 				h($fromform['creqID']),

@@ -4,9 +4,9 @@ require('inc/lsapp.php');
 
 $fromform = $_POST;
 // creqID,ClassID,Date,NotedBy,Note
-$requestor = stripIDIR($_SERVER["REMOTE_USER"]);
+$requestor = LOGGED_IN_IDIR;
 $now = date('Y-m-d H:i:s');
-$noteID = stripIDIR($_SERVER["REMOTE_USER"]) . '-' . date('Ymd-His');
+$noteID = LOGGED_IN_IDIR . '-' . date('Ymd-His');
 $newchange = Array(
 				$noteID,
 				h($fromform['ClassID']),

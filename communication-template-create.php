@@ -4,7 +4,7 @@ require('inc/lsapp.php');
 
 $fromform = $_POST;
 
-$createdby = stripIDIR($_SERVER["REMOTE_USER"]);
+$createdby = LOGGED_IN_IDIR;
 $now = date('Y-m-d H:i:s');
 $templateID = date('YmdHis');
 // CourseID,TemplateName,Template,Created,CreatedBy,Modified,ModifiedBy

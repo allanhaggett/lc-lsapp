@@ -1,7 +1,7 @@
 <?php 
 
 require('inc/lsapp.php');
-$currentuser = stripIDIR($_SERVER["REMOTE_USER"]);
+$currentuser = LOGGED_IN_IDIR;
 opcache_reset();
 if($_POST):
 
