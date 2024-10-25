@@ -50,6 +50,8 @@ function formatSizeUnits($bytes) {
         <li>A set of directories under \Learning folder that reside at 
     https://gww.bcpublicservice.gov.bc.ca/learning/ <strong>Accessing this address requires
     an IDIR to access</strong>. <a href="kepler-large-file-finder.php" class="fw-bold">Large File Finder.</a>
+        NOTE: Large File Finder can take a while to load and it resource intensive for the server to load.
+        Use with caution.
         <li>A set of directories under \NonSSOLearning that are accessible via 
     https://learn.bcpublicservice.gov.bc.ca/ <strong>This address is publicly accessible</strong>.
     </ol>
