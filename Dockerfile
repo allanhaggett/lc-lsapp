@@ -78,37 +78,39 @@ RUN { \
     echo 'error_log=/var/log/php_errors.log'; \
 } > /usr/local/etc/php/conf.d/opcache-recommended.ini
 
+# Set the working directory to /var/www/html
 WORKDIR /var/www/html
-COPY . /var/www/html
-RUN mkdir /var/www/html/logs
-RUN chmod 777 /var/www/html/logs
-RUN chown -R www-data:www-data /var/www/html
 
-# Set subfolder for the application
-RUN mkdir -p /var/www/html/lsapp
-RUN cp -r /var/www/html/* /var/www/html/lsapp/
+# Copy the application code into /var/www/html/lsapp
+COPY . /var/www/html/lsapp
+
+# Create logs directory and set permissions
+RUN mkdir /var/www/html/lsapp/logs
+RUN chmod 777 /var/www/html/lsapp/logs
+RUN chown -R www-data:www-data /var/www/html
 
 # Configure Apache for subfolder access
 RUN echo '<Directory /var/www/html/lsapp/>\n\
     Options Indexes FollowSymLinks MultiViews\n\
     AllowOverride All\n\
-    Order allow,deny\n\
-    allow from all\n\
+    Require all granted\n\
 </Directory>' > /etc/apache2/conf-available/lsapp.conf \
     && a2enconf lsapp
 
 # Configure VirtualHost for lsapp
 RUN echo '<VirtualHost *:8080>\n\
-    DocumentRoot /var/www/html/lsapp\n\
-    <Directory "/var/www/html/lsapp">\n\
+    DocumentRoot /var/www/html\n\
+    <Directory "/var/www/html">\n\
         AllowOverride All\n\
         Require all granted\n\
     </Directory>\n\
 </VirtualHost>' > /etc/apache2/sites-available/000-default.conf
 
-USER root
-
+# Expose port 8080
 EXPOSE 8080
+
+# Start Apache in the foreground
+CMD ["apache2-foreground"]
 
 RUN sed -i 's/80/8080/g' /etc/apache2/ports.conf
 RUN cp /usr/local/etc/php/php.ini-development /usr/local/etc/php/php.ini
