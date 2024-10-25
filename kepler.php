@@ -49,7 +49,7 @@ function formatSizeUnits($bytes) {
     <ol>
         <li>A set of directories under \Learning folder that reside at 
     https://gww.bcpublicservice.gov.bc.ca/learning/ <strong>Accessing this address requires
-    an IDIR to access</strong>.
+    an IDIR to access</strong>. <a href="kepler-large-file-finder.php" class="fw-bold">Large File Finder.</a>
         <li>A set of directories under \NonSSOLearning that are accessible via 
     https://learn.bcpublicservice.gov.bc.ca/ <strong>This address is publicly accessible</strong>.
     </ol>
