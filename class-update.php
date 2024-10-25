@@ -7,7 +7,7 @@ if($_POST):
 
 
 	$fromform = $_POST;
-	$user = stripIDIR($_SERVER["REMOTE_USER"]);
+	$user = LOGGED_IN_IDIR;
 	$notadmin = 0;
 	$f = fopen('data/classes.csv','r');
 	$temp_table = fopen('data/classes-temp.csv','w');
@@ -156,7 +156,7 @@ else:
 <input type="hidden" name="CourseDays" id="CourseDays" value="<?= h($deets[17]) ?>">
 <input type="hidden" name="CourseCategory" value="<?= h($deets[46]) ?>">
 <input type="hidden" name="Modified" id="Modified" value="<?= date('Y-m-dH:i:s') ?>">
-<input type="hidden" name="ModifiedBy" id="ModifiedBy" value="<?php echo stripIDIR($_SERVER["REMOTE_USER"]) ?>">
+<input type="hidden" name="ModifiedBy" id="ModifiedBy" value="<?php echo LOGGED_IN_IDIR ?>">
 <input type="hidden" name="avAssigned" id="avAssigned" value="<?= h($deets[51]) ?>">
 <input type="hidden" name="ClassID" value="<?= h($deets[0]) ?>">
 <input type="hidden" name="cid" value="<?= h($deets[0]) ?>">

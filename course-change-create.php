@@ -4,9 +4,9 @@ require('inc/lsapp.php');
 
 $fromform = $_POST;
 //creqID,CourseID,CourseName,DateRequested,RequestedBy,Status,CompletedBy,CompletedDate,Request,RequestType,AssignedTo,Priority
-$requestor = stripIDIR($_SERVER["REMOTE_USER"]);
+$requestor = LOGGED_IN_IDIR;
 $now = date('Y-m-d H:i:s');
-$creqID = stripIDIR($_SERVER["REMOTE_USER"]) . '-' . date('Ymd-His');
+$creqID = LOGGED_IN_IDIR . '-' . date('Ymd-His');
 $newchange = Array(
 				$creqID,
 				h($fromform['CourseID']),

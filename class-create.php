@@ -31,7 +31,7 @@ if($fromform['VenueCity']) {
 	$city = 'N/A';
 }
 
-//$classid = $course[3] . '-' . $urldate . '-' . $city . '-' . stripIDIR($_SERVER["REMOTE_USER"]) . '-' . date('Ymd-His');
+//$classid = $course[3] . '-' . $urldate . '-' . $city . '-' . LOGGED_IN_IDIR . '-' . date('Ymd-His');
 $classid = date('YmdHis');
 
 //$mm = explode('/',$fromform['MinMax']);
@@ -63,7 +63,7 @@ $combinedtimes = h($fromform['StartTime']) . ' - ' . h($fromform['EndTime']);
 // here for some odd reason. Figure this out and variable-session class offerings are yours.
 if(isset($fromform['d2-date'])) {
 	$csession = h($fromform['d2-date']);
-	$sessID = 'sess-' . stripIDIR($_SERVER["REMOTE_USER"]) . '-' . date('Ymd-His');
+	$sessID = 'sess-' . LOGGED_IN_IDIR . '-' . date('Ymd-His');
 	$sess = array($sessID,$classid,$csession);
 	$sesp = fopen('data/sessions.csv', 'a+');
 	foreach ($sess as $fields) {
@@ -152,7 +152,7 @@ foreach ($class as $fields) {
     fputcsv($fp, $fields);
 }
 fclose($fp);
-header('Location: /lsapp/person.php?idir=' . stripIDIR($_SERVER["REMOTE_USER"]));
+header('Location: /lsapp/person.php?idir=' . LOGGED_IN_IDIR);
 
 else:
 

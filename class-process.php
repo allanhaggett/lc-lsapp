@@ -3,7 +3,7 @@ require('inc/lsapp.php');
 if(isAdmin()):
 	$classid = $_GET['classid'];
 	$item = $_GET['itemcode'];
-	$user = stripIDIR($_SERVER["REMOTE_USER"]);
+	$user = LOGGED_IN_IDIR;
 	$f = fopen('data/classes.csv','r');
 	$temp_table = fopen('data/classes-temp.csv','w');
 	$headers = fgetcsv($f);

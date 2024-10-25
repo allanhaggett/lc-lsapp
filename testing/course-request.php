@@ -1,6 +1,6 @@
 <?php require('inc/lsapp.php') ?>
 <?php opcache_reset(); ?>
-<?php $user = stripIDIR($_SERVER["REMOTE_USER"]) ?>
+<?php $user = LOGGED_IN_IDIR ?>
 <?php getHeader() ?>
 
 <title>Course Request</title>

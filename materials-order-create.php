@@ -32,7 +32,7 @@ fclose($m);
 
 $orderid = date('YmdHis');
 $created = date('YmdHis');
-$createdby = stripIDIR($_SERVER["REMOTE_USER"]);
+$createdby = LOGGED_IN_IDIR;
 $courseid = h($fromform['CourseID']);
 $neworder = Array($orderid,
 				'Draft',

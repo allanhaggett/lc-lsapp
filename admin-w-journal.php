@@ -32,7 +32,7 @@
 </h1>
 </div>
 <ul class="list-group list-group-flush">
-<?php //echo stripIDIR($_SERVER["REMOTE_USER"]) ?>
+<?php //echo LOGGED_IN_IDIR ?>
 <li class="list-group-item"><a href="venues-dashboard.php" class="">Venues Dashboard</a></li>
 <li class="list-group-item"><a href="materials.php" class="">Materials Dashboard</a></li>
 <li class="list-group-item"><a href="shipping.php" class="">Shipping Dashboard</a></li>

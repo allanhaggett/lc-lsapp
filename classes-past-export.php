@@ -10,7 +10,7 @@ require_once dirname(__FILE__) . '/phpexcel/PHPExcel.php';
 $fulldate = date('Y-m-d-hi');
 
 $desc = "LSApp Export";
-$modifiedby = stripIDIR($_SERVER["REMOTE_USER"]);
+$modifiedby = LOGGED_IN_IDIR;
 $phpxl = new PHPExcel();
 $phpxl->getProperties()->setCreator("Allan Haggett")
 				 ->setLastModifiedBy($modifiedby)

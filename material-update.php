@@ -73,7 +73,7 @@ if($_POST):
 	// MaterialID,CourseName,CourseID,MaterialName,PerCourse,InStock,Partial,Restock,Notes,FileName,
 	// CreatedOn,CreatedBy,ModifiedOn,ModifiedBy,Notes
 	$today = date('Y-m-d\TH:i:s');
-	$modby = stripIDIR($_SERVER["REMOTE_USER"]);
+	$modby = LOGGED_IN_IDIR;
 	$material = Array($mid,
 				h($fromform['CourseName']),
 				h($fromform['CourseID']),

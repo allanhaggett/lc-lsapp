@@ -5,7 +5,7 @@ if($_POST):
 
 $fromform = $_POST;
 $classid = $fromform['classid'];
-$user = stripIDIR($_SERVER["REMOTE_USER"]);
+$user = LOGGED_IN_IDIR;
 
 $f = fopen('data/classes.csv','r');
 $temp_table = fopen('data/classes-temp.csv','w');

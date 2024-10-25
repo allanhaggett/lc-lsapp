@@ -1,5 +1,5 @@
 <?php require('inc/lsapp.php') ?>
-<?php $idir = stripIDIR($_SERVER["REMOTE_USER"]); ?>
+<?php $idir = LOGGED_IN_IDIR; ?>
 <?php if(canACcess()): ?>
 <?php 
 $cityname = (isset($_GET['name'])) ? $_GET['name'] : 0;

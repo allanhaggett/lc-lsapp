@@ -3,7 +3,7 @@ require('inc/lsapp.php');
 if(canAccess()):
 	$cid = $_GET['cid'];
 	$unclaim = $_GET['unclaim'];
-	$user = stripIDIR($_SERVER["REMOTE_USER"]);
+	$user = LOGGED_IN_IDIR;
 	$notadmin = 0;
 	$f = fopen('data/classes.csv','r');
 	$temp_table = fopen('data/classes-temp.csv','w');

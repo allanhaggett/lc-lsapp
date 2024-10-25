@@ -62,7 +62,7 @@ $headers = fgetcsv($f);
 fputcsv($temp_table,$headers);
 
 $modified = date('Y-m-d');
-$modifiedby = stripIDIR($_SERVER["REMOTE_USER"]);
+$modifiedby = LOGGED_IN_IDIR;
 //OrderID,Status,Created,CreatedBy,Modified,ModifiedBy,CourseID,CourseName,Cost,DateOrdered,DateArrived,Notes,FilePath,QuotedBy,SigningAuthority,PONumber,ConsigneeFile,PreviousStatus
 $order = Array($orderid,
 		h($fromform['Status']),

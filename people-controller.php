@@ -6,7 +6,7 @@ if($_POST):
 
 if($_POST['action'] == 'delete'):
 
-	$currentuser = stripIDIR($_SERVER["REMOTE_USER"]);
+	$currentuser = LOGGED_IN_IDIR;
 	$idir = $_POST['idir'];
 	$f = fopen('data/people.csv','r');
 	$temp_table = fopen('data/people-temp.csv','w');

@@ -1,6 +1,6 @@
 <?php require('inc/lsapp.php') ?>
 <?php opcache_reset() ?>
-<?php $currentuser = stripIDIR($_SERVER["REMOTE_USER"]); ?>
+<?php $currentuser = LOGGED_IN_IDIR; ?>
 <?php $idir = (isset($_GET['idir'])) ? $_GET['idir'] : 0; ?>
 <?php $person = getPerson($idir) ?>
 <?php $requests = getUserRequested($idir) ?>
