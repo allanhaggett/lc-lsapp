@@ -1,7 +1,9 @@
 <?php 
-$path = $_SERVER['DOCUMENT_ROOT'] . '\lsapp\inc\lsapp.php';
+opcache_reset();
+$path = '../inc/lsapp.php';
 require($path); 
-opcache_reset(); ?>
+?>
+
 <?php if(canACcess()): ?>
 
 <?php getHeader() ?>
