@@ -146,7 +146,7 @@ $grid->getStyle('A3:H999')->getAlignment()->setWrapText(true);
 // Set active sheet index to the first sheet, so Excel opens this as the first sheet
 $phpxl->setActiveSheetIndex(0);
 $objWriter = PHPExcel_IOFactory::createWriter($phpxl, 'Excel2007');
-$path = "exports/";
+$path = "data/backups/";
 $fname = "ELM-upcoming-classes-export-asof-".$fulldate.".xlsx";
 
 

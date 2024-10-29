@@ -101,7 +101,7 @@ $(document).ready(function(){
 		});
 		
 		setTimeout(function(){
-			$('.download').html('<a class="btn btn-block btn-success mt-1" href="exports/ELM-upcoming-classes-export-asof-<?php echo date('Y-m-d') ?>.xlsx">Download</a>');		
+			$('.download').html('<a class="btn btn-block btn-success mt-1" href="data/backups/ELM-upcoming-classes-export-asof-<?php echo date('Y-m-d') ?>.xlsx">Download</a>');		
 		},3000);
 		
 	});
