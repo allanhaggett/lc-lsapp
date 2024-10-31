@@ -29,18 +29,23 @@ function updateCourse($existingCourse, $newCourseData) {
         36 => 10, // LearningHubPartner (ELM index 10 -> LSApp index 36)
         38 => 15, // Topics (ELM index 15 -> LSApp index 38)
         39 => 14, // Audience (ELM index 14 -> LSApp index 39)
-        40 => 13  // Levels (Group) (ELM index 13 -> LSApp index 40)
+        40 => 13,  // Levels (Group) (ELM index 13 -> LSApp index 40)
     ];
 
     foreach ($fieldMappings as $lsappIndex => $elmIndex) {
         if ($existingCourse[$lsappIndex] !== h($newCourseData[$elmIndex] ?? '')) {
             $updatedCourse[$lsappIndex] = h($newCourseData[$elmIndex] ?? '');
-            echo $updatedCourse[2] . ' UPDATED<br>';
+            // Update the 'Modified' field to the current timestamp
+            $updatedCourse[51] = date('Y-m-d\TH:i:s'); // Adjust as needed for your date format
         }
     }
 
-    // Update the 'Modified' field to the current timestamp
-    $updatedCourse[51] = date('Y-m-d\TH:i:s'); // Adjust as needed for your date format
+    if ($existingCourse[52] !== 'PSA Learning System') {
+        $updatedCourse[52] = 'PSA Learning System'; // It's always this from this source.
+    }
+    if ($existingCourse[53] != 1) {
+        $updatedCourse[53] = 1; // It's always published if it's in this feed.
+    }
 
     return $updatedCourse;
 }
@@ -96,7 +101,7 @@ foreach ($hubCourses as $hcCode => $hc) {
             '', '', '', '', '', // ClassTimes, ClassDays, ELM, PreWork, PostWork
             h($hc[12] ?? ''),   // CourseOwner
             '', '', '',         // MinMax, CourseNotes, Requested
-            LOGGED_IN_IDIR,               // RequestedBy
+            'SYNCBOT',          // RequestedBy
             $now,               // EffectiveDate
             h($hc[2] ?? ''),    // CourseDescription
             '', '',             // CourseAbstract, Prerequisites
@@ -119,7 +124,9 @@ foreach ($hubCourses as $hcCode => $hc) {
             0,                  // isMoodle
             0, '',              // TaxProcessed, TaxProcessedBy
             h($hc[13] ?? ''),   // ELMCourseID
-            $now                // Modified
+            $now,                // Modified
+            'PSA Learning System', // ExternalSystem
+            1                      // HUBInclude
         ];
         $itemCode = $newCourse[4]; // ItemCode
         $updatedCourses[$itemCode] = $newCourse;
@@ -143,7 +150,7 @@ if ($fpTemp !== false) {
         'Developer', 'EvaluationsLink', 'LearningHubPartner', 'Alchemer', 'Topics', 
         'Audience', 'Levels', 'Reporting', 'PathLAN', 'PathStaging', 'PathLive', 
         'PathNIK', 'PathTeams', 'isMoodle', 'TaxProcessed', 'TaxProcessedBy', 
-        'ELMCourseID', 'Modified'
+        'ELMCourseID', 'Modified','ExternalSystem','HUBInclude'
     ]);
 
     // Load existing courses from the main file
@@ -177,7 +184,7 @@ if ($fpTemp !== false) {
     rename($tempFilePath, $coursesPath);
 }
 
-//header('Location: jsonfeed.php');
+header('Location: feed-create.php');
 ?>
 <?php else: ?>
 <?php include('templates/noaccess.php') ?>

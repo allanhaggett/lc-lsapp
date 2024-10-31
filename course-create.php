@@ -79,7 +79,9 @@ if(canAccess()):
 					0, // TaxProcessed
 					'', // TaxProcessedBy
 					'',  // ELMCourseID - field #50
-					$now
+					$now,
+					'', // External System
+					0 // HUBInclude
 		);
 		
 	$course = array($newcourse);

@@ -103,7 +103,9 @@ $course = Array($_POST['CourseID'],
 				h($_POST['TaxonomyProcessed']),
 				h($_POST['TaxonomyProcessedBy']),
 				h($_POST['ELMCourseID']),
-				$now
+				$now,
+				'', // External System
+				0 // HUBInclude
 			);
 
 $courseid = $_POST['CourseID'];
