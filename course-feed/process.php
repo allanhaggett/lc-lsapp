@@ -1,7 +1,6 @@
 <?php 
 opcache_reset();
 
-$cats = '';
 $finalCols = ['Course Code', 'Course Name', 'Course Description', 'Delivery Method', 'Category', 'Learner Group', 
               'Duration', 'Available Classes', 'Link to ELM Search', 'Course Last Modified', 
               'Course Owner Org', 'Course ID', 'Keywords', 'Group', 'Audience', 'Topic'];
@@ -9,17 +8,18 @@ $finalCols = ['Course Code', 'Course Name', 'Course Description', 'Delivery Meth
 // Process keywords CSV
 $keywordsFile = "data/GBC_ATWORK_CATALOG_KEYWORDS.csv";
 $keywords = processCsvFile($keywordsFile);
-$keys = mergeKeywords($keywords);
+$keywordsByCode = mergeKeywords($keywords);
 
 // Process catalog CSV
 $catalogFile = "data/GBC_LEARNINGHUB_SYNC2.csv";
 $courses = processCsvFile($catalogFile);
-$newCourses = mergeCourses($courses, $keys);
+$newCourses = mergeCourses($courses, $keywordsByCode);
 
 // Write final course data to CSV
 writeCsv('data/courses.csv', $finalCols, $newCourses);
 
-// Redirect
+// Redirect or output success message
+// echo 'Success!';
 header('Location: lhub-course-sync.php');
 
 // Functions
@@ -36,70 +36,100 @@ function processCsvFile($filename) {
 }
 
 function mergeKeywords($keywords) {
-    $keys = [];
-    $lastCode = '';
-    $k = $partnerKey = '';
-
+    $keywordsByCode = [];
     foreach ($keywords as $keyword) {
         $code = $keyword['Course Code'];
-        $key = $keyword['Keyword'];
-        if ($lastCode && $code != $lastCode) {
-            $keys[] = [$lastCode, trim($k, ', '), $partnerKey];
-            $k = $partnerKey = '';
+        if (!isset($keywordsByCode[$code])) {
+            $keywordsByCode[$code] = ['keywords' => [], 'partnerKey' => ''];
         }
-        if ($keyword['Keyword Type ID'] == 1039) $partnerKey = $key;
-        $k .= $key . ', ';
-        $lastCode = $code;
+        $key = $keyword['Keyword'];
+        if ($keyword['Keyword Type ID'] == 1039) {
+            $keywordsByCode[$code]['partnerKey'] = $key;
+        }
+        $keywordsByCode[$code]['keywords'][] = $key;
     }
-    return $keys;
+    return $keywordsByCode;
 }
 
-function mergeCourses($courses, $keys) {
-    $newCourses = [];
-    $lastCode = '';
-    $categories = $kwords = $learningPartner = $audience = $group = $topic = '';
+function mergeCourses($courses, $keywordsByCode) {
+    $coursesByCode = [];
 
+    // Group courses by Course Code
     foreach ($courses as $course) {
         if (!in_array($course['Learner Group'], ['All Government of British Columbia Learners', 'Excluded Managers', 'Ministries - All'])) {
             continue;
         }
-
-        $currentCode = $course['Course Code'];
-        if ($lastCode && $currentCode != $lastCode) {
-            if ($learningPartner && $audience && $group && $topic) {  // Only add if learningPartner is set
-                $newCourses[] = buildCourseArray($course, $categories, $learningPartner, $kwords, $group, $audience, $topic);
-            } else {
-                //echo "Warning: Course {$lastCode} is missing a learning partner, audience, group, or topic.\n";
-            }
-            $categories = $kwords = $learningPartner = $audience = $group = $topic = '';
+        $code = $course['Course Code'];
+        if (!isset($coursesByCode[$code])) {
+            $coursesByCode[$code] = [];
         }
-
-        // Categories, Keywords, Group, Audience, and Topic aggregation based on Short Name
-        if (strlen($course['Category']) > 0) {
-            switch ($course['Short Name']) {
-                case 'Audience':
-                    $audience = $course['Category'];
-                    break;
-                case 'Group':
-                    $group = $course['Category'];
-                    break;
-                case 'Topic':
-                    $topic = $course['Category'];
-                    break;
-            }
-            $categories .= $course['Category'] . ', ';
-            $categories = rtrim($categories, ',');
-        }
-
-        foreach ($keys as $k) {
-            if ($k[0] == $currentCode) {
-                $kwords .= $k[1] . ',';
-                $learningPartner = !empty($k[2]) ? mapPartnerCode($k[2]) : '';  // Only set if $k[2] is not empty
-            }
-        }
-
-        $lastCode = $currentCode;
+        $coursesByCode[$code][] = $course;
     }
+
+    $newCourses = [];
+
+    // Process each course code separately
+    foreach ($coursesByCode as $code => $courseEntries) {
+        // Initialize variables for each course
+        $categories = '';
+        $kwords = '';
+        $learningPartner = '';
+        $audience = '';
+        $group = '';
+        $topic = '';
+
+        // Get the first course entry (assuming details are the same across entries)
+        $course = $courseEntries[0];
+
+        // Get the keywords and learning partner
+        if (isset($keywordsByCode[$code])) {
+            $kwordsArray = $keywordsByCode[$code]['keywords'];
+            $partnerKey = $keywordsByCode[$code]['partnerKey'];
+            $learningPartner = mapPartnerCode($partnerKey);
+            $kwords = implode(', ', $kwordsArray);
+        } else {
+            // No keywords or partnerKey found, skip this course
+            continue;
+        }
+
+        // If no partnerKey (learningPartner), skip this course
+        if (empty($learningPartner)) {
+            continue;
+        }
+
+        // Collect categories, audience, group, topic
+        foreach ($courseEntries as $entry) {
+            $category = $entry['Category'];
+            $shortName = $entry['Short Name'];
+
+            if (strlen($category) > 0) {
+                switch ($shortName) {
+                    case 'Audience':
+                        $audience = $category; // Store only the last value
+                        break;
+                    case 'Group':
+                        $group = $category; // Store only the last value
+                        break;
+                    case 'Topic':
+                        $topic = $category; // Store only the last value
+                        break;
+                    default:
+                        $categories .= $category . ', ';
+                        break;
+                }
+            }
+        }
+
+        // Trim trailing commas and spaces
+        $categories = rtrim($categories, ', ');
+        $audience = trim($audience);
+        $group = trim($group);
+        $topic = trim($topic);
+
+        // Build the course array
+        $newCourses[] = buildCourseArray($course, $categories, $learningPartner, $kwords, $group, $audience, $topic);
+    }
+
     return $newCourses;
 }
 
@@ -109,6 +139,7 @@ function mapPartnerCode($code) {
         'Priorities & Innovation' => 'Leadership, Engagement and Priority Initiatives',
         'CIRMO' => 'Corporate Information and Records Management Office',
         'DWCS' => 'Digital Workplace and Collaboration Services Branch',
+        // Add other mappings as needed
     ];
     return $partners[$code] ?? $code;
 }
@@ -119,7 +150,7 @@ function buildCourseArray($course, $categories, $learningPartner, $keywords, $gr
         htmlspecialchars($course['Course Name'], ENT_QUOTES, 'UTF-8'),
         trim_all($course['Course Description']),
         convertDeliveryMethod($course['Delivery Method']),
-        rtrim($categories, ', '),
+        $categories,
         $course['Learner Group'],
         'Not Listed', // Duration placeholder
         $course['Available Classes'],
@@ -127,7 +158,7 @@ function buildCourseArray($course, $categories, $learningPartner, $keywords, $gr
         $course['Course Last Modified'],
         $learningPartner,
         $course['Course ID'],
-        rtrim($keywords, ', '),
+        $keywords,
         $group,
         $audience,
         $topic
@@ -149,9 +180,14 @@ function trim_all($str, $what = null, $with = ' ') {
 }
 
 function convertDeliveryMethod($method) {
-    return str_replace(
+    $method = str_replace(
         ['Moodle', 'Virtual', 'Self-Directed', 'Scheduled Learning Activities', 'Self-Paced Learning Activities'],
         'eLearning',
         $method
     );
+    // Handle 'Webinar' specifically
+    if (stripos($method, 'Webinar') !== false) {
+        $method = 'Webinar';
+    }
+    return $method;
 }

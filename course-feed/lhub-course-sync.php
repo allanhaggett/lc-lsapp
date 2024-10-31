@@ -16,20 +16,7 @@ function getCoursesFromCSV($filepath, $isActiveFilter = false, $itemCodeIndex = 
 	}
 	return $courses;
 }
-// ELM courses.csv:
-//0-Course Code, 1-Course Name, 2-Course Description, 3-Delivery Method, 4-Category, 5-Learner Group, 6-Duration,
-//7-Available Classes, 8-Link to ELM Search, 9-Course Last Modified, 10-Course Owner Org, 11-Course ID, 12-Keywords, 13-Group, 14-Audience, 15-Topic
-//
-// LSApp courses.csv:
-//0-CourseID,1-Status,2-CourseName,3-CourseShort,4-ItemCode,5-ClassTimes,6-ClassDays,7-ELM,8-PreWork,9-PostWork,10-CourseOwner,
-//11-MinMax,12-CourseNotes,13-Requested,14-RequestedBy,15-EffectiveDate,16-CourseDescription,17-CourseAbstract,18-Prerequisites,
-//19-Keywords,20-Categories,21-Method,22-elearning,23-WeShip,24-ProjectNumber,25-Responsibility,26-ServiceLine,
-//27-STOB,28-MinEnroll,29-MaxEnroll,30-StartTime,31-EndTime,32-Color
-//33-Featured,34-Developer,35-EvaluationsLink,36-LearningHubPartner,37-Alchemer,
-//38-Topics,39-Audience,40-Levels,41-Reporting
-//42-PathLAN,43-PathStaging,44-PathLive,45-PathNIK,46-PathTeams
-// 47-isMoodle,48-TaxProcessed,49-TaxProcessedBy,50-ELMCourseID,51-Modified
-// 52-ExternalSystem, 53-HUBInclude
+
 function updateCourse($existingCourse, $newCourseData) {
     $updatedCourse = $existingCourse;
 
@@ -48,6 +35,7 @@ function updateCourse($existingCourse, $newCourseData) {
     foreach ($fieldMappings as $lsappIndex => $elmIndex) {
         if ($existingCourse[$lsappIndex] !== h($newCourseData[$elmIndex] ?? '')) {
             $updatedCourse[$lsappIndex] = h($newCourseData[$elmIndex] ?? '');
+            echo $updatedCourse[2] . ' UPDATED<br>';
         }
     }
 
@@ -64,7 +52,7 @@ $hubCoursesPath = build_path(BASE_DIR, 'course-feed', 'data', 'courses.csv');
 // Load courses with specified index for Item Code in each file
 $lsappCourses = getCoursesFromCSV($coursesPath, true, 4);  // LSApp file, Item Code is at index 4
 $hubCourses = getCoursesFromCSV($hubCoursesPath, false, 0); // ELM file, Item Code is at index 0
-echo '<pre>';
+// echo '<pre>';
 // / print_r($hubCourses); exit;
 $timestamp = date('YmdHis');
 $now = date('Y-m-d\TH:i:s');
@@ -76,14 +64,28 @@ foreach ($hubCourses as $hcCode => $hc) {
 
     if (isset($lsappCourses[$hcCode])) {
         // Update course if it exists and fields have changed
-		print_r($lsappCourses[$hcCode]); continue;
         $updatedCourse = updateCourse($lsappCourses[$hcCode], $hc);
-        $updatedCourses[] = $updatedCourse;
+        $itemCode = $updatedCourse[4]; // Assuming this is the ItemCode
+        $updatedCourses[$itemCode] = $updatedCourse;
+        
     } else {
         // Add new course if it doesn't exist
-		echo 'A thing was ADDED.<br>';
         $count++;
         $courseId = $timestamp . '-' . $count;
+        // ELM courses.csv:
+        //0-Course Code, 1-Course Name, 2-Course Description, 3-Delivery Method, 4-Category, 5-Learner Group, 6-Duration,
+        //7-Available Classes, 8-Link to ELM Search, 9-Course Last Modified, 10-Course Owner Org, 11-Course ID, 12-Keywords, 13-Group, 14-Audience, 15-Topic
+        //
+        // LSApp courses.csv:
+        //0-CourseID,1-Status,2-CourseName,3-CourseShort,4-ItemCode,5-ClassTimes,6-ClassDays,7-ELM,8-PreWork,9-PostWork,10-CourseOwner,
+        //11-MinMax,12-CourseNotes,13-Requested,14-RequestedBy,15-EffectiveDate,16-CourseDescription,17-CourseAbstract,18-Prerequisites,
+        //19-Keywords,20-Categories,21-Method,22-elearning,23-WeShip,24-ProjectNumber,25-Responsibility,26-ServiceLine,
+        //27-STOB,28-MinEnroll,29-MaxEnroll,30-StartTime,31-EndTime,32-Color
+        //33-Featured,34-Developer,35-EvaluationsLink,36-LearningHubPartner,37-Alchemer,
+        //38-Topics,39-Audience,40-Levels,41-Reporting
+        //42-PathLAN,43-PathStaging,44-PathLive,45-PathNIK,46-PathTeams
+        // 47-isMoodle,48-TaxProcessed,49-TaxProcessedBy,50-ELMCourseID,51-Modified
+        // 52-ExternalSystem, 53-HUBInclude
 
         $newCourse = [
             $courseId,
@@ -94,8 +96,8 @@ foreach ($hubCourses as $hcCode => $hc) {
             '', '', '', '', '', // ClassTimes, ClassDays, ELM, PreWork, PostWork
             h($hc[12] ?? ''),   // CourseOwner
             '', '', '',         // MinMax, CourseNotes, Requested
-            $now,               // RequestedBy
-            h($hc[2] ?? ''),    // EffectiveDate
+            LOGGED_IN_IDIR,               // RequestedBy
+            $now,               // EffectiveDate
             h($hc[2] ?? ''),    // CourseDescription
             '', '',             // CourseAbstract, Prerequisites
             h($hc[14] ?? ''),   // Keywords
@@ -107,7 +109,7 @@ foreach ($hubCourses as $hcCode => $hc) {
             '#F1F1F1',          // Color
             1,                  // Featured
             '', '',             // Developer, EvaluationsLink
-            h($hc[12] ?? ''),   // LearningHubPartner
+            h($hc[10] ?? ''),   // LearningHubPartner
             'No',               // Alchemer
             h($hc[18] ?? ''),   // Topics
             h($hc[17] ?? ''),   // Audience
@@ -119,8 +121,9 @@ foreach ($hubCourses as $hcCode => $hc) {
             h($hc[13] ?? ''),   // ELMCourseID
             $now                // Modified
         ];
-
-        $updatedCourses[] = $newCourse;
+        $itemCode = $newCourse[4]; // ItemCode
+        $updatedCourses[$itemCode] = $newCourse;
+        echo h($hc[1] ?? '') . ' ADDED<br>';
     }
 }
 
@@ -148,21 +151,21 @@ if ($fpTemp !== false) {
         fgetcsv($fpOriginal); // Skip header row in the original file
         
         while (($row = fgetcsv($fpOriginal)) !== false) {
-            $courseId = $row[4]; // 
-
+            $itemCode = $row[4]; // ItemCode
+    
             // Check if the course exists in the updated courses array
-            if (isset($updatedCourses[$courseId])) {
+            if (isset($updatedCourses[$itemCode])) {
                 // Write the updated course row
-                fputcsv($fpTemp, $updatedCourses[$courseId]);
-                unset($updatedCourses[$courseId]); // Remove it after writing to avoid duplication
+                fputcsv($fpTemp, $updatedCourses[$itemCode]);
+                unset($updatedCourses[$itemCode]); // Remove it after writing to avoid duplication
             } else {
                 // Write the existing row as is
                 fputcsv($fpTemp, $row);
             }
         }
         fclose($fpOriginal);
-    }
-
+    }                                                                                                                           
+    
     // Append any remaining new courses that were not in the original file
     foreach ($updatedCourses as $newCourse) {
         fputcsv($fpTemp, $newCourse);
