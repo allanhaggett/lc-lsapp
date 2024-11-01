@@ -80,7 +80,8 @@ $platforms = getAllPlatforms();
 <?php endforeach ?>
 </div>
 <div class="form-group">
-<label><input type="checkbox" name="HUBInclude" id="HUBInclude"> HUB Include?</label>
+<input type="checkbox" name="HUBInclude" id="HUBInclude">
+<label for="HUBInclude">Include in LearningHUB?</label>
 </div>
 
 
