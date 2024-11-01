@@ -2075,7 +2075,8 @@ function getAllPlatforms () {
 		'UBC Learning System',
 		'UK National Institute for Health Research',
 		'Your Digital Workplace',
-		'YouTube'
+		'YouTube',
+		'Vimeo'
 	];
 
 }
