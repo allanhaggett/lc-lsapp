@@ -201,6 +201,29 @@ header('Location: course.php?courseid=' . $courseid);?>
 </div>
 
 <div class="form-group">
+<?php $platforms = getAllPlatforms(); ?>
+<label for="Platform">Platform</label><br>
+<select name="Platform" id="Platform" class="form-control">
+<?php foreach($platforms as $pl): ?>
+<?php if($course[52] == $pl): ?>
+<option selected><?= $pl ?></option>
+<?php else: ?>
+<option><?= $pl ?></option>
+<?php endif ?>
+<?php endforeach ?>
+</div>
+
+<div class="form-group">
+<?php if($course[53] == 'on' || $course[53] == 'Yes'): ?>
+<label for="HUBInclude"> HUB Include?</label><br>
+<input type="checkbox" name="HUBInclude" id="HUBInclude" checked>
+<?php else: ?>
+<label for="HUBInclude">HUB Include?</label><br>
+<input type="checkbox" name="HUBInclude" id="HUBInclude">
+<?php endif ?>
+</div>
+
+<div class="form-group">
 <?php if($course[33] == 'on' || $course[33] == 'Yes'): ?>
 <input type="checkbox" name="Featured" id="Featured" checked> Featured?
 <?php else: ?>
@@ -254,27 +277,6 @@ header('Location: course.php?courseid=' . $courseid);?>
 
 
 
-
-<div class="form-group">
-<?php $platforms = getAllPlatforms(); ?>
-<label for="Platform">Platform</label><br>
-<select name="Platform" id="Platform" class="form-control">
-<?php foreach($platforms as $pl): ?>
-<?php if($course[52] == $pl): ?>
-<option selected><?= $pl ?></option>
-<?php else: ?>
-<option><?= $pl ?></option>
-<?php endif ?>
-<?php endforeach ?>
-</div>
-
-<div class="form-group">
-<?php if($course[53] == 'on' || $course[53] == 'Yes'): ?>
-<label><input type="checkbox" name="HUBInclude" id="HUBInclude" checked> HUB Include?</label>
-<?php else: ?>
-<label><input type="checkbox" name="HUBInclude" id="HUBInclude"> HUB Include?</label>
-<?php endif ?>
-</div>
 
 
 <input class="form-control CourseID" type="hidden" name="CourseID" value="<?= h($course[0]) ?>">
