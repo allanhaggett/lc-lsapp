@@ -2056,6 +2056,7 @@ function getAllTopics () {
 function getAllPlatforms () {
 
 	return [
+		'PSA Learning System',
 		'Acumen Academy',
 		'Alluvial',
 		'Apolitical',
@@ -2068,7 +2069,6 @@ function getAllPlatforms () {
 		'OCIO\'s Information Security Branch',
 		'OpenSchoolBC',
 		'PSA Learning Curator',
-		'PSA Learning System',
 		'PSA SharePoint',
 		'Public Service Pension Plan Website',
 		'Scrum Alliance',
