@@ -65,7 +65,7 @@ $platforms = getAllPlatforms();
 // Pop the headers off the top
 //array_shift($partners);
 ?>
-<select name="LearningHubPartner" id="LearningHubPartner" class="form-control" required>
+<select name="LearningHubPartner" id="LearningHubPartner" class="form-select" required>
 	<?php foreach($partners as $p): ?>
 	<option><?= $p->name ?></option>
 	<?php endforeach ?>
@@ -74,7 +74,7 @@ $platforms = getAllPlatforms();
 
 <div class="form-group my-3">
 <label for="Platform">Platform</label><br>
-<select name="Platform" id="Platform" class="form-control">
+<select name="Platform" id="Platform" class="form-select">
 <?php foreach($platforms as $pl): ?>
 <option><?= $pl ?></option>
 <?php endforeach ?>

@@ -203,7 +203,7 @@ header('Location: course.php?courseid=' . $courseid);?>
 <div class="form-group">
 <?php $platforms = getAllPlatforms(); ?>
 <label for="Platform">Platform</label><br>
-<select name="Platform" id="Platform" class="form-control">
+<select name="Platform" id="Platform" class="form-select">
 <?php foreach($platforms as $pl): ?>
 <?php if($course[52] == $pl): ?>
 <option selected><?= $pl ?></option>
