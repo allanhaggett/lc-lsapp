@@ -79,7 +79,9 @@ if(canAccess()):
 					0, // TaxProcessed
 					'', // TaxProcessedBy
 					'',  // ELMCourseID - field #50
-					$now
+					$now,
+					h($_POST['Platform']),
+					h($_POST['HUBInclude'])
 		);
 		
 	$course = array($newcourse);

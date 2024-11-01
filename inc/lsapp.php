@@ -2053,6 +2053,33 @@ function getAllTopics () {
 	];
 }
 
+function getAllPlatforms () {
+
+	return [
+		'Acumen Academy',
+		'Alluvial',
+		'Apolitical',
+		'Canada School of Public Service',
+		'Eventbrite',
+		'General Assembly',
+		'InnovateUS',
+		'LifeSpeak',
+		'MS Teams',
+		'OCIO\'s Information Security Branch',
+		'OpenSchoolBC',
+		'PSA Learning Curator',
+		'PSA Learning System',
+		'PSA SharePoint',
+		'Public Service Pension Plan Website',
+		'Scrum Alliance',
+		'UBC Learning System',
+		'UK National Institute for Health Research',
+		'Your Digital Workplace',
+		'YouTube'
+	];
+
+}
+
 function getAllAudiences () {
 
 	return [

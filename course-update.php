@@ -103,7 +103,10 @@ $course = Array($_POST['CourseID'],
 				h($_POST['TaxonomyProcessed']),
 				h($_POST['TaxonomyProcessedBy']),
 				h($_POST['ELMCourseID']),
-				$now
+				$now,
+				h($_POST['ExternalSystem']),
+				h($_POST['HUBInclude'])
+
 			);
 
 $courseid = $_POST['CourseID'];
@@ -247,6 +250,30 @@ header('Location: course.php?courseid=' . $courseid);?>
 <input type="text" name="CourseShort" id="CourseShort" class="form-control" required value="<?= h($course[3]) ?>">
 <div class="alert alert-success" id="CNSNum"></div>
 </div>
+
+
+
+
+<div class="form-group">
+<label for="Platform">Platform</label><br>
+<select name="Platform" id="Platform" class="form-control">
+<?php foreach($platforms as $pl): ?>
+<?php if($course[52] == $pl): ?>
+<option selected><?= $pl ?></option>
+<?php else: ?>
+<option><?= $pl ?></option>
+<?php endif ?>
+<?php endforeach ?>
+</div>
+
+<div class="form-group">
+<?php if($course[53] == 'on' || $course[53] == 'Yes'): ?>
+<label><input type="checkbox" name="HUBInclude" id="HUBInclude" checked> HUB Include?</label>
+<?php else: ?>
+<label><input type="checkbox" name="HUBInclude" id="HUBInclude"> HUB Include?</label>
+<?php endif ?>
+</div>
+
 
 <input class="form-control CourseID" type="hidden" name="CourseID" value="<?= h($course[0]) ?>">
 

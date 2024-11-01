@@ -61,6 +61,7 @@
 <?php 
 // Get the full list of partners
 $partners = getPartnersNew();
+$platforms = getAllPlatforms();
 // Pop the headers off the top
 //array_shift($partners);
 ?>
@@ -84,6 +85,24 @@ $partners = getPartnersNew();
 <input type="text" name="CourseShort" id="CourseShort" class="form-control" required>
 <div class="alert alert-success" id="cnameshortCharNum"></div>
 </div>
+
+
+
+
+<div class="form-group">
+<label for="Platform">Platform</label><br>
+<select name="Platform" id="Platform" class="form-control">
+<?php foreach($platforms as $pl): ?>
+<option><?= $pl ?></option>
+<?php endforeach ?>
+</div>
+<div class="form-group">
+<label><input type="checkbox" name="HUBInclude" id="HUBInclude"> HUB Include?</label>
+</div>
+
+
+
+
 
 <div class="row">
 <div class="col">
