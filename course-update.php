@@ -216,10 +216,10 @@ header('Location: course.php?courseid=' . $courseid);?>
 
 <div class="form-group">
 <?php if($course[53] == 'on' || $course[53] == 'Yes'): ?>
-<label for="HUBInclude">Include in LearningHUB?</label><br>
+<label for="HUBInclude">Include in LearningHUB?</label>
 <input type="checkbox" name="HUBInclude" id="HUBInclude" checked>
 <?php else: ?>
-<label for="HUBInclude">Include in LearningHUB?</label><br>
+<label for="HUBInclude">Include in LearningHUB?</label>
 <input type="checkbox" name="HUBInclude" id="HUBInclude">
 <?php endif ?>
 </div>
