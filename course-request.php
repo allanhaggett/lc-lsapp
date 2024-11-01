@@ -71,6 +71,21 @@ $platforms = getAllPlatforms();
 	<?php endforeach ?>
 </select>
 </div>	
+
+<div class="form-group my-3">
+<label for="Platform">Platform</label><br>
+<select name="Platform" id="Platform" class="form-control">
+<?php foreach($platforms as $pl): ?>
+<option><?= $pl ?></option>
+<?php endforeach ?>
+</div>
+<div class="form-group">
+<label><input type="checkbox" name="HUBInclude" id="HUBInclude"> HUB Include?</label>
+</div>
+
+
+
+
 <div class="form-group">	
 <label for="CourseName">Course Name (Long)</label><br>
 <small>(Max# characters, alpha/numeric =200) | Full/Complete title of the course</small>
@@ -89,16 +104,6 @@ $platforms = getAllPlatforms();
 
 
 
-<div class="form-group">
-<label for="Platform">Platform</label><br>
-<select name="Platform" id="Platform" class="form-control">
-<?php foreach($platforms as $pl): ?>
-<option><?= $pl ?></option>
-<?php endforeach ?>
-</div>
-<div class="form-group">
-<label><input type="checkbox" name="HUBInclude" id="HUBInclude"> HUB Include?</label>
-</div>
 
 
 
