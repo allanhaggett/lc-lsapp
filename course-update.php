@@ -144,6 +144,7 @@ header('Location: course.php?courseid=' . $courseid);?>
 
 
 <?php else: ?>
+
 <?php $courseid = (isset($_GET['courseid'])) ? $_GET['courseid'] : 0 ?>
 <?php $course = getCourse($courseid) ?>
 <?php getHeader() ?>
@@ -255,6 +256,7 @@ header('Location: course.php?courseid=' . $courseid);?>
 
 
 <div class="form-group">
+<?php $platforms = getAllPlatforms(); ?>
 <label for="Platform">Platform</label><br>
 <select name="Platform" id="Platform" class="form-control">
 <?php foreach($platforms as $pl): ?>
