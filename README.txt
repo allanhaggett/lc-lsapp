@@ -93,7 +93,8 @@ Prerequisites,Keywords,Category,Method,elearning,WeShip,ProjectNumber,Responsibi
 //38-Topics,39-Audience,40-Levels,41-Reporting
 //42-PathLAN,43-PathStaging,44-PathLive,45-PathNIK,46-PathTeams
 // 47-isMoodle,48-TaxProcessed,49-TaxProcessedBy,50-ELMCourseID,51-Modified
-// 52-HUBInclude
+// 52-ExternalSystem, 53-HUBInclude
+// still need to implement 54-HubExpirationDate and probably 55-RegistrationLink
 
 
 
