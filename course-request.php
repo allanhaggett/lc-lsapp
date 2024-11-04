@@ -61,15 +61,32 @@
 <?php 
 // Get the full list of partners
 $partners = getPartnersNew();
+$platforms = getAllPlatforms();
 // Pop the headers off the top
 //array_shift($partners);
 ?>
-<select name="LearningHubPartner" id="LearningHubPartner" class="form-control" required>
+<select name="LearningHubPartner" id="LearningHubPartner" class="form-select" required>
 	<?php foreach($partners as $p): ?>
 	<option><?= $p->name ?></option>
 	<?php endforeach ?>
 </select>
 </div>	
+
+<div class="form-group my-3">
+<label for="Platform">Platform</label><br>
+<select name="Platform" id="Platform" class="form-select">
+<?php foreach($platforms as $pl): ?>
+<option><?= $pl ?></option>
+<?php endforeach ?>
+</div>
+<div class="form-group">
+<input type="checkbox" name="HUBInclude" id="HUBInclude">
+<label for="HUBInclude">Include in LearningHUB?</label>
+</div>
+
+
+
+
 <div class="form-group">	
 <label for="CourseName">Course Name (Long)</label><br>
 <small>(Max# characters, alpha/numeric =200) | Full/Complete title of the course</small>
@@ -84,6 +101,14 @@ $partners = getPartnersNew();
 <input type="text" name="CourseShort" id="CourseShort" class="form-control" required>
 <div class="alert alert-success" id="cnameshortCharNum"></div>
 </div>
+
+
+
+
+
+
+
+
 
 <div class="row">
 <div class="col">

@@ -50,7 +50,7 @@ function updateCourse($existingCourse, $newCourseData, &$logEntries) {
 
     if ($existingCourse[52] !== 'PSA Learning System') {
         $updatedCourse[52] = 'PSA Learning System';
-        $changes[] = "Updated ExternalSystem to 'PSA Learning System'";
+        $changes[] = "Updated Platform to 'PSA Learning System'";
     }
     if ($existingCourse[53] != 1) {
         $updatedCourse[53] = 1;
@@ -128,7 +128,7 @@ foreach ($hubCourses as $hcCode => $hc) {
             0, '',              // TaxProcessed, TaxProcessedBy
             h($hc[11] ?? ''),   // ELMCourseID
             $now,               // Modified
-            'PSA Learning System', // ExternalSystem
+            'PSA Learning System', // Platform
             1                      // HUBInclude
         ];
         $itemCode = $newCourse[4];
@@ -155,7 +155,7 @@ if ($fpTemp !== false) {
         'Developer', 'EvaluationsLink', 'LearningHubPartner', 'Alchemer', 'Topics', 
         'Audience', 'Levels', 'Reporting', 'PathLAN', 'PathStaging', 'PathLive', 
         'PathNIK', 'PathTeams', 'isMoodle', 'TaxProcessed', 'TaxProcessedBy', 
-        'ELMCourseID', 'Modified','ExternalSystem','HUBInclude'
+        'ELMCourseID', 'Modified','Platform','HUBInclude'
     ]);
 
     if (($fpOriginal = fopen($coursesPath, 'r')) !== false) {

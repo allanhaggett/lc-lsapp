@@ -62,7 +62,7 @@ foreach ($datas as $course) {
             '_audience' => $course['Audience'] ?? '',
             '_topic' => $course['Topics'] ?? '',
             '_learning_partner' => $course['LearningHubPartner'] ?? '',
-            '_external_system' => $course['ExternalSystem'] ?? ''
+            '_platform' => $course['Platform'] ?? ''
         ];
         foreach ($namespaces as $key => $value) {
             if (!empty($value)) {
