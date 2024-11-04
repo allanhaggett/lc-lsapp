@@ -104,8 +104,9 @@ $course = Array($_POST['CourseID'],
 				h($_POST['TaxonomyProcessedBy']),
 				h($_POST['ELMCourseID']),
 				$now,
-				'', // External System
-				0 // HUBInclude
+				h($_POST['Platform']),
+				h($_POST['HUBInclude'])
+
 			);
 
 $courseid = $_POST['CourseID'];
@@ -143,6 +144,7 @@ header('Location: course.php?courseid=' . $courseid);?>
 
 
 <?php else: ?>
+
 <?php $courseid = (isset($_GET['courseid'])) ? $_GET['courseid'] : 0 ?>
 <?php $course = getCourse($courseid) ?>
 <?php getHeader() ?>
@@ -199,6 +201,30 @@ header('Location: course.php?courseid=' . $courseid);?>
 </div>
 
 <div class="form-group">
+<?php $platforms = getAllPlatforms(); ?>
+<label for="Platform">Platform</label><br>
+<select name="Platform" id="Platform" class="form-select">
+<?php foreach($platforms as $pl): ?>
+<?php if($course[52] == $pl): ?>
+<option selected><?= $pl ?></option>
+<?php else: ?>
+<option><?= $pl ?></option>
+<?php endif ?>
+<?php endforeach ?>
+</select>
+</div>
+
+<div class="form-group">
+<?php if($course[53] == 'on' || $course[53] == 'Yes'): ?>
+	<input type="checkbox" name="HUBInclude" id="HUBInclude" checked>
+	<label for="HUBInclude">Include in LearningHUB?</label>
+<?php else: ?>
+	<input type="checkbox" name="HUBInclude" id="HUBInclude">
+	<label for="HUBInclude">Include in LearningHUB?</label>
+<?php endif ?>
+</div>
+
+<div class="form-group">
 <?php if($course[33] == 'on' || $course[33] == 'Yes'): ?>
 <input type="checkbox" name="Featured" id="Featured" checked> Featured?
 <?php else: ?>
@@ -249,6 +275,10 @@ header('Location: course.php?courseid=' . $courseid);?>
 <input type="text" name="CourseShort" id="CourseShort" class="form-control" required value="<?= h($course[3]) ?>">
 <div class="alert alert-success" id="CNSNum"></div>
 </div>
+
+
+
+
 
 <input class="form-control CourseID" type="hidden" name="CourseID" value="<?= h($course[0]) ?>">
 
