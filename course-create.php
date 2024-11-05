@@ -28,6 +28,7 @@ if(canAccess()):
 		$alchemer = 'No';
 	}
 	$combinedtimes = h($fromform['StartTime']) . ' - ' . h($fromform['EndTime']);
+	$slug = createSlug($_POST['CourseName']);
 	$newcourse = Array($courseid,
 					'Requested',
 					h($fromform['CourseName']),
@@ -80,8 +81,11 @@ if(canAccess()):
 					'', // TaxProcessedBy
 					'',  // ELMCourseID - field #50
 					$now,
-					'', // External System
-					0 // HUBInclude
+					h($_POST['Platform']),
+					h($_POST['HUBInclude']),
+					h($_POST['RegistrationLink']),
+					$slug,
+					h($_POST['HubExpirationDate'])
 		);
 		
 	$course = array($newcourse);

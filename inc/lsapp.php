@@ -2005,12 +2005,33 @@ function h($str) {
 	//$str = htmlspecialchars($str);
 	return $str;
 }
-function createSlug($str, $delimiter = '-'){
 
-    $slug = strtolower(trim(preg_replace('/[\s-]+/', $delimiter, preg_replace('/[^A-Za-z0-9-]+/', $delimiter, preg_replace('/[&]/', 'and', preg_replace('/[\']/', '', iconv('UTF-8', 'ASCII//TRANSLIT', $str))))), $delimiter));
+function createSlug($string) {
+    // Define a list of common words to remove
+    $commonWords = ['and', 'the', 'of', 'in', 'for', 'on', 'with', 'at', 'by', 'to', 'a', 'an'];
+    
+    // Convert the string to lowercase
+    $string = strtolower($string);
+    
+    // Remove common words
+    $words = explode(' ', $string);
+    $filteredWords = array_filter($words, function($word) use ($commonWords) {
+        return !in_array($word, $commonWords);
+    });
+    
+    // Limit the result to 8 words
+    $limitedWords = array_slice($filteredWords, 0, 8);
+    
+    // Join the limited words into a single string
+    $filteredString = implode(' ', $limitedWords);
+    
+    // Replace any non-alphanumeric characters with hyphens and trim extra hyphens
+    $slug = preg_replace('/[^a-z0-9]+/', '-', $filteredString);
+    $slug = trim($slug, '-'); // Remove leading/trailing hyphens
+    
     return $slug;
-
 }
+
 
 
 
@@ -2051,6 +2072,34 @@ function getAllTopics () {
 		'Project Management',
 		'Respectful Workplaces'
 	];
+}
+
+function getAllPlatforms () {
+
+	return [
+		'PSA Learning System',
+		'Acumen Academy',
+		'Alluvial',
+		'Apolitical',
+		'Canada School of Public Service',
+		'Eventbrite',
+		'General Assembly',
+		'InnovateUS',
+		'LifeSpeak',
+		'MS Teams',
+		'OCIO\'s Information Security Branch',
+		'OpenSchoolBC',
+		'PSA Learning Curator',
+		'PSA SharePoint',
+		'Public Service Pension Plan Website',
+		'Scrum Alliance',
+		'UBC Learning System',
+		'UK National Institute for Health Research',
+		'Your Digital Workplace',
+		'YouTube',
+		'Vimeo'
+	];
+
 }
 
 function getAllAudiences () {

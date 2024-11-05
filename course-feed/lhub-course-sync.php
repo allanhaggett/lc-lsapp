@@ -34,18 +34,18 @@ function updateCourse($existingCourse, $newCourseData, &$logEntries) {
 
     $changes = [];
 
-    // Set status to "Active" if it's currently "Inactive"
-    if ($existingCourse[1] === 'Inactive') {
-        $updatedCourse[1] = 'Active';
-        $changes[] = "Updated status to 'Active'";
-    }
-
     foreach ($fieldMappings as $lsappIndex => $elmIndex) {
         if ($existingCourse[$lsappIndex] !== h($newCourseData[$elmIndex] ?? '')) {
             $updatedCourse[$lsappIndex] = h($newCourseData[$elmIndex] ?? '');
             $changes[] = "Updated field index $lsappIndex to '{$updatedCourse[$lsappIndex]}'";
             $updatedCourse[51] = date('Y-m-d\TH:i:s');
         }
+    }
+
+    // Set status to "Active" if it's currently "Inactive"
+    if ($existingCourse[1] === 'Inactive') {
+        $updatedCourse[1] = 'Active';
+        $changes[] = "Updated status to 'Active'";
     }
 
     if ($existingCourse[52] !== 'PSA Learning System') {
@@ -93,43 +93,46 @@ foreach ($hubCourses as $hcCode => $hc) {
         // Add new course if it doesn't exist
         $count++;
         $courseId = $timestamp . '-' . $count;
-
+        $slug = createSlug($hc[1]);
         $newCourse = [
             $courseId,
             'Active',
-            h($hc[1] ?? ''),   // CourseName
-            '',                 // CourseShort
-            h($hc[0] ?? ''),    // ItemCode
-            '', '', '', '', '', // ClassTimes, ClassDays, ELM, PreWork, PostWork
-            '',                 // CourseOwner
-            '', '',             // MinMax, CourseNotes,
-            $now,               // Requested
-            'SYNCBOT',          // RequestedBy
-            $now,               // EffectiveDate
-            h($hc[2] ?? ''),    // CourseDescription
-            '', '',             // CourseAbstract, Prerequisites
-            h($hc[12] ?? ''),   // Keywords
-            '',                 // Category
-            h($hc[3] ?? ''),    // Method
-            '', 'No',           // elearning, WeShip
-            '', '', '', '', '', // ProjectNumber, Responsibility, ServiceLine, STOB, MinEnroll
-            '', '', '',         // MaxEnroll, StartTime, EndTime
-            '#F1F1F1',          // Color
-            1,                  // Featured
-            '', '',             // Developer, EvaluationsLink
-            h($hc[10] ?? ''),   // LearningHubPartner
-            'No',               // Alchemer
-            h($hc[15] ?? ''),   // Topics
-            h($hc[14] ?? ''),   // Audience
-            h($hc[13] ?? ''),   // Levels (Group)
-            '', '', '', '', '', // Reporting, PathLAN, PathStaging, PathLive, PathNIK
-            '',                 // PathTeams
-            0,                  // isMoodle
-            0, '',              // TaxProcessed, TaxProcessedBy
-            h($hc[11] ?? ''),   // ELMCourseID
-            $now,               // Modified
-            'PSA Learning System', // Platform
-            1                      // HUBInclude
+            h($hc[1] ?? ''),        // CourseName
+            '',                     // CourseShort
+            h($hc[0] ?? ''),        // ItemCode
+            '', '', '', '', '',     // ClassTimes, ClassDays, ELM, PreWork, PostWork
+            '',                     // CourseOwner
+            '', '',                 // MinMax, CourseNotes,
+            $now,                   // Requested
+            'SYNCBOT',              // RequestedBy
+            $now,                   // EffectiveDate
+            h($hc[2] ?? ''),        // CourseDescription
+            '', '',                 // CourseAbstract, Prerequisites
+            h($hc[12] ?? ''),       // Keywords
+            '',                     // Category
+            h($hc[3] ?? ''),        // Method
+            '', 'No',               // elearning, WeShip
+            '', '', '', '', '',     // ProjectNumber, Responsibility, ServiceLine, STOB, MinEnroll
+            '', '', '',             // MaxEnroll, StartTime, EndTime
+            '#F1F1F1',              // Color
+            1,                      // Featured
+            '', '',                 // Developer, EvaluationsLink
+            h($hc[10] ?? ''),       // LearningHubPartner
+            'No',                   // Alchemer
+            h($hc[15] ?? ''),       // Topics
+            h($hc[14] ?? ''),       // Audience
+            h($hc[13] ?? ''),       // Levels (Group)
+            '', '', '', '', '',     // Reporting, PathLAN, PathStaging, PathLive, PathNIK
+            '',                     // PathTeams
+            0,                      // isMoodle
+            0, '',                  // TaxProcessed, TaxProcessedBy
+            h($hc[11] ?? ''),       // ELMCourseID
+            $now,                   // Modified
+            'PSA Learning System',  // Platform
+            1,                      // HUBInclude
+            '',                     // RegistrationLink
+            $slug,                  // CourseNameSlug
+            ''                      // HubExpirationDate
         ];
         $itemCode = $newCourse[4];
         $updatedCourses[$itemCode] = $newCourse;
@@ -155,7 +158,8 @@ if ($fpTemp !== false) {
         'Developer', 'EvaluationsLink', 'LearningHubPartner', 'Alchemer', 'Topics', 
         'Audience', 'Levels', 'Reporting', 'PathLAN', 'PathStaging', 'PathLive', 
         'PathNIK', 'PathTeams', 'isMoodle', 'TaxProcessed', 'TaxProcessedBy', 
-        'ELMCourseID', 'Modified','Platform','HUBInclude'
+        'ELMCourseID', 'Modified','Platform','HUBInclude',
+        'RegistrationLink','CourseNameSlug','HubExpirationDate'
     ]);
 
     if (($fpOriginal = fopen($coursesPath, 'r')) !== false) {

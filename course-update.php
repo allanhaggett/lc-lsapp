@@ -52,6 +52,8 @@ $combinedtimes = h($_POST['StartTime']) . ' - ' . h($_POST['EndTime']);
 $lanpathfront = ltrim(trim($_POST['PathLAN']),'\\');
 $lanpathvalid = rtrim($lanpathfront,'\\');
 
+$slug = createSlug($_POST['CourseName']);
+
 $course = Array($_POST['CourseID'],
 				h($_POST['Status']),
 				h($_POST['CourseName']),
@@ -105,7 +107,10 @@ $course = Array($_POST['CourseID'],
 				h($_POST['ELMCourseID']),
 				$now,
 				h($_POST['Platform']),
-				h($_POST['HUBInclude'])
+				h($_POST['HUBInclude']),
+				h($_POST['RegistrationLink']),
+				$slug,
+				h($_POST['HubExpirationDate'])
 
 			);
 
@@ -214,6 +219,35 @@ header('Location: course.php?courseid=' . $courseid);?>
 </select>
 </div>
 
+<div id="notelm" class="alert alert-primary">
+	<div class="form-group mb-3">
+		<label for="RegistrationLink">Registration Link</label><br>
+		<small>If this course does not have registration in the Learning System, 
+			then where do you go to register for it?</small>
+		<input type="text" name="RegistrationLink" id="RegistrationLink" class="form-control" value="<?= $course[54] ?>">
+	</div>
+	<div class="form-group">
+		<label for="HubExpirationDate">Expiration date</label><br>
+		<small>Date after which the course will be removed from the search results.</small>
+		<input type="date" name="HubExpirationDate" id="HubExpirationDate" class="form-control" value="<?= $course[56] ?>">
+	</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const platformSelect = document.getElementById("Platform");
+    const notElmDiv = document.getElementById("notelm");
+
+    platformSelect.addEventListener("change", function () {
+        if (platformSelect.value === "PSA Learning System") {
+            notElmDiv.classList.add("d-none");
+        } else {
+            notElmDiv.classList.remove("d-none");
+        }
+    });
+});
+</script>
+
+
 <div class="form-group">
 <?php if($course[53] == 'on' || $course[53] == 'Yes'): ?>
 	<input type="checkbox" name="HUBInclude" id="HUBInclude" checked>
@@ -223,6 +257,10 @@ header('Location: course.php?courseid=' . $courseid);?>
 	<label for="HUBInclude">Include in LearningHUB?</label>
 <?php endif ?>
 </div>
+
+
+
+
 
 <div class="form-group">
 <?php if($course[33] == 'on' || $course[33] == 'Yes'): ?>
