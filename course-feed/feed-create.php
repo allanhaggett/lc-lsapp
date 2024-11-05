@@ -55,7 +55,7 @@ foreach ($datas as $course) {
             "_audience" => $course['Audience'] ?? '',
             "_topic" => $course['Topics'] ?? '',
             "_learning_partner" => $course['LearningHubPartner'] ?? '',
-            "_external_system" => $course['Platform'] ?? '',
+            "_platform" => $course['Platform'] ?? '',
             "author" => $course['LearningHubPartner'] ?? '',
             "date_published" => "2020-05-13T14:00:00",
             "date_modified" => $formattedDate,
