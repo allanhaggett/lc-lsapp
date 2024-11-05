@@ -219,7 +219,7 @@ header('Location: course.php?courseid=' . $courseid);?>
 </select>
 </div>
 
-<div id="notelm" class="alert alert-primary">
+<div id="notelm" class="d-none alert alert-primary">
 	<div class="form-group mb-3">
 		<label for="RegistrationLink">Registration Link</label><br>
 		<small>If this course does not have registration in the Learning System, 
