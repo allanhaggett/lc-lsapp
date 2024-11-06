@@ -34,7 +34,7 @@ $json = [
     "version" => "https://jsonfeed.org/version/1",
     "title" => "BC Gov Corporate Learning Courses",
     "home_page_url" => "https://learningcentre.gww.gov.bc.ca/learninghub/",
-    "feed_url" => "https://learn.bcpublicservice.gov.bc.ca/learning-hub/corporate-learning-courses.json",
+    "feed_url" => "https://learn.bcpublicservice.gov.bc.ca/learning-hub/bcps-corporate-learning-courses.json",
     "items" => []
 ];
 
@@ -66,14 +66,14 @@ foreach ($datas as $course) {
 }
 
 $jsonOutput = json_encode($json, JSON_PRETTY_PRINT);
-$jsonFilename = 'data/corporate-learning-courses.json';
+$jsonFilename = 'data/bcps-corporate-learning-courses.json';
 file_put_contents($jsonFilename, $jsonOutput);
 
-// $newfile = 'E:/WebSites/NonSSOLearning/learning-hub/learning-partner-courses.json';
-// if (!copy($jsonFilename, $newfile)) {
-//     echo 'Failed to copy ' . $jsonFilename . '... contact Allan';
-//     exit;
-// }
+$newfile = 'E:/WebSites/NonSSOLearning/learning-hub/bcps-corporate-learning-courses.json';
+if (!copy($jsonFilename, $newfile)) {
+    echo 'Failed to copy ' . $jsonFilename . '... contact Allan';
+    exit;
+}
 
 // header('Location: ' . $jsonFilename);
 header('Location: index.php?message=Success');

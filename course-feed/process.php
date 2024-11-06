@@ -20,7 +20,7 @@ writeCsv('data/courses.csv', $finalCols, $newCourses);
 
 // Redirect or output success message
 // echo 'Success!';
-header('Location: lhub-course-sync.php');
+header('Location: elm-course-sync.php');
 
 // Functions
 function processCsvFile($filename) {

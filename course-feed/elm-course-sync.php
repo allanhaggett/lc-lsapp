@@ -184,7 +184,7 @@ if ($fpTemp !== false) {
     fclose($fpTemp);
     rename($tempFilePath, $coursesPath);
 }
-header('Location: feed-create.php');
+header('Location: elm-inactive.php');
 ?>
 <?php else: ?>
 <?php include('templates/noaccess.php') ?>

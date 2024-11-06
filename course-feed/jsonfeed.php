@@ -60,7 +60,7 @@ foreach($datas as $course) {
         $json .= '"_topic":"' . $course['Topic'] . '",' . PHP_EOL;
         //$json .= '"duration":"' . $course['Days'] . '",' . PHP_EOL;
         $json .= '"_learning_partner":"' . $course['Course Owner Org'] . '",' . PHP_EOL;
-        $json .= '"_external_system":"PSA Learning System",' . PHP_EOL;
+        $json .= '"_platform":"PSA Learning System",' . PHP_EOL;
         $json .= '"author":"' . $course['Course Owner Org'] . '",' . PHP_EOL;
         $json .= '"date_published":"2020-05-13T14:00:00",' . PHP_EOL;
         $json .= '"date_modified":"' . $newDate . '",' . PHP_EOL;
