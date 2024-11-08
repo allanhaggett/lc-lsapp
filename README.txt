@@ -1,5 +1,5 @@
-LSApp
-Learning Support Administration Application
+# LSApp
+## Learning Support Administration Application
 
  **        ********     **                    
 /**       **//////     ****    ******  ****** 
@@ -14,7 +14,6 @@ Learning Support Administration Application
 010011001010010100000011100001110000 
 
 
-
  _        ______ _______             
 (_)      / _____(_______)            
  _      ( (____  _______ ____  ____  
@@ -23,56 +22,82 @@ Learning Support Administration Application
 |_______(______/|_|   |_|  __/|  __/ 
                         |_|   |_|    
 
-						
-						
-						
 
-"Meta-ELM" It's not an LMS/ELM. It doesn't manage registration, course content delivery, or any interface for the learner.
-It does contain all of the data associated with courses and class sessions that is necessary to be able to input that information
-into the LMS (ELM). A small team cannot possible memorize the information associated with many dozens of courses.
+"Meta-ELM" It's not an LMS/ELM. It doesn't manage registration, course content delivery, or any interface for
+the learner. It does contain all of the data associated with courses and class sessions that is necessary to 
+be able to input that information into the LMS (ELM).
 
 LSApp integrates Development, Delivery, and Operations with a central repository of meta data and communications 
 for all aspects of course creation and delivery.
 
-LSApp answers questions. It exposes the database that operations uses. 
-Any and all bits of information that are associated with that course/class are at your finger tips.
-If you look at a class page, and there's an important bit of information missing or incorrect? 
-You can bring it to LSA attention, and have the record of it maintained.
+LSApp answers questions. It exposes the database that operations uses. Any and all bits of information that are 
+associated with that course/class are at your finger tips. If you look at a class page, and there's an important 
+bit of information missing or incorrect?  You can bring it to LSA attention, and have the record of it maintained.
 
 - Custom Content Management System created by Allan
-- General tools suck. Long Live Bespoke! 
-	- I didn't write an LMS, I wrote "Learning Centre" software
-- Web-based (Bellini! where all the course content lives) and mobile-friendly
+- I didn't write an LMS, I wrote "Learning Centre" software
+- Web-based (Kepler! where all the course content lives) and mobile-friendly
 - Focused around people and tracking the things they contribute
 	- Integrated with Single Sign-On (no new accounts/passwords)
 	- Simple Access Control List
 		- Roles: super, admin, internal, external
-Each course gets its own page, listing _all_ associated meta data, materials, checklists, and upcoming classes
-Each class gets its own page listing _everything_ about that class WWWWWhy, including notes and change history
-Changes are submitted and tracked on the course/class pages, in context
-Basic work flow for entering into the Learning System
-Basic venues management
-Materials inventory management
-Materials order management, tracking, and reporting
-
-Basic (very) checklist management
-Basic custom work flows:
-	- Venue booking (communications templates, costs)
-	- Shipping (labels, communications templates)
-Integrates with Learning System (weekly course stats import):
+- Each course gets its own page, listing _all_ associated meta data, materials, checklists, and upcoming classes
+- Each class gets its own page listing _everything_ about that class WWWWWhy, including notes and change history
+- Changes are submitted and tracked on the course/class pages, in context
+- Basic work flow for entering into the Learning System
+- Basic venues management
+- Integrates with Learning System (weekly course stats import):
 	- Status updates
 	- Enrollment numbers
 	- Audit tool
-Dashboards
+- Dashboards
 	- Upcoming classes
 	- Incomplete change requests
 	- Unclaimed service requests
 	- Person dashboards list every pertinent thing for that person
 
-##ROADMAP
+## Technical History
 
+LSApp was born as 8 or more naive Excel spreadsheets spread across a LAN. VBScripts were scripts were introduced
+for data validation and normalization. Eventually Excel yeilded to Access which merged the 8 spreadsheets into a 
+single data model. After a year operating in Access, it was noticed that the web server that we use for hosting 
+elearning materials had PHP enabled on it. It was PHP 5.4 with almost zero modules enabled (no SQLite for example)
+but it was PHP and it could access a REMOTE_USER environmental variable that contained the logged in users IDIR.
 
-Note: naming all this stuff is NO FUN. Both "session" and "class" are, like, protected words in programming.
+After writing a prototype version of LSApp in CakePHP using MySQL as a database, it was discovered that it would
+more political sense if the application was written within the existing constraints and without any need of 
+further resources needed for a database or upgrades to PHP.
+
+CSV files were exported from Access and the most basic, old school PHP you can imagine was written to manage them.
+No framework; flat file database. I deliberating took as simple approach as could, even eschewing OOP in favor
+of a stack of simple functions and directly manipulating the files wherever possible. I definitely made numerous 
+mistakes that continue to plague the project, but by and large it came out well enough that it was an easy sell to 
+leadership. It went live in 2019.
+
+In 2019 the vast majority of the courses that we delivered were in person. We booked physical space at dozens of 
+venues across the province and shipped physical course materials (e.g. manuals and AV equipment) to meet the 
+in person facilitators wherever they were. Along with basic course information, LSApp was focussed on class offerings
+and offered various administrative workflows and shortcuts, designed to make entering service requests into ELM easy,
+while also providing dashboards for booking venues and ordering and shipping materials with built-in documentation.
+
+LSApp simplified onboarding and training across roles on the operations team and reduced error rates dramatically.
+
+Since 2019, obviously a lot has happened. In person training is represents less the 5% of the courses we now offer,
+with eLearning and Webinars accounting for the vast majority of the catalog. Many new features have been added and
+some are ready to be removed.
+
+## Installation
+
+LSApp is super-duper portable!
+
+- Clone the repo and cd into it
+- Copy the data folder into the files (example files coming soon, but see header structure/schema below)
+- docker build -t lsapp .
+- docker run -d -p 8080:8080 --name php-container lsapp
+
+Voila! You're up and running; no builds; no other containers needed. I'll likely migrate the data to a PVC soon, which 
+will complicate things slightly, but docker compose ... should be easy too.
+
 
 # DATA FILE HEADERS and number maps
 -----------------courses.csv--------------------
@@ -98,7 +123,11 @@ Prerequisites,Keywords,Category,Method,elearning,WeShip,ProjectNumber,Responsibi
 
 
 --------------------classes.csv--------------------
-ClassID,Status,Requested,RequestedBy,Dedicated,CourseID,CourseName,ItemCode,StartDate,EndDate,Times,MinEnroll,MaxEnroll,ShipDate,Facilitating,WebinarLink,WebinarDate,CourseDays,Enrolled,ReservedSeats,PendingApproval,Waitlisted,Dropped,VenueID,VenueName,VenueCity,VenueAddress,VenuePostalCode,VenueContactName,VenuePhone,VenueEmail,VenueAttention,RequestNotes,Shipper,Boxes,Weight,Courier,TrackingOut,TrackingIn,AttendanceReturned,EvaluationsReturned,VenueNotified,Modified,ModifiedBy,Assigned,DeliveryMethod,CourseCategory,Region,CheckedBy,ShippingStatus,PickupIn
+ClassID,Status,Requested,RequestedBy,Dedicated,CourseID,CourseName,ItemCode,StartDate,EndDate,Times,MinEnroll,MaxEnroll,ShipDate,
+Facilitating,WebinarLink,WebinarDate,CourseDays,Enrolled,ReservedSeats,PendingApproval,Waitlisted,Dropped,VenueID,VenueName,VenueCity,
+VenueAddress,VenuePostalCode,VenueContactName,VenuePhone,VenueEmail,VenueAttention,RequestNotes,Shipper,Boxes,Weight,Courier,TrackingOut,
+TrackingIn,AttendanceReturned,EvaluationsReturned,VenueNotified,Modified,ModifiedBy,Assigned,DeliveryMethod,CourseCategory,Region,
+CheckedBy,ShippingStatus,PickupIn
 
 // As of 2019-10-30
 // 0-ClassID,1-Status,2-RequestedOn,3-RequestedBy,4-Dedicated,5-CourseID,6-CourseName,7-ItemCode,8-ClassDate,9-EndDate,10-ClassTimes,
