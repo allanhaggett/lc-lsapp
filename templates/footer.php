@@ -167,7 +167,7 @@
 <script>
 var data = [
 <?php foreach($people as $p): ?>
-    <?php if($p[4] == 'Active'): ?>
+    <?php if(isset($p[4]) && $p[4] == 'Active'): ?>
     { 
         "idir": "<?= $p[0] ?>",
         "team": "<?= $p[1] ?>",
