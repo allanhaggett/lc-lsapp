@@ -34,8 +34,8 @@ foreach($dates as $date) {
 		$facilitators = str_replace('@','',$fa);
 		$facilitatorsclean = str_replace(',','',$facilitators);
 	}
-	if($fromform['VenueCity']) {
-		$city = explode('TBD - ', $fromform['VenueCity']);
+	if($_POST['VenueCity']) {
+		$city = explode('TBD - ', $_POST['VenueCity']);
 		$city = preg_replace('/\s+/', '', $city[1]);
 		$city = str_replace('.', '', $city);
 		$city = strtolower($city);
@@ -68,14 +68,14 @@ foreach($dates as $date) {
 				'0', // Dropped
 				'', // VenueID
 				'', // VenueName
-				$city, //h($fromform['VenueCity']),
+				$city, //h($_POST['VenueCity']),
 				'', // VenueAddress
 				'', // VenuePostalCode
 				'', // VenueContactName
 				'', // VenuePhone
 				'', // VenueEmail
 				'', // VenueAttention
-				$_POST['RequestNotes'][$count], // h($fromform['RequestNotes']), $_POST['RequestNotes'];
+				$_POST['RequestNotes'][$count], // h($_POST['RequestNotes']), $_POST['RequestNotes'];
 				'', // Shipper
 				'', // Boxes
 				'', // Weight
@@ -89,7 +89,7 @@ foreach($dates as $date) {
 				$currentuser,
 				'', // Assigned
 				$course[21],
-				$course[20], //h($fromform['CourseCategory']),
+				$course[20], //h($_POST['CourseCategory']),
 				'', // Region
 				'', // CheckedBy
 				$doweship, // ShippingStatus
