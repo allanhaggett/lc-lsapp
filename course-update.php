@@ -45,6 +45,12 @@ if(!isset($_POST['Alchemer'])) {
 	$alchemer = 'Yes';
 }
 
+if(!isset($_POST['HUBInclude'])) {
+	$hubInclude = 'No';
+} else {
+	$hubInclude = 'Yes';
+}
+
 $now = date('Y-m-d\TH:i:s');
 
 $combinedtimes = h($_POST['StartTime']) . ' - ' . h($_POST['EndTime']);
@@ -61,7 +67,7 @@ $reporting = $_POST['Reporting'] ?? '';
 $isMoodle = $_POST['isMoodle'] ?? '';
 $taxonomyProcessed = $_POST['TaxonomyProcessed'] ?? '';
 $taxonomyProcessedBy = $_POST['TaxonomyProcessedBy'] ?? '';
-$hubInclude = $_POST['HUBInclude'] ?? '';
+
 
 $course = Array($_POST['CourseID'],
 				h($_POST['Status']),
