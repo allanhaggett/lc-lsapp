@@ -8,7 +8,11 @@ function getCoursesFromCSV($filepath, $isActiveFilter = false, $itemCodeIndex = 
     if (($handle = fopen($filepath, 'r')) !== false) {
         fgetcsv($handle); // Skip header row
         while ($row = fgetcsv($handle)) {
-            $itemCode = strtoupper(trim($row[$itemCodeIndex])); // Normalize Item Code
+            $itemCode = strtoupper(trim($row[$itemCodeIndex]));
+
+            // Sanitize CourseAbstract field (index 17) and other relevant text fields
+            $row[17] = sanitizeText($row[17] ?? ''); // Clean CourseAbstract
+
             if (!$isActiveFilter || $row[1] === 'Active' || $row[1] === 'Inactive') {
                 $courses[$itemCode] = $row;
             }
@@ -35,30 +39,29 @@ function updateCourse($existingCourse, $newCourseData, &$logEntries) {
     $changes = [];
 
     foreach ($fieldMappings as $lsappIndex => $elmIndex) {
-        $existingValue = mb_strtolower(trim(html_entity_decode($existingCourse[$lsappIndex])));
-        $newValue = mb_strtolower(trim(html_entity_decode($newCourseData[$elmIndex] ?? '')));
+        $existingValue = sanitizeText(trim($existingCourse[$lsappIndex] ?? ''));
+        $newValue = sanitizeText(trim($newCourseData[$elmIndex] ?? ''));
 
         if ($existingValue !== $newValue) {
-            $updatedCourse[$lsappIndex] = h($newCourseData[$elmIndex] ?? '');
-            $changes[] = "Updated field index $lsappIndex to '{$updatedCourse[$lsappIndex]}'";
-            $updatedCourse[51] = date('Y-m-d\TH:i:s');
+            $updatedCourse[$lsappIndex] = $newValue;
+            $changes[] = "Updated field index $lsappIndex to '{$newValue}'";
+            $updatedCourse[51] = date('Y-m-d\TH:i:s'); // Update modified timestamp only if there's a change
         }
     }
 
-    // Update status, platform, and HUBInclude conditionally
-    if ($existingCourse[1] === 'Inactive') {
+    if (trim($existingCourse[1]) === 'Inactive') {
         $updatedCourse[1] = 'Active';
         $changes[] = "Updated status to 'Active'";
     }
 
-    if (mb_strtolower(trim($existingCourse[52])) !== 'psa learning system') {
+    if (trim($existingCourse[52]) !== 'PSA Learning System') {
         $updatedCourse[52] = 'PSA Learning System';
         $changes[] = "Updated Platform to 'PSA Learning System'";
     }
 
-    if ($existingCourse[53] != 'Yes') {
+    if (trim($existingCourse[53]) != 'Yes') {
         $updatedCourse[53] = 'Yes';
-        $changes[] = "Updated HUBInclude to Yes";
+        $changes[] = "Updated HUBInclude to 'Yes'";
     }
 
     if ($changes) {
@@ -73,7 +76,6 @@ $hubCoursesPath = build_path(BASE_DIR, 'course-feed', 'data', 'courses.csv');
 $timestamp = date('YmdHis');
 $logEntries = [];
 $logFilePath = build_path(BASE_DIR, 'data', "course-sync-log-$timestamp.log");
-$inactiveLogFilePath = build_path(BASE_DIR, 'data', "elminactive-log-$timestamp.log");
 
 $lsappCourses = getCoursesFromCSV($coursesPath, false, 4);
 $hubCourses = getCoursesFromCSV($hubCoursesPath, false, 0);
@@ -135,11 +137,14 @@ foreach ($hubCourses as $hcCode => $hc) {
 }
 
 foreach ($lsappCourses as $lsappCode => $lsappCourse) {
-    // $lsappCourse[53] == 1 || $lsappCourse[53] == 'Yes' && 
+    
     if ($lsappCourse[52] === 'PSA Learning System' && !isset($hubCourses[$lsappCode])) {
-        $lsappCourse[53] = 'No';
-        $updatedCourses[$lsappCode] = $lsappCourse;
-        $logEntries[] = "Set HUBInclude to No for '{$lsappCourse[2]}' (Class code: $lsappCode)";
+        // Only set HUBInclude to 'No' if it isn't already 'No'
+        if ($lsappCourse[53] !== 'No') {
+            $lsappCourse[53] = 'No';
+            $updatedCourses[$lsappCode] = $lsappCourse;
+            $logEntries[] = "Set HUBInclude to No for '{$lsappCourse[2]}' (Class code: $lsappCode)";
+        }
     }
 }
 
@@ -147,7 +152,9 @@ file_put_contents($logFilePath, implode("\n", $logEntries) . "\n", FILE_APPEND);
 
 $tempFilePath = build_path(BASE_DIR, 'data', 'temp_courses.csv');
 $fpTemp = fopen($tempFilePath, 'w');
+
 if ($fpTemp !== false) {
+    // Write header to the temporary file
     fputcsv($fpTemp, [
         'CourseID', 'Status', 'CourseName', 'CourseShort', 'ItemCode', 'ClassTimes',
         'ClassDays', 'ELM', 'PreWork', 'PostWork', 'CourseOwner', 'MinMax', 'CourseNotes',
@@ -157,15 +164,46 @@ if ($fpTemp !== false) {
         'Color', 'Featured', 'Developer', 'EvaluationsLink', 'LearningHubPartner', 'Alchemer',
         'Topics', 'Audience', 'Levels', 'Reporting', 'PathLAN', 'PathStaging', 'PathLive',
         'PathNIK', 'PathTeams', 'isMoodle', 'TaxProcessed', 'TaxProcessedBy', 'ELMCourseID',
-        'Modified','Platform','HUBInclude', 'RegistrationLink','CourseNameSlug','HubExpirationDate'
+        'Modified', 'Platform', 'HUBInclude', 'RegistrationLink', 'CourseNameSlug', 'HubExpirationDate'
     ]);
 
-    foreach ($lsappCourses as $itemCode => $course) {
-        fputcsv($fpTemp, $updatedCourses[$itemCode] ?? $course);
+    if (($fpOriginal = fopen($coursesPath, 'r')) !== false) {
+        fgetcsv($fpOriginal); // Skip header row
+
+        while (($row = fgetcsv($fpOriginal)) !== false) {
+            $itemCode = $row[4]; // Assuming ItemCode is at index 4
+
+            // Sanitize CourseAbstract (index 17)
+            $row[17] = sanitizeText($row[17] ?? '');
+
+            if (isset($updatedCourses[$itemCode])) {
+                $updatedCourses[$itemCode][17] = sanitizeText($updatedCourses[$itemCode][17] ?? '');
+                fputcsv($fpTemp, $updatedCourses[$itemCode]);
+                unset($updatedCourses[$itemCode]);
+            } else {
+                fputcsv($fpTemp, $row);
+            }
+        }
+        fclose($fpOriginal);
     }
+
+    foreach ($updatedCourses as $newCourse) {
+        $newCourse[17] = sanitizeText($newCourse[17] ?? '');
+        fputcsv($fpTemp, $newCourse);
+    }
+
     fclose($fpTemp);
-    rename($tempFilePath, $coursesPath);
+
+    if (rename($tempFilePath, $coursesPath)) {
+        $logEntries[] = "Successfully updated courses.csv with the latest data.";
+    } else {
+        $logEntries[] = "Failed to replace courses.csv with updated data.";
+    }
+} else {
+    $logEntries[] = "Failed to open temp file for writing at $tempFilePath.";
 }
+// include($logFilePath);
+// echo '<a href="feed-create.php">Proceed to create feed</a>';
 header('Location: feed-create.php');
 ?>
 <?php else: ?>
