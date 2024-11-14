@@ -40,6 +40,7 @@ require($path);
   <div class="alert alert-success">
 <h2>Successful Upload</h2>
 <p><a href="./" class="btn btn-success">Synchronize Again</a>
+    <a href="./process.php" class="btn btn-success">Process Again</a>
 </div>
 <?php else: ?>
 <ol>
