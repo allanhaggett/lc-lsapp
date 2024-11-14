@@ -41,7 +41,8 @@ $json = [
 foreach ($datas as $course) {
     $description = preg_replace("/\r|\n/", "", htmlentities($course['CourseDescription'] ?? ''));
     $desc = iconv(mb_detect_encoding($description, mb_detect_order(), true), "UTF-8", $description);
-    $formattedDate = date("Y-m-d\TH:i:s", strtotime(str_replace('  ', ' ', $course['Modified'] ?? '')));
+    $createdDate = date("Y-m-d\TH:i:s", strtotime(str_replace('  ', ' ', $course['Requested'] ?? '')));
+    $modifiedDate = date("Y-m-d\TH:i:s", strtotime(str_replace('  ', ' ', $course['Modified'] ?? '')));
 
     if ($course['Status'] == 'Active' && !empty($course['LearningHubPartner'])  && $course['HUBInclude'] > 0) {
         $json['items'][] = [
@@ -54,11 +55,12 @@ foreach ($datas as $course) {
             "_keywords" => $course['Keywords'] ?? '',
             "_audience" => $course['Audience'] ?? '',
             "_topic" => $course['Topics'] ?? '',
+            "_slug" => $course['CourseNameSlug'] ?? '',
             "_learning_partner" => $course['LearningHubPartner'] ?? '',
             "_platform" => $course['Platform'] ?? '',
             "author" => $course['LearningHubPartner'] ?? '',
-            "date_published" => "2020-05-13T14:00:00",
-            "date_modified" => $formattedDate,
+            "date_published" => $createdDate,
+            "date_modified" => $modifiedDate,
             "tags" => rtrim(trim($course['Category'] ?? ''), ','),
             "url" => "https://learning.gov.bc.ca/psc/CHIPSPLM/EMPLOYEE/ELM/c/LM_OD_EMPLOYEE_FL.LM_CRS_DTL_FL.GBL?Page=LM_CRS_DTL_FL&Action=U&ForceSearch=Y&LM_CI_ID=" . ($course['CourseID'] ?? '')
         ];
@@ -77,3 +79,4 @@ if (!copy($jsonFilename, $newfile)) {
 
 // header('Location: ' . $jsonFilename);
 header('Location: index.php?message=Success');
+// header('Location: rss2-feed-create.php');
