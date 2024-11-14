@@ -55,6 +55,37 @@ $people = getPeopleAll();
 $lsapppeople = count($people); 
 
 
+// Helper function to sanitize text
+function sanitizeText($text) {
+    // Step 1: Remove any invalid UTF-8 sequences
+    $cleanText = iconv('UTF-8', 'UTF-8//IGNORE', $text);
+
+    // Step 2: Replace common Word characters with standard equivalents
+    $wordCharacters = [
+        "\xE2\x80\x9C" => '"', // Left double quote
+        "\xE2\x80\x9D" => '"', // Right double quote
+        "\xE2\x80\x98" => "'", // Left single quote
+        "\xE2\x80\x99" => "'", // Right single quote
+        "\xE2\x80\x93" => "-", // En dash
+        "\xE2\x80\x94" => "-", // Em dash
+        "\xC2\xA0" => " ",     // Non-breaking space
+        "\xE2\x80\xA6" => "...", // Ellipsis
+        "\xE2\x80\xB9" => "<", // Single left-pointing angle quotation
+        "\xE2\x80\xBA" => ">", // Single right-pointing angle quotation
+        "\xC2\xAD" => "",      // Soft hyphen (remove)
+    ];
+    $cleanText = strtr($cleanText, $wordCharacters);
+
+    // Step 3: Remove other control characters except newlines
+    $cleanText = preg_replace('/[^\P{C}\n]+/u', '', $cleanText);
+
+    // Step 4: Normalize whitespace (remove excessive spaces)
+    $cleanText = preg_replace('/\s+/', ' ', $cleanText); // Replace multiple spaces with a single space
+    $cleanText = trim($cleanText); // Trim leading and trailing whitespace
+
+    return $cleanText;
+}
+
 // TODO this file really ought to be broken up into separate files?
 // 2023-03-23 - There are currently 87 functions in this file
 
