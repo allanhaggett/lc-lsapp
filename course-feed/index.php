@@ -18,8 +18,9 @@ require($path);
 <div class="row justify-content-md-center">
 <div class="col-md-6 col-xl-4">
 
-<div>PSA Learning System </div>
 <h1>Course Catalog Generator</h1>
+<p>Synchronize ELM courses that have a "Learning Partner" keyword with LSApp,
+    and then generate a new "feed" for the LearningHUB to consume.</p>
 
 <div class="btn-group mb-3">
     <a href="https://learn.bcpublicservice.gov.bc.ca/learning-hub/learning-partner-courses.json"
@@ -81,68 +82,74 @@ Upload both of those CSV files here:<br>
 </li>
 </ol>
 <?php endif ?>
-<h3>Screencast of Process:</h3>
-<video src="lsapp-sync-elm-with-learninghub.mp4" width="100%" height="320" controls="true"></video>
+
 </div>
-<div class="col-md-6">
+<div class="col-md-3">
 <?php
-  // Define the pattern to match files like course-sync-log-YYYYMMDDHHiiss.log
-  $pattern = '/^course-sync-log-(\d{14})\.log$/';
+// Path to the persistent sync log
+$persistentLogPath = '../data/elm_sync_log.txt';
 
-  // Scan the ../data directory for files
-  $files = scandir('../data');
+// Check if the persistent log file exists and get the last sync time from the first line
+$lastSyncMessage = "No sync history found.";
+if (file_exists($persistentLogPath)) {
+    $lines = file($persistentLogPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    if (!empty($lines)) {
+        $lastSyncMessage = $lines[0]; // First line contains the last sync date
+    }
+}
 
-  // Filter files that match the pattern
-  $logFiles = array_filter($files, function($file) use ($pattern) {
-      return preg_match($pattern, $file);
-  });
+// Define the pattern to match files like course-sync-log-YYYYMMDDHHiiss.log
+$pattern = '/^course-sync-log-(\d{14})\.log$/';
 
-  // Sort log files in reverse chronological order by extracting the timestamp
-  usort($logFiles, function($a, $b) use ($pattern) {
-      preg_match($pattern, $a, $matchesA);
-      preg_match($pattern, $b, $matchesB);
-      return strcmp($matchesB[1], $matchesA[1]); // Sort in descending order
-  });
+// Scan the ../data directory for files
+$files = scandir('../data');
 
-  // Display the "Last time synced" if there are any log files
-  if (!empty($logFiles)) {
-      // Extract the timestamp from the most recent log file
-      if (preg_match($pattern, $logFiles[0], $matches)) {
-          $dateStr = $matches[1];
-          $lastSyncDate = DateTime::createFromFormat('YmdHis', $dateStr);
-          $formattedLastSyncDate = $lastSyncDate->format('F j, Y, g:i:s A');
-          echo "<p><strong>Last time synced:</strong> $formattedLastSyncDate</p>";
-      }
+// Filter files that match the pattern
+$logFiles = array_filter($files, function($file) use ($pattern) {
+    return preg_match($pattern, $file);
+});
 
-      echo "<h3>Course Sync Logs:</h3><ul class='list-group'>";
-      foreach ($logFiles as $logFile) {
-          // Check if the file has substantive content (more than just whitespace or newline)
-          $filePath = "../data/$logFile";
-          $content = trim(file_get_contents($filePath)); // Trim whitespace and newlines
+// Sort log files in reverse chronological order by extracting the timestamp
+usort($logFiles, function($a, $b) use ($pattern) {
+    preg_match($pattern, $a, $matchesA);
+    preg_match($pattern, $b, $matchesB);
+    return strcmp($matchesB[1], $matchesA[1]); // Sort in descending order
+});
 
-          if (!empty($content)) { // Only proceed if there's actual content
-              // Extract the date portion (YYYYMMDDHHiiss) from the filename
-              if (preg_match($pattern, $logFile, $matches)) {
-                  $dateStr = $matches[1]; // Extracted timestamp
+// Display the "Last time synced" from the persistent log file
+echo "<p><strong>Last time synced:</strong> $lastSyncMessage</p>";
 
-                  // Create a DateTime object from the extracted timestamp
-                  $date = DateTime::createFromFormat('YmdHis', $dateStr);
+// Display the list of log files if there are any
+if (!empty($logFiles)) {
+    echo "<h3>Course Sync Logs:</h3><ul class='list-group'>";
+    foreach ($logFiles as $logFile) {
+        // Check if the file has substantive content (more than just whitespace or newline)
+        $filePath = "../data/$logFile";
+        $content = trim(file_get_contents($filePath)); // Trim whitespace and newlines
 
-                  // Format the date nicely
-                  $formattedDate = $date->format('F j, Y, g:i:s A');
+        if (!empty($content)) { // Only proceed if there's actual content
+            // Extract the date portion (YYYYMMDDHHiiss) from the filename
+            if (preg_match($pattern, $logFile, $matches)) {
+                $dateStr = $matches[1]; // Extracted timestamp
 
-                  // Display the link with the formatted date, triggering the modal
-                  echo "<li class='list-group-item'>
-                          <a href='#' data-bs-toggle='modal' data-bs-target='#logModal' onclick='loadLogContent(\"$logFile\")'>$formattedDate</a>
-                        </li>";
-              }
-          }
-      }
-      echo "</ul>";
-  } else {
-      echo "<p>No course sync log files found.</p>";
-  }
-  ?>
+                // Create a DateTime object from the extracted timestamp
+                $date = DateTime::createFromFormat('YmdHis', $dateStr);
+
+                // Format the date nicely
+                $formattedDate = $date->format('F j, Y, g:i:s A');
+
+                // Display the link with the formatted date, triggering the modal
+                echo "<li class='list-group-item'>
+                        <a href='#' data-bs-toggle='modal' data-bs-target='#logModal' onclick='loadLogContent(\"$logFile\")'>$formattedDate</a>
+                      </li>";
+            }
+        }
+    }
+    echo "</ul>";
+} else {
+    echo "<p>No course sync log files found.</p>";
+}
+?>
 <!-- Modal Template -->
 <div class="modal fade" id="logModal" tabindex="-1" aria-labelledby="logModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">

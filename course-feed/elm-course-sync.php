@@ -9,10 +9,7 @@ function getCoursesFromCSV($filepath, $isActiveFilter = false, $itemCodeIndex = 
         fgetcsv($handle); // Skip header row
         while ($row = fgetcsv($handle)) {
             $itemCode = strtoupper(trim($row[$itemCodeIndex]));
-
-            // Sanitize CourseAbstract field (index 17) and other relevant text fields
             $row[17] = sanitizeText($row[17] ?? ''); // Clean CourseAbstract
-
             if (!$isActiveFilter || $row[1] === 'Active' || $row[1] === 'Inactive') {
                 $courses[$itemCode] = $row;
             }
@@ -28,6 +25,7 @@ function updateCourse($existingCourse, $newCourseData, &$logEntries) {
     $fieldMappings = [
         2  => 1,  // CourseName (ELM index 1 -> LSApp index 2)
         16 => 2,  // CourseDescription (ELM index 2 -> LSApp index 16)
+        50 => 11, // ELMCourseID (ELM index 11 -> LSApp index 50)
         19 => 12, // Keywords (ELM index 12 -> LSApp index 19)
         21 => 3,  // Method (ELM index 3 -> LSApp index 21)
         36 => 10, // LearningHubPartner (ELM index 10 -> LSApp index 36)
@@ -52,8 +50,13 @@ function updateCourse($existingCourse, $newCourseData, &$logEntries) {
     if (trim($existingCourse[1]) === 'Inactive') {
         $updatedCourse[1] = 'Active';
         $changes[] = "Updated status to 'Active'";
-    }
+    } // we don't do the inverse action to make active courses inactive because of the flow
+      // of operations here, where LSApp can be the first point of creation for a new course
+      // request before it's actually entered in ELM. We need new courses to be "Active" before
+      // they are available for registration, so if we just make everything that's active 
+      // but not included in the hub inactive, then we loose the ability 
 
+    
     if (trim($existingCourse[52]) !== 'PSA Learning System') {
         $updatedCourse[52] = 'PSA Learning System';
         $changes[] = "Updated Platform to 'PSA Learning System'";
@@ -71,11 +74,14 @@ function updateCourse($existingCourse, $newCourseData, &$logEntries) {
     return $updatedCourse;
 }
 
+// Paths to course data and log files
 $coursesPath = build_path(BASE_DIR, 'data', 'courses.csv');
 $hubCoursesPath = build_path(BASE_DIR, 'course-feed', 'data', 'courses.csv');
 $timestamp = date('YmdHis');
+$isoDateTime = date('c'); // ISO 8601 date format for "elm_sync_log.txt"
 $logEntries = [];
 $logFilePath = build_path(BASE_DIR, 'data', "course-sync-log-$timestamp.log");
+$persistentLogPath = build_path(BASE_DIR, 'data', 'elm_sync_log.txt');
 
 $lsappCourses = getCoursesFromCSV($coursesPath, false, 4);
 $hubCourses = getCoursesFromCSV($hubCoursesPath, false, 0);
@@ -148,7 +154,17 @@ foreach ($lsappCourses as $lsappCode => $lsappCourse) {
     }
 }
 
-file_put_contents($logFilePath, implode("\n", $logEntries) . "\n", FILE_APPEND);
+// Check if any updates occurred
+if (!empty($logEntries)) {
+    // Create the timestamped log file only if there are updates
+    file_put_contents($logFilePath, implode("\n", $logEntries) . "\n", FILE_APPEND);
+    $logEntries[] = "Logged updates to $logFilePath";
+}
+
+// Always update the persistent log (prepend latest sync time)
+$currentPersistentLog = file_exists($persistentLogPath) ? file_get_contents($persistentLogPath) : '';
+$newPersistentLogEntry = "$isoDateTime\n" . $currentPersistentLog;
+file_put_contents($persistentLogPath, $newPersistentLogEntry);
 
 $tempFilePath = build_path(BASE_DIR, 'data', 'temp_courses.csv');
 $fpTemp = fopen($tempFilePath, 'w');
