@@ -56,7 +56,7 @@ getHeader();
 <?php if($course[21] == 'Classroom'): ?>
 <div class="col-md-6">
 <label for="VenueCity">City</label>
-<select name="VenueCity" id="VenueCity" class="form-control mb-0" >
+<select name="VenueCity[]" id="VenueCity" class="form-control mb-0" >
 	<option value="">Choose a City</option>
 	<!-- <option>Provided</option>-->
 	<option data-region="LM">TBD - Other (see notes)</option>

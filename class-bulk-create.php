@@ -34,14 +34,7 @@ foreach($dates as $date) {
 		$facilitators = str_replace('@','',$fa);
 		$facilitatorsclean = str_replace(',','',$facilitators);
 	}
-	if($_POST['VenueCity']) {
-		$city = explode('TBD - ', $_POST['VenueCity']);
-		$city = preg_replace('/\s+/', '', $city[1]);
-		$city = str_replace('.', '', $city);
-		$city = strtolower($city);
-	} else {
-		$city = 'N/A';
-	}
+
 
 	$newclass = Array($classid,
 				$status,
@@ -68,7 +61,7 @@ foreach($dates as $date) {
 				'0', // Dropped
 				'', // VenueID
 				'', // VenueName
-				$city, //h($_POST['VenueCity']),
+				h($_POST['VenueCity'][$count] ?? ''),
 				'', // VenueAddress
 				'', // VenuePostalCode
 				'', // VenueContactName
