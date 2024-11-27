@@ -33,4 +33,3 @@ file_put_contents($filePath, json_encode($data, JSON_PRETTY_PRINT));
 
 // Redirect or show a confirmation message
 echo $recordFound ? "Record updated successfully." : "New record added successfully.";
-?>
