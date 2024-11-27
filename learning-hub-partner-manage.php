@@ -37,14 +37,12 @@ if (isset($_GET['id'])) {
 <body>
 <?php getNavigation() ?>
 <div class="container">
-<div class="row">
+<div class="row justify-content-md-center">
 <div class="col-md-6">
     <h2>Learning Partner Form</h2>
     <form action="learning-hub-partner-update.php" method="post">
-        <div class="mb-3">
-            <label for="id" class="form-label">ID</label>
-            <input type="number" class="form-control" id="id" name="id" placeholder="Record ID" value="<?php echo htmlspecialchars($id); ?>" required>
-        </div>
+        
+        <input type="hidden" id="id" name="id" value="<?php echo htmlspecialchars($id); ?>">
         <div class="mb-3">
             <label for="name" class="form-label">Name</label>
             <input type="text" class="form-control" id="name" name="name" value="<?php echo htmlspecialchars($name); ?>" required>
