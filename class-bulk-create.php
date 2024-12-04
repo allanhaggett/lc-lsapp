@@ -1,8 +1,8 @@
 <?php 
 
+opcache_reset();
 
 require('inc/lsapp.php');
-
 if(canAccess()):
 
 $currentuser = LOGGED_IN_IDIR;
@@ -13,7 +13,7 @@ $dates = $_POST['StartDate'];
 $count = 0;
 $allclasses = [];
 foreach($dates as $date) {
-
+	
 	$classid = date('YmdHis') . '-' . $count;
 	$combinedtimes = h($_POST['StartTime'][$count]) . ' - ' . h($_POST['EndTime'][$count]);	
 	$status = 'Requested';
@@ -33,14 +33,6 @@ foreach($dates as $date) {
 		$fa = strip_tags(trim($fac));
 		$facilitators = str_replace('@','',$fa);
 		$facilitatorsclean = str_replace(',','',$facilitators);
-	}
-	if($fromform['VenueCity']) {
-		$city = explode('TBD - ', $fromform['VenueCity']);
-		$city = preg_replace('/\s+/', '', $city[1]);
-		$city = str_replace('.', '', $city);
-		$city = strtolower($city);
-	} else {
-		$city = 'N/A';
 	}
 
 	$newclass = Array($classid,
@@ -68,14 +60,14 @@ foreach($dates as $date) {
 				'0', // Dropped
 				'', // VenueID
 				'', // VenueName
-				$city, //h($fromform['VenueCity']),
+				h($_POST['VenueCity'][$count] ?? ''),
 				'', // VenueAddress
 				'', // VenuePostalCode
 				'', // VenueContactName
 				'', // VenuePhone
 				'', // VenueEmail
 				'', // VenueAttention
-				$_POST['RequestNotes'][$count], // h($fromform['RequestNotes']), $_POST['RequestNotes'];
+				$_POST['RequestNotes'][$count], // h($_POST['RequestNotes']), $_POST['RequestNotes'];
 				'', // Shipper
 				'', // Boxes
 				'', // Weight
@@ -89,7 +81,7 @@ foreach($dates as $date) {
 				$currentuser,
 				'', // Assigned
 				$course[21],
-				$course[20], //h($fromform['CourseCategory']),
+				$course[20], //h($_POST['CourseCategory']),
 				'', // Region
 				'', // CheckedBy
 				$doweship, // ShippingStatus

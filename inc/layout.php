@@ -301,7 +301,7 @@ function getNavigation($context = NULL) {
       </ul>
 	  <?php if(canAccess() && $context != 'footer'): ?>
 
-  Welcome,&nbsp;<a class="nav-link ml-1" href="/lsapp/person.php?idir=<?= LOGGED_IN_IDIR ?>"><?= LOGGED_IN_IDIR ?></a>. <?php echo date('D M dS') ?>&nbsp; <span id="clock"></span>
+	Welcome,&nbsp;<a class="nav-link ml-1" href="/lsapp/person.php?idir=<?= LOGGED_IN_IDIR ?>"><?= LOGGED_IN_IDIR ?></a>. <?php echo date('D M dS') ?>&nbsp; <span id="clock"></span>
 	<a role="button" class="btn btn-sm btn-primary ms-3" href="/lsapp/requests.php">Requests</a>
 	<?php endif ?>
     </div>

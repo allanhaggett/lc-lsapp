@@ -328,8 +328,8 @@ foreach ($courz as $fields) {
 // Close the file
 fclose($fp);
 // Redirect 
-// header('Location: jsonfeed.php');
-header('Location: lhub-course-sync.php');
+header('Location: jsonfeed.php');
+// header('Location: lhub-course-sync.php');
 
 
 

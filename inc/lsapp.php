@@ -55,6 +55,37 @@ $people = getPeopleAll();
 $lsapppeople = count($people); 
 
 
+// Helper function to sanitize text
+function sanitizeText($text) {
+    // Step 1: Remove any invalid UTF-8 sequences
+    $cleanText = iconv('UTF-8', 'UTF-8//IGNORE', $text);
+
+    // Step 2: Replace common Word characters with standard equivalents
+    $wordCharacters = [
+        "\xE2\x80\x9C" => '"', // Left double quote
+        "\xE2\x80\x9D" => '"', // Right double quote
+        "\xE2\x80\x98" => "'", // Left single quote
+        "\xE2\x80\x99" => "'", // Right single quote
+        "\xE2\x80\x93" => "-", // En dash
+        "\xE2\x80\x94" => "-", // Em dash
+        "\xC2\xA0" => " ",     // Non-breaking space
+        "\xE2\x80\xA6" => "...", // Ellipsis
+        "\xE2\x80\xB9" => "<", // Single left-pointing angle quotation
+        "\xE2\x80\xBA" => ">", // Single right-pointing angle quotation
+        "\xC2\xAD" => "",      // Soft hyphen (remove)
+    ];
+    $cleanText = strtr($cleanText, $wordCharacters);
+
+    // Step 3: Remove other control characters except newlines
+    $cleanText = preg_replace('/[^\P{C}\n]+/u', '', $cleanText);
+
+    // Step 4: Normalize whitespace (remove excessive spaces)
+    $cleanText = preg_replace('/\s+/', ' ', $cleanText); // Replace multiple spaces with a single space
+    $cleanText = trim($cleanText); // Trim leading and trailing whitespace
+
+    return $cleanText;
+}
+
 // TODO this file really ought to be broken up into separate files?
 // 2023-03-23 - There are currently 87 functions in this file
 
@@ -2005,12 +2036,33 @@ function h($str) {
 	//$str = htmlspecialchars($str);
 	return $str;
 }
-function createSlug($str, $delimiter = '-'){
 
-    $slug = strtolower(trim(preg_replace('/[\s-]+/', $delimiter, preg_replace('/[^A-Za-z0-9-]+/', $delimiter, preg_replace('/[&]/', 'and', preg_replace('/[\']/', '', iconv('UTF-8', 'ASCII//TRANSLIT', $str))))), $delimiter));
+function createSlug($string) {
+    // Define a list of common words to remove
+    $commonWords = ['and', 'the', 'of', 'in', 'for', 'on', 'with', 'at', 'by', 'to', 'a', 'an'];
+    
+    // Convert the string to lowercase
+    $string = strtolower($string);
+    
+    // Remove common words
+    $words = explode(' ', $string);
+    $filteredWords = array_filter($words, function($word) use ($commonWords) {
+        return !in_array($word, $commonWords);
+    });
+    
+    // Limit the result to 8 words
+    $limitedWords = array_slice($filteredWords, 0, 8);
+    
+    // Join the limited words into a single string
+    $filteredString = implode(' ', $limitedWords);
+    
+    // Replace any non-alphanumeric characters with hyphens and trim extra hyphens
+    $slug = preg_replace('/[^a-z0-9]+/', '-', $filteredString);
+    $slug = trim($slug, '-'); // Remove leading/trailing hyphens
+    
     return $slug;
-
 }
+
 
 
 

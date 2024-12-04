@@ -2,7 +2,7 @@
 require('inc/lsapp.php');
 
 
-$partner = getPartnerDetails(urldecode($_GET['partnerid']));
+// $partner = getPartnerDetails(urldecode($_GET['partnerid']));
 
 // Get the full list of partners
 $courses = getCoursesByPartnerName($_GET['partnerid']);
@@ -55,7 +55,7 @@ are to be included in <a href="https://learningcentre.gww.gov.bc.ca/hub/" target
 
 <ul class="list-group list mb-5">
 <?php foreach($courses as $c): ?>
-	
+	<?php if($c[1] == 'Active'): ?>
 	<li class="list-group-item">
 		<span class="coursename">
 			<a href="/lsapp/course.php?courseid=<?= h($c[0]) ?>">
@@ -63,7 +63,7 @@ are to be included in <a href="https://learningcentre.gww.gov.bc.ca/hub/" target
 			</a>
 		</span>
 	</li>
-
+	<?php endif ?>
 <?php endforeach ?>
 </ul>
 

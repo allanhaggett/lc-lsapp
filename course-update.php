@@ -45,12 +45,29 @@ if(!isset($_POST['Alchemer'])) {
 	$alchemer = 'Yes';
 }
 
+if(!isset($_POST['HUBInclude'])) {
+	$hubInclude = 'No';
+} else {
+	$hubInclude = 'Yes';
+}
+
 $now = date('Y-m-d\TH:i:s');
 
 $combinedtimes = h($_POST['StartTime']) . ' - ' . h($_POST['EndTime']);
 
 $lanpathfront = ltrim(trim($_POST['PathLAN']),'\\');
 $lanpathvalid = rtrim($lanpathfront,'\\');
+
+$slug = createSlug($_POST['CourseName']);
+
+$featured = $_POST['Featured'] ?? ''; // Default to empty string if not provided
+$developer = $_POST['Developer'] ?? ''; // Default to empty string if not provided
+$levels = $_POST['Levels'] ?? '';
+$reporting = $_POST['Reporting'] ?? '';
+$isMoodle = $_POST['isMoodle'] ?? '';
+$taxonomyProcessed = $_POST['TaxonomyProcessed'] ?? '';
+$taxonomyProcessedBy = $_POST['TaxonomyProcessedBy'] ?? '';
+
 
 $course = Array($_POST['CourseID'],
 				h($_POST['Status']),
@@ -85,27 +102,30 @@ $course = Array($_POST['CourseID'],
 				h($_POST['StartTime']),
 				h($_POST['EndTime']),
 				h($_POST['CourseColor']),
-				h($_POST['Featured']),
-				h($_POST['Developer']),
+				$featured,
+				$developer,
 				h($_POST['EvaluationsLink']),
 				h($_POST['LearningHubPartner']),
 				h($alchemer),
 				h($_POST['Topics']),
 				h($_POST['Audience']),
-				h($_POST['Levels']),
-				h($_POST['Reporting']),
+				$levels,
+				$reporting,
 				$lanpathvalid,
 				h($_POST['PathStaging']),
 				h($_POST['PathLive']),
 				h($_POST['PathNIK']),
 				h($_POST['PathTeams']),
-				h($_POST['isMoodle']),
-				h($_POST['TaxonomyProcessed']),
-				h($_POST['TaxonomyProcessedBy']),
+			    $isMoodle,
+				$taxonomyProcessed,
+				$taxonomyProcessedBy,
 				h($_POST['ELMCourseID']),
 				$now,
 				h($_POST['Platform']),
-				h($_POST['HUBInclude'])
+				$hubInclude,
+				h($_POST['RegistrationLink']),
+				$slug,
+				h($_POST['HubExpirationDate'])
 
 			);
 
@@ -131,7 +151,7 @@ if($_POST['CourseOwner'] != $coursesteward) {
 	$stew = [$courseid,'steward',$_POST['CourseOwner'], $now];
 	fputcsv($peoplefp, $stew);
 }
-if($_POST['Developer'] != $coursedeveloper) {
+if(isset($_POST['Developer']) && $_POST['Developer'] != $coursedeveloper) {
 	$dev = [$courseid,'dev',$_POST['Developer'], $now];
 	fputcsv($peoplefp, $dev);
 }
@@ -214,6 +234,35 @@ header('Location: course.php?courseid=' . $courseid);?>
 </select>
 </div>
 
+<div id="notelm" class="d-none alert alert-primary">
+	<div class="form-group mb-3">
+		<label for="RegistrationLink">Registration Link</label><br>
+		<small>If this course does not have registration in the Learning System, 
+			then where do you go to register for it?</small>
+		<input type="text" name="RegistrationLink" id="RegistrationLink" class="form-control" value="<?= $course[54] ?>">
+	</div>
+	<div class="form-group">
+		<label for="HubExpirationDate">Expiration date</label><br>
+		<small>Date after which the course will be removed from the search results.</small>
+		<input type="date" name="HubExpirationDate" id="HubExpirationDate" class="form-control" value="<?= $course[56] ?>">
+	</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const platformSelect = document.getElementById("Platform");
+    const notElmDiv = document.getElementById("notelm");
+
+    platformSelect.addEventListener("change", function () {
+        if (platformSelect.value === "PSA Learning System") {
+            notElmDiv.classList.add("d-none");
+        } else {
+            notElmDiv.classList.remove("d-none");
+        }
+    });
+});
+</script>
+
+
 <div class="form-group">
 <?php if($course[53] == 'on' || $course[53] == 'Yes'): ?>
 	<input type="checkbox" name="HUBInclude" id="HUBInclude" checked>
@@ -223,6 +272,10 @@ header('Location: course.php?courseid=' . $courseid);?>
 	<label for="HUBInclude">Include in LearningHUB?</label>
 <?php endif ?>
 </div>
+
+
+
+
 
 <div class="form-group">
 <?php if($course[33] == 'on' || $course[33] == 'Yes'): ?>
@@ -272,7 +325,7 @@ header('Location: course.php?courseid=' . $courseid);?>
 <div class="form-group">
 <label for="CourseShort">Course Name (Short)</label><br>
 <small>(Max# characters, alpha/numeric= 10; <strong>no spaces</strong>) | <a href="#" title="coming soon">Appropriate acronym following LC guidelines</a></small>
-<input type="text" name="CourseShort" id="CourseShort" class="form-control" required value="<?= h($course[3]) ?>">
+<input type="text" name="CourseShort" id="CourseShort" class="form-control" value="<?= h($course[3]) ?>">
 <div class="alert alert-success" id="CNSNum"></div>
 </div>
 
@@ -366,7 +419,7 @@ The overall purpose of the training in 2 to 3 sentences (maximum) inclusive of:<
 <li>Course Structure (if relevant to understanding the course: e.g., six sections (modularized)
 <li>Competencies
 </ol></small>
-<textarea name="CourseAbstract" id="CourseAbstract" class="form-control" required>
+<textarea name="CourseAbstract" id="CourseAbstract" class="form-control">
 <?= h($course[17]) ?>
 </textarea>
 <div class="alert alert-success" id="CANum"></div>
@@ -437,7 +490,7 @@ $reportinglist = getReportingList();
 </div>
 
 <div class="form-group">
-<label for="Reporting<?= $deets[0] ?>">Evaluation</label><br>
+<label for="Reporting<?= $course[0] ?>">Evaluation</label><br>
 <select name="Reporting" id="Reporting<?= $course[0] ?>" class="form-select">
 	<option selected disabled>Unassigned</option>
 	<?php foreach($reportinglist as $r): ?>
@@ -537,11 +590,11 @@ $reportinglist = getReportingList();
 <div class="row">
 <div class="col-md-6">
 <label for="st">Start time</label>
-<input class="form-select starttime" id="st" type="text" name="StartTime" value="<?= h($course[30]) ?>" required="required">
+<input class="form-select starttime" id="st" type="text" name="StartTime" value="<?= h($course[30]) ?>">
 </div>
 <div class="col-md-6">
 <label for="et">End time</label>
-<input class="form-select endtime" id="et" type="text" name="EndTime" value="<?= h($course[31]) ?>" required="required">
+<input class="form-select endtime" id="et" type="text" name="EndTime" value="<?= h($course[31]) ?>">
 </div>
 </div>
 <!--

@@ -74,16 +74,45 @@ $platforms = getAllPlatforms();
 
 <div class="form-group my-3">
 <label for="Platform">Platform</label><br>
-<select name="Platform" id="Platform" class="form-select">
+<select name="Platform" id="Platform" class="form-select" required>
 <?php foreach($platforms as $pl): ?>
 <option><?= $pl ?></option>
 <?php endforeach ?>
+</select>
 </div>
+<div id="notelm" class="d-none alert alert-primary">
+	<div class="form-group mb-3">
+		<label for="RegistrationLink">Registration Link</label><br>
+		<small>If this course does not have registration in the Learning System, 
+			then where do you go to register for it?</small>
+		<input type="text" name="RegistrationLink" id="RegistrationLink" class="form-control">
+	</div>
+	<div class="form-group">
+		<label for="HubExpirationDate">Expiration date</label><br>
+		<small>Date after which the course will be removed from the search results.</small>
+		<input type="date" name="HubExpirationDate" id="HubExpirationDate" class="form-control">
+	</div>
+</div>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const platformSelect = document.getElementById("Platform");
+    const notElmDiv = document.getElementById("notelm");
+
+    platformSelect.addEventListener("change", function () {
+        if (platformSelect.value === "PSA Learning System") {
+            notElmDiv.classList.add("d-none");
+        } else {
+            notElmDiv.classList.remove("d-none");
+        }
+    });
+});
+</script>
+
+
 <div class="form-group">
 <input type="checkbox" name="HUBInclude" id="HUBInclude">
 <label for="HUBInclude">Include in LearningHUB?</label>
 </div>
-
 
 
 
@@ -98,7 +127,7 @@ $platforms = getAllPlatforms();
 <div class="form-group">
 <label for="CourseShort">Course Name (Short)</label><br>
 <small>(Max# characters, alpha/numeric= 10) | <a href="#" title="coming soon">Appropriate acronym following LC guidelines</a></small>
-<input type="text" name="CourseShort" id="CourseShort" class="form-control" required>
+<input type="text" name="CourseShort" id="CourseShort" class="form-control">
 <div class="alert alert-success" id="cnameshortCharNum"></div>
 </div>
 
@@ -131,7 +160,7 @@ $platforms = getAllPlatforms();
 <div class="form-group">
 <label for="EffectiveDate">Effective date</label><br>
 <small>Date the course should be made visible to learners</small>
-<input type="text" name="EffectiveDate" id="EffectiveDate" class="form-control" required>
+<input type="date" name="EffectiveDate" id="EffectiveDate" class="form-control" required>
 </div>
 </div>
 </div>
@@ -164,13 +193,13 @@ The overall purpose of the training in 2 to 3 sentences (maximum) inclusive of:<
 <li>Course Structure (if relevant to understanding the course: e.g., six sections (modularized)
 <li>Competencies
 </ol></small>
-<textarea name="CourseAbstract" id="CourseAbstract" class="form-control" required></textarea>
+<textarea name="CourseAbstract" id="CourseAbstract" class="form-control" ></textarea>
 <div class="alert alert-success" id="CANum"></div>
 </div>
 
 <div class="form-group">
 <label for="Prerequisites">Pre-requisites</label><br>
-<small>Any required stand-alone course/s and/or resources that course registrant needs to attend/complete any time prior to attendance of this course</small>
+<small>Any  stand-alone course/s and/or resources that course registrant needs to attend/complete any time prior to attendance of this course</small>
 <input type="text" name="Prerequisites" id="Prerequisites" class="form-control">
 
 </div>
@@ -188,7 +217,7 @@ $reportinglist = getReportingList();
 <div class="col-6">
 <div class="form-group">
 <label for="Topics">Topics</label><br>
-<select name="Topics" id="Topics" class="form-control">
+<select name="Topics" id="Topics" class="form-control" required>
 <option>Select one</option>
 <?php foreach($topics as $t): ?>
 <option><?= $t ?></option>
@@ -197,7 +226,7 @@ $reportinglist = getReportingList();
 </div>
 <div class="form-group">
 <label for="Audience">Audience</label><br>
-<select name="Audience" id="Audience" class="form-control">
+<select name="Audience" id="Audience" class="form-control" required>
 <option>Select one</option>
 <?php foreach($audience as $a): ?>
 <option><?= $a ?></option>
@@ -212,7 +241,7 @@ $reportinglist = getReportingList();
 <div class="form-group">
 
 <label for="Levels">Levels</label><br>
-<select name="Levels" id="Levels" class="form-control">
+<select name="Levels" id="Levels" class="form-control" required>
 <option>Select one</option>
 <?php foreach($levels as $l): ?>
 <option><?= $l ?></option>
@@ -278,14 +307,14 @@ $reportinglist = getReportingList();
 <div class="col-3">
 <div class="form-group">
 <label for="MinEnroll">Minimum # of Participants</label><br>
-<input type="text" name="MinEnroll" id="MinEnroll" class="form-control" required>
+<input type="text" name="MinEnroll" id="MinEnroll" class="form-control" >
 </div>
 </div>
 
 <div class="col-3">
 <div class="form-group">
 <label for="MaxEnroll">Maximum # of Participants</label><br>
-<input type="text" name="MaxEnroll" id="MaxEnroll" class="form-control" required>
+<input type="text" name="MaxEnroll" id="MaxEnroll" class="form-control" >
 </div>
 </div>
 
@@ -310,15 +339,15 @@ $reportinglist = getReportingList();
 <div class="col-6">
 <div class="form-group"> 	
 <label for="ClassDays">How Many Days?</label><br>
-<input type="text" name="ClassDays" id="ClassDays" class="form-control" required>
+<input type="text" name="ClassDays" id="ClassDays" class="form-control" >
 <div class="row">
 <div class="col-md-6">
 <label for="st">Start time</label>
-<input class="form-control starttime" id="st" type="text" name="StartTime" value="" required="required">
+<input class="form-control starttime" id="st" type="text" name="StartTime" value="">
 </div>
 <div class="col-md-6">
 <label for="et">End time</label>
-<input class="form-control endtime" id="et" type="text" name="EndTime" value="" required="required">
+<input class="form-control endtime" id="et" type="text" name="EndTime" value="">
 </div>
 </div>
 </div>
