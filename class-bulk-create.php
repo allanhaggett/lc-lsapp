@@ -1,8 +1,8 @@
 <?php 
 
+opcache_reset();
 
 require('inc/lsapp.php');
-
 if(canAccess()):
 
 $currentuser = LOGGED_IN_IDIR;
@@ -13,7 +13,7 @@ $dates = $_POST['StartDate'];
 $count = 0;
 $allclasses = [];
 foreach($dates as $date) {
-
+	
 	$classid = date('YmdHis') . '-' . $count;
 	$combinedtimes = h($_POST['StartTime'][$count]) . ' - ' . h($_POST['EndTime'][$count]);	
 	$status = 'Requested';
@@ -34,7 +34,6 @@ foreach($dates as $date) {
 		$facilitators = str_replace('@','',$fa);
 		$facilitatorsclean = str_replace(',','',$facilitators);
 	}
-
 
 	$newclass = Array($classid,
 				$status,

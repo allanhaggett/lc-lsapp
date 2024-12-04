@@ -104,9 +104,9 @@ Original list provided by Corp. Services 2023-03-22:
 </div>
 <div class="col-md-4">
 <h2>New Request</h2>
-<p>Learning Centre designated iStore submitters may make requests for 
-    new people to gain "write access" to Kepler folders using the 
-    following template. 
+<p>Learning Centre designated iStore submitters may make requests to the
+    "PSA IT Service Request" email address for new people to gain "write access" 
+    to Kepler folders using the following template. 
     <em>Any Director may also submit these requests.</em>
 </p>
 <p>Designated iStore Submitter(s):</p>
@@ -116,7 +116,7 @@ Original list provided by Corp. Services 2023-03-22:
     <?php endforeach ?>
     </ul>
     
-<?php if($person[11] == 1 || $person[8] == 1): ?>
+
 <div>
     <a class="btn btn-block btn-primary mb-4" href="mailto:ItServiceRequest@gov.bc.ca?BCC=learning.centre.admin@gov.bc.ca;&body=Dear IT Service Request Team,%0D%0DPlease add:%0D%0D<?= $person[2] ?> (<?= $person[0] ?>) <?= $person[3] ?>to security group PSA_w_ELM_prod_C on Kepler.%0D%0DThank you,%0D%0DThe Learning Centre&subject=Request: Add user to PSA_w_ELM_prod_C on Kepler">
         Send New Request
@@ -137,14 +137,7 @@ to security group PSA_w_ELM_prod_C on Kepler.
 
 Thanks!
 </textarea>
-<?php else: ?>
 
-
-<p>If you are an iStore submitter or a Director, you will not see this message; you'll see a button that 
-    will open Outlook with a message pre-composed for you. Simply change the name details to the 
-    person we wish to grant access to, add your signature, and click send :)</p>
-
-<?php endif; // end person check ?>
 </div>
 </div>
 </div>
@@ -152,4 +145,3 @@ Thanks!
 
 <?php require('templates/javascript.php') ?>
 <?php require('templates/footer.php') ?>
-	
