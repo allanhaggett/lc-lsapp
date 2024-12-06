@@ -1,0 +1,23 @@
+{
+    "courseid": "20241023144141",
+    "assign_to": "bnovak",
+    "crm_ticket_reference": "0000",
+    "category": "other",
+    "description": "No do this other thing.",
+    "scope": "minor",
+    "approval_status": "approved",
+    "urgent": false,
+    "comments": "TESTING 5678",
+    "status": "not_started",
+    "last_assigned_at": 1733460407,
+    "assign_to_history": [
+        {
+            "name": "nsinclar",
+            "assigned_at": 1733460270
+        },
+        {
+            "name": "ahaggett",
+            "assigned_at": 1733460276
+        }
+    ]
+}
