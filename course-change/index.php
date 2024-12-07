@@ -2,33 +2,71 @@
 opcache_reset();
 $path = '../inc/lsapp.php';
 require($path); 
+ // Get parameters from the URL
+ $courseid = isset($_GET['courseid']) ? htmlspecialchars($_GET['courseid']) : null;
+ $changeid = isset($_GET['changeid']) ? htmlspecialchars($_GET['changeid']) : null;
+
+ if (!$courseid) {
+     echo '<div class="alert alert-danger">Error: Course ID is required.</div>';
+     exit;
+ }
+ $deets = getCourse($courseid);
 ?>
 
 <?php if(canACcess()): ?>
 
 <?php getHeader() ?>
 
-<title>PSALS Course Catalog Feed Generator</title>
+<title><?= $deets[2] ?> Change Request</title>
 
 <?php getScripts() ?>
 </body>
 <?php getNavigation() ?>
 
-<div class="container-fluid">
-<div class="row justify-content-md-center">
-<div class="col-md-6 col-xl-4">
-
-        <h1 class="text-center mb-4">Course Change Request Form</h1>
-
+<div class="container">
+    <div class="row justify-content-md-center">
+        <div class="col">
+            <h1 class=""><a href="/lsapp/course.php?courseid=<?= $deets[0] ?>"><?= $deets[2] ?></a></h1>
+            <h2>Course Change Request</h2>
+        </div>
+    </div>
+    
+    <!-- <div><a href="change.php?courseid=<?= $courseid ?>&changeid=<?= $changeid ?>" class="btn btn-sm btn-secondary mt-2">View</a></div> -->
+        <a class="btn btn-primary" data-bs-toggle="collapse" href="#otherchanges" role="button" aria-expanded="false" aria-controls="otherchanges">
+            Other Changes
+        </a>
+        <div id="otherchanges" class="collapse">
         <?php
-        // Get parameters from the URL
-        $courseid = isset($_GET['courseid']) ? htmlspecialchars($_GET['courseid']) : null;
-        $changeid = isset($_GET['changeid']) ? htmlspecialchars($_GET['changeid']) : null;
-
-        if (!$courseid) {
-            echo '<div class="alert alert-danger">Error: Course ID is required.</div>';
-            exit;
+        // Fetch all matching request files for the course ID
+        $files = glob("requests/course-{$courseid}-*.json");
+        if (empty($files)) {
+            echo '<p>No requests found for this course.</p>';
+        } else {
+            echo '<ul class="list-group mb-4">';
+            foreach ($files as $file) {
+                $request = json_decode(file_get_contents($file), true);
+                $filenameParts = explode('-', basename($file, '.json')); // Parse file name
+                $chid = $filenameParts[2]; // Extract change ID (second part of the name)
+                echo '<li class="list-group-item">';
+                echo "<strong>Request ID:</strong> {$changeid}<br>";
+                echo "<strong>Assigned To:</strong> {$request['assign_to']}<br>";
+                echo "<strong>Status:</strong> {$request['status']}<br>";
+                echo "<strong>Last Assigned:</strong> " . date('Y-m-d H:i:s', $request['last_assigned_at'] ?? time()) . "<br>";
+                echo "<strong>Description:</strong> {$request['description']}<br>";
+                echo "<a href='?courseid={$courseid}&changeid={$chid}' class='btn btn-sm btn-primary mt-2'>Edit</a>";
+                echo '</li>';
+            }
+            echo '</ul>';
         }
+        ?>
+
+        </div>
+
+
+        <div class="row justify-content-md-center">
+        <div class="col-md-5">
+        <?php
+       
 
         // Prefill data if updating an existing change
         $formData = [
@@ -44,7 +82,7 @@ require($path);
         ];
 
         if ($changeid) {
-            $filePath = "requests/$changeid.json";
+            $filePath = "requests/course-$courseid-$changeid.json";
             if (file_exists($filePath)) {
                 $formData = json_decode(file_get_contents($filePath), true);
             } else {
@@ -53,44 +91,18 @@ require($path);
         }
         ?>
 
-        <form action="addupdate.php" method="post" class="needs-validation" novalidate>
+        <form action="controller.php" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+
             <!-- Hidden Fields -->
             <input type="hidden" name="courseid" value="<?php echo $courseid; ?>">
             <input type="hidden" name="changeid" value="<?php echo $changeid; ?>">
 
-            <!-- Assign To -->
-            <div class="mb-3">
-                <label for="assign_to" class="form-label">Assign To</label>
-                <input type="text" id="assign_to" name="assign_to" class="form-control" value="<?php echo $formData['assign_to']; ?>" required>
-                <div class="invalid-feedback">Please provide the assignee.</div>
+            <div class="mb-3 form-check">
+                <input type="checkbox" id="urgent" name="urgent" class="form-check-input" value="yes" <?php echo $formData['urgent'] ? 'checked' : ''; ?>>
+                <label for="urgent" class="form-check-label">Urgent</label>
             </div>
-
-            <!-- CRM Ticket Reference -->
-            <div class="mb-3">
-                <label for="crm_ticket_reference" class="form-label">CRM Ticket Reference #</label>
-                <input type="text" id="crm_ticket_reference" name="crm_ticket_reference" class="form-control" value="<?php echo $formData['crm_ticket_reference']; ?>">
-            </div>
-
-            <!-- Category -->
-            <div class="mb-3">
-                <label for="category" class="form-label">Category</label>
-                <select id="category" name="category" class="form-select" required>
-                    <option value="" disabled>Choose a category</option>
-                    <option value="open_course" <?php echo $formData['category'] === 'open_course' ? 'selected' : ''; ?>>Open Course</option>
-                    <option value="close_course" <?php echo $formData['category'] === 'close_course' ? 'selected' : ''; ?>>Close Course</option>
-                    <option value="course_update" <?php echo $formData['category'] === 'course_update' ? 'selected' : ''; ?>>Course Update</option>
-                    <option value="other" <?php echo $formData['category'] === 'other' ? 'selected' : ''; ?>>Other</option>
-                </select>
-                <div class="invalid-feedback">Please select a category.</div>
-            </div>
-
-            <!-- Description -->
-            <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
-                <textarea id="description" name="description" class="form-control" rows="4" required><?php echo $formData['description']; ?></textarea>
-                <div class="invalid-feedback">Please provide a description of the request.</div>
-            </div>
-
+            <div class="row">
+            <div class="col">
             <!-- Scope -->
             <div class="mb-3">
                 <label for="scope" class="form-label">Scope</label>
@@ -102,9 +114,9 @@ require($path);
                 </select>
                 <div class="invalid-feedback">Please select the scope of the request.</div>
             </div>
-
+            </div>
             <!-- Approval Status -->
-            <div class="mb-3">
+            <div class="col">
                 <label for="approval_status" class="form-label">Approval Status</label>
                 <select id="approval_status" name="approval_status" class="form-select" required>
                     <option value="" disabled>Choose approval status</option>
@@ -115,21 +127,10 @@ require($path);
                 </select>
                 <div class="invalid-feedback">Please select the approval status.</div>
             </div>
-
-            <!-- Urgency -->
-            <div class="mb-3 form-check">
-                <input type="checkbox" id="urgent" name="urgent" class="form-check-input" value="yes" <?php echo $formData['urgent'] ? 'checked' : ''; ?>>
-                <label for="urgent" class="form-check-label">Urgent</label>
             </div>
-
-            <!-- Comments -->
-            <div class="mb-3">
-                <label for="comments" class="form-label">Comments</label>
-                <textarea id="comments" name="comments" class="form-control" rows="4"><?php echo $formData['comments']; ?></textarea>
-            </div>
-
+            <div class="row mb-3">
             <!-- Status -->
-            <div class="mb-3">
+            <div class="col">
                 <label for="status" class="form-label">Status</label>
                 <select id="status" name="status" class="form-select" required>
                     <option value="" disabled>Choose a status</option>
@@ -140,13 +141,156 @@ require($path);
                 <div class="invalid-feedback">Please select the status.</div>
             </div>
 
+            <div class="col">
+                <label for="category" class="form-label">Category</label>
+                <select id="category" name="category" class="form-select" required>
+                    <option value="" disabled>Choose a category</option>
+                    <option value="open_course" <?php echo $formData['category'] === 'open_course' ? 'selected' : ''; ?>>Open Course</option>
+                    <option value="close_course" <?php echo $formData['category'] === 'close_course' ? 'selected' : ''; ?>>Close Course</option>
+                    <option value="course_update" <?php echo $formData['category'] === 'course_update' ? 'selected' : ''; ?>>Course Update</option>
+                    <option value="other" <?php echo $formData['category'] === 'other' ? 'selected' : ''; ?>>Other</option>
+                </select>
+                <div class="invalid-feedback">Please select a category.</div>
+            </div>
+            </div>
+
+            <div class="row mb-3">
+            <div class="col">
+                <label for="assign_to" class="form-label">Assigned To</label>
+                <!-- <input type="text" id="assign_to" name="assign_to" class="form-control" value="<?php echo $formData['assign_to']; ?>" required> -->
+                <div class="invalid-feedback">Please provide the assignee.</div>
+                <input list="people" 
+                        name="assign_to" 
+                        id="assign_to" 
+                        class="form-control" 
+                        placeholder="Select a person"
+                        value="<?php echo htmlspecialchars($formData['assign_to'] ?? ''); ?>"
+                >
+                <datalist id="people">
+                    <?php
+                    // Generate the datalist options
+                    foreach ($people as $person) {
+                        // Ensure the array has at least 3 elements for IDIR and Name
+                        if (!empty($person[0]) && !empty($person[2])) {
+                            $value = htmlspecialchars($person[0]); // Use IDIR (index 0) as the value
+                            $label = htmlspecialchars($person[2]); // Use Name (index 2) as the displayed label
+                            echo "<option value=\"{$value}\" label=\"{$label}\"></option>";
+                        }
+                    }
+                    ?>
+                </datalist>
+                <?php if(!empty($formData['last_assigned_at'])): ?>
+                Assigned on <?php echo date('Y-m-d H:i:s', $formData['last_assigned_at']); ?>
+                <?php endif ?>
+            </div>
+            <!-- CRM Ticket Reference -->
+            <div class="col">
+                <label for="crm_ticket_reference" class="form-label">CRM Ticket Reference #</label>
+                <input type="text" id="crm_ticket_reference" name="crm_ticket_reference" class="form-control" value="<?php echo $formData['crm_ticket_reference']; ?>">
+            </div>
+            </div>
+            <!-- Description -->
+            <div class="mb-3">
+                <label for="description" class="form-label">Description</label>
+                <textarea id="description" name="description" class="form-control" rows="4" required><?php echo $formData['description']; ?></textarea>
+                <div class="invalid-feedback">Please provide a description of the request.</div>
+            </div>
+            </div>
+            <div class="col-md-3">
+            <!-- Existing Files -->
+            <div class="mb-3">
+                <label for="existing_files" class="form-label">Files</label>
+                <ul class="list-group">
+                    <?php if (!empty($formData['files'])): ?>
+                        <?php foreach ($formData['files'] as $file): ?>
+                            <?php
+                            // Extract the file name without the ID part
+                            $shortFileName = preg_replace("/^course-\d+-change-\d+-/", '', $file);
+                            ?>
+                            <li class="list-group-item">
+                                <a href="requests/files/<?php echo $file; ?>" target="_blank"><?php echo $shortFileName; ?></a>
+                            </li>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <li class="list-group-item">No files uploaded yet.</li>
+                    <?php endif; ?>
+                </ul>
+            </div>
+            <!-- Add New Files -->
+            <div class="mb-3">
+                <label for="uploaded_files" class="form-label">Upload Files</label>
+                <input type="file" id="uploaded_files" name="uploaded_files[]" class="form-control" multiple>
+                <small class="text-muted">You can upload multiple files. Max size: 5MB each.</small>
+            </div>
+
+
+            </div>
+            <div class="col-md-4">
+
+            <?php if (!empty($formData['comments'])): ?>
+            <!-- Existing Comments -->
+            <div class="mb-3">
+                <label for="existing_comments" class="form-label">Comments</label>
+                <ul class="list-group">
+                        <?php foreach ($formData['comments'] as $comment): ?>
+                            <li class="list-group-item">
+                                <strong><?php echo htmlspecialchars($comment['commented_by']); ?></strong>
+                                <small class="text-muted"><?php echo date('Y-m-d H:i:s', $comment['commented_at']); ?></small>
+                                <p><?php echo htmlspecialchars($comment['comment']); ?></p>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php endif; ?>
+
+            <!-- Add New Comment -->
+            <div class="mb-3">
+                <label for="new_comment" class="form-label">Add New Comment</label>
+                <textarea id="new_comment" name="new_comment" class="form-control" rows="3"></textarea>
+            </div>
+
             <!-- Submit Button -->
             <button type="submit" class="btn btn-primary w-100"><?php echo $changeid ? 'Update' : 'Submit'; ?></button>
         </form>
+        <!-- History Section -->
+    <div class="mt-4">
+        <h2>History</h2>
+        <div class="card">
+            <div class="card-body">
+                <h3>Assignment History</h3>
+                <?php if (!empty($formData['assign_to_history'])): ?>
+                    <ul class="list-group mb-4">
+                        <?php foreach ($formData['assign_to_history'] as $history): ?>
+                            <li class="list-group-item">
+                                <strong>Assigned To:</strong> <?php echo htmlspecialchars($history['name']); ?><br>
+                                <strong>Assigned At:</strong> <?php echo date('Y-m-d H:i:s', $history['assigned_at']); ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php else: ?>
+                    <p>No assignment history available.</p>
+                <?php endif; ?>
 
+                <h3>Status History</h3>
+                <?php if (!empty($formData['status_history'])): ?>
+                    <ul class="list-group mb-4">
+                        <?php foreach ($formData['status_history'] as $history): ?>
+                            <li class="list-group-item">
+                                <strong>Previous Status:</strong> <?php echo htmlspecialchars($history['previous_status']); ?><br>
+                                <strong>New Status:</strong> <?php echo htmlspecialchars($history['new_status']); ?><br>
+                                <strong>Changed At:</strong> <?php echo date('Y-m-d H:i:s', $history['changed_at']); ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                <?php else: ?>
+                    <p>No status history available.</p>
+                <?php endif; ?>
 
-
+            </div>
+        </div>
     </div>
+    </div>
+    
 
 
     <!-- Form Validation -->
