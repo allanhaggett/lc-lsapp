@@ -195,6 +195,8 @@ require($path);
                 <textarea id="description" name="description" class="form-control" rows="4" required><?php echo $formData['description']; ?></textarea>
                 <div class="invalid-feedback">Please provide a description of the request.</div>
             </div>
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary w-100"><?php echo $changeid ? 'Update' : 'Submit'; ?></button>
             </div>
             <div class="col-md-3">
             <!-- Existing Files -->
@@ -227,13 +229,35 @@ require($path);
             </div>
             <div class="col-md-4">
 
-            <?php if (!empty($formData['comments'])): ?>
+            <!-- Add New Comment -->
+            <div class="mb-3">
+                <label for="new_comment" class="form-label">Add New Comment</label>
+                <textarea id="new_comment" name="new_comment" class="form-control" rows="3"></textarea>
+            </div>
+
+            
+        </form>
+        <?php if (!empty($formData['comments'])): ?>
             <!-- Existing Comments -->
+            <?php
+            // Ensure the comments exist before sorting
+            if (!empty($formData['comments'])) {
+                usort($formData['comments'], function ($a, $b) {
+                    return $b['commented_at'] <=> $a['commented_at'];
+                });
+            }
+            ?>
             <div class="mb-3">
                 <label for="existing_comments" class="form-label">Comments</label>
                 <ul class="list-group">
-                        <?php foreach ($formData['comments'] as $comment): ?>
+                        <?php foreach ($formData['comments'] as $index => $comment): ?>
                             <li class="list-group-item">
+                                <form action="delete.php" method="post" class="float-end">
+                                    <input type="hidden" name="courseid" value="<?php echo htmlspecialchars($courseid); ?>">
+                                    <input type="hidden" name="changeid" value="<?php echo htmlspecialchars($changeid); ?>">
+                                    <input type="hidden" name="comment_id" value="<?php echo htmlspecialchars($comment['id']); ?>">
+                                    <button type="submit" class="btn btn-secondary btn-sm">x</button>
+                                </form>
                                 <strong><?php echo htmlspecialchars($comment['commented_by']); ?></strong>
                                 <small class="text-muted"><?php echo date('Y-m-d H:i:s', $comment['commented_at']); ?></small>
                                 <p><?php echo htmlspecialchars($comment['comment']); ?></p>
@@ -242,16 +266,6 @@ require($path);
                     </ul>
                 </div>
             <?php endif; ?>
-
-            <!-- Add New Comment -->
-            <div class="mb-3">
-                <label for="new_comment" class="form-label">Add New Comment</label>
-                <textarea id="new_comment" name="new_comment" class="form-control" rows="3"></textarea>
-            </div>
-
-            <!-- Submit Button -->
-            <button type="submit" class="btn btn-primary w-100"><?php echo $changeid ? 'Update' : 'Submit'; ?></button>
-        </form>
         <!-- History Section -->
     <div class="mt-4">
         <h2>History</h2>

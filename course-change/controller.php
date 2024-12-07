@@ -4,8 +4,11 @@ $path = '../inc/lsapp.php';
 require($path); 
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    
+    $changeid = $_POST['changeid'] ?? null;
     // Collect form data
     $data = [
+        'changeid' => $changeid,
         'courseid' => $_POST['courseid'],
         'assign_to' => $_POST['assign_to'],
         'crm_ticket_reference' => $_POST['crm_ticket_reference'] ?? null,
@@ -20,11 +23,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $comment = $_POST['new_comment'] ?? null;
     $logged_in_user = LOGGED_IN_IDIR; // Assuming constant is available.
 
-    $changeid = $_POST['changeid'] ?? null;
-
-    // Determine file path
+    
     $courseid = $data['courseid'];
+
     if ($changeid) {
+        // Determine file path
         $filename = "requests/course-{$courseid}-{$changeid}.json";
         if (file_exists($filename)) {
             // Load existing data
@@ -35,7 +38,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $existingData['assign_to_history'] = [];
             }
             if ($existingData['assign_to'] !== $data['assign_to']) {
+                $assignid = uniqid();
                 $existingData['assign_to_history'][] = [
+                    'id' => $assignid,
                     'name' => $existingData['assign_to'],
                     'assigned_at' => $existingData['last_assigned_at'] ?? time(),
                 ];
@@ -52,7 +57,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $existingData['status_history'] = [];
             }
             if ($existingData['status'] !== $data['status']) {
+                $historyid = uniqid();
                 $existingData['status_history'][] = [
+                    'id' => $historyid,
                     'previous_status' => $existingData['status'],
                     'new_status' => $data['status'],
                     'changed_at' => time(),
@@ -70,7 +77,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Add new comment if provided
             if ($comment) {
+                $commentId = uniqid(); // Generate a unique identifier for the comment
                 $existingData['comments'][] = [
+                    'id' => $commentId,
                     'comment' => $comment,
                     'commented_by' => $logged_in_user,
                     'commented_at' => time(),
@@ -78,27 +87,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
 
             $data['comments'] = $existingData['comments'];
-            $data['changeID'] = $existingData['changeID'];
+
             $data['files'] = $existingData['files'] ?? []; // Retain existing files
         }
     } else {
+
         // Creating a new entry
-        $changeid = time();
+        $changeid = uniqid(); // Generate a unique identifier for the comment
+        $date_created = time();
         $filename = "requests/course-{$courseid}-{$changeid}.json";
-        $data['assign_to_history'] = [];
+        $data['changeid'] = $changeid;
+        $data['date_created'] = $date_created;
+        $data['date_modififed'] = $date_created;
+        $data['created_by'] = LOGGED_IN_IDIR;
         $data['last_assigned_at'] = time();
+        $data['assign_to_history'] = [];
         $data['status_history'] = []; // Initialize status history
         $data['comments'] = [];
-
         // Add initial comment if provided
         if ($comment) {
+            $commentId = uniqid(); // Generate a unique identifier for the comment
             $data['comments'][] = [
+                'id' => $commentId,
                 'comment' => $comment,
                 'commented_by' => $logged_in_user,
                 'commented_at' => time(),
             ];
         }
-        $data['changeID'] = $changeid;
+        
     }
 
     // Handle file uploads

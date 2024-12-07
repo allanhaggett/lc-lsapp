@@ -417,9 +417,39 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
 
 	<h3 class="mb-1">
 		Change Requests
-		<a class="badge text-light-emphasis bg-light-subtle" href="/lsapp/course-change/?courseid=<?= $deets[0] ?>">All Requests</a>
+		<a class="badge text-light-emphasis bg-light-subtle" href="/lsapp/course-change/?courseid=<?= $deets[0] ?>">New Request</a>
 	</h3>
 	
+	
+        <div id="otherchanges" class="">
+        <?php
+        // Fetch all matching request files for the course ID
+        $files = glob("course-change/requests/course-{$courseid}-*.json");
+        if (empty($files)) {
+            echo '<p>No requests found for this course.</p>';
+        } else {
+            echo '<ul class="list-group mb-4">';
+            foreach ($files as $file) {
+                $request = json_decode(file_get_contents($file), true);
+                $filenameParts = explode('-', basename($file, '.json')); // Parse file name
+                $chid = $filenameParts[2]; // Extract change ID (second part of the name)
+                echo '<li class="list-group-item">';
+                echo "<strong>Request ID:</strong> {$chid}<br>";
+                echo "<strong>Assigned To:</strong> {$request['assign_to']}<br>";
+                echo "<strong>Status:</strong> {$request['status']}<br>";
+                echo "<strong>Last Assigned:</strong> " . date('Y-m-d H:i:s', $request['last_assigned_at'] ?? time()) . "<br>";
+                echo "<strong>Description:</strong> {$request['description']}<br>";
+                echo "<a href='course-change/?courseid={$courseid}&changeid={$chid}' class='btn btn-sm btn-primary mt-2'>Edit</a>";
+                echo '</li>';
+            }
+            echo '</ul>';
+        }
+        ?>
+
+        </div>
+
+
+
 
 </div>
 
