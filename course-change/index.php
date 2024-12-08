@@ -186,7 +186,7 @@ require($path);
             </div>
             <!-- CRM Ticket Reference -->
             <div class="col">
-                <label for="crm_ticket_reference" class="form-label">CRM Ticket Reference #</label>
+                <label for="crm_ticket_reference" class="form-label">CRM Ticket #</label>
                 <input type="text" id="crm_ticket_reference" name="crm_ticket_reference" class="form-control" value="<?php echo $formData['crm_ticket_reference']; ?>">
             </div>
             </div>
@@ -239,81 +239,88 @@ require($path);
 
             
         </form>
-        <?php if (!empty($formData['comments'])): ?>
-            <!-- Existing Comments -->
-            <?php
-            // Ensure the comments exist before sorting
-            if (!empty($formData['comments'])) {
-                usort($formData['comments'], function ($a, $b) {
-                    return $b['commented_at'] <=> $a['commented_at'];
-                });
-            }
-            ?>
-            <div class="mb-3">
-                <label for="existing_comments" class="form-label">Comments</label>
-                <ul class="list-group">
-                        <?php foreach ($formData['comments'] as $index => $comment): ?>
-                            <li class="list-group-item">
-                                <?php if($comment['commented_by'] === LOGGED_IN_IDIR): ?>
-                                <form action="delete-comment.php" method="post" class="float-end">
-                                    <input type="hidden" name="courseid" value="<?php echo htmlspecialchars($courseid); ?>">
-                                    <input type="hidden" name="changeid" value="<?php echo htmlspecialchars($changeid); ?>">
-                                    <input type="hidden" name="comment_id" value="<?php echo htmlspecialchars($comment['id']); ?>">
-                                    <button type="submit" class="btn btn-secondary btn-sm">x</button>
-                                </form>
-                                <?php endif ?>
-                                <strong><?php echo htmlspecialchars($comment['commented_by']); ?></strong>
-                                <small class="text-muted"><?php echo date('Y-m-d H:i:s', $comment['commented_at']); ?></small>
-                                <p><?php echo htmlspecialchars($comment['comment']); ?></p>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
-                </div>
-            <?php endif; ?>
-        <!-- History Section -->
-    <div class="mt-4">
-        <h2>History</h2>
-        <div>
-        <?php if(!empty($formData['date_created'])): ?>
-        Created <?php echo date('Y-m-d H:i:s', $formData['date_created']); ?>
-        <?php endif ?>
-        <?php if(!empty($formData['created_by'])): ?>
-        by <?php echo $formData['created_by']; ?>
-        <?php endif ?>
-        </div>
-        <div class="card">
-            <div class="card-body">
-                <h3>Assignment History</h3>
-                <?php if (!empty($formData['assign_to_history'])): ?>
-                    <ul class="list-group mb-4">
-                        <?php foreach ($formData['assign_to_history'] as $history): ?>
-                            <li class="list-group-item">
-                                <strong>Assigned To:</strong> <?php echo htmlspecialchars($history['name']); ?><br>
-                                <strong>Assigned At:</strong> <?php echo date('Y-m-d H:i:s', $history['assigned_at']); ?>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
-                <?php else: ?>
-                    <p>No assignment history available.</p>
-                <?php endif; ?>
+        <?php
+// Merge comments, status history, and assignment history into a unified timeline
+$timeline = [];
 
-                <h3>Status History</h3>
-                <?php if (!empty($formData['status_history'])): ?>
-                    <ul class="list-group mb-4">
-                        <?php foreach ($formData['status_history'] as $history): ?>
-                            <li class="list-group-item">
-                                <strong>Previous Status:</strong> <?php echo htmlspecialchars($history['previous_status']); ?><br>
-                                <strong>New Status:</strong> <?php echo htmlspecialchars($history['new_status']); ?><br>
-                                <strong>Changed At:</strong> <?php echo date('Y-m-d H:i:s', $history['changed_at']); ?>
-                            </li>
-                        <?php endforeach; ?>
-                    </ul>
-                <?php else: ?>
-                    <p>No status history available.</p>
-                <?php endif; ?>
+// Add comments to the timeline
+if (!empty($formData['comments'])) {
+    foreach ($formData['comments'] as $comment) {
+        $timeline[] = [
+            'type' => 'comment',
+            'id' => $comment['id'], // Include the unique ID
+            'commented_by' => $comment['commented_by'],
+            'commented_at' => $comment['commented_at'],
+            'comment' => $comment['comment'],
+        ];
+    }
+}
 
-            </div>
-        </div>
+// Add status history to the timeline
+if (!empty($formData['status_history'])) {
+    foreach ($formData['status_history'] as $status) {
+        $timeline[] = [
+            'type' => 'status',
+            'id' => $status['id'], // Include the unique ID
+            'previous_status' => $status['previous_status'],
+            'new_status' => $status['new_status'],
+            'changed_at' => $status['changed_at'],
+        ];
+    }
+}
+
+// Add assignment history to the timeline
+if (!empty($formData['assign_to_history'])) {
+    foreach ($formData['assign_to_history'] as $assignment) {
+        $timeline[] = [
+            'type' => 'assignment',
+            'id' => $assignment['id'], // Include the unique ID
+            'assigned_to' => $assignment['name'],
+            'assigned_at' => $assignment['assigned_at'],
+        ];
+    }
+}
+
+// Sort the timeline by timestamp in reverse chronological order
+usort($timeline, function ($a, $b) {
+    $aTime = $a['commented_at'] ?? $a['changed_at'] ?? $a['assigned_at'] ?? 0;
+    $bTime = $b['commented_at'] ?? $b['changed_at'] ?? $b['assigned_at'] ?? 0;
+    return $aTime <=> $bTime;
+});
+?>
+
+<div class="mt-4">
+    <h2>Timeline</h2>
+    <ul class="list-group">
+        <?php foreach ($timeline as $event): ?>
+            <li class="list-group-item">
+                <?php if ($event['type'] === 'comment'): ?>
+                    <strong>Commented By:</strong> <?php echo htmlspecialchars($event['commented_by'] ?? ''); ?><br>
+                    <small class="text-muted"><?php echo date('Y-m-d H:i:s', $event['commented_at'] ?? ''); ?></small>
+                    <p><?php echo htmlspecialchars($event['comment'] ?? ''); ?></p>
+                    <?php if ($event['commented_by'] === LOGGED_IN_IDIR): ?>
+                        <form action="delete-comment.php" method="post" class="mt-2">
+                            <input type="hidden" name="courseid" value="<?php echo htmlspecialchars($courseid ?? ''); ?>">
+                            <input type="hidden" name="changeid" value="<?php echo htmlspecialchars($changeid ?? ''); ?>">
+                            <input type="hidden" name="comment_id" value="<?php echo htmlspecialchars($event['id'] ?? ''); ?>">
+                            <button type="submit" class="btn btn-secondary btn-sm">Delete</button>
+                        </form>
+                    <?php endif; ?>
+
+                <?php elseif ($event['type'] === 'status'): ?>
+                    <strong>Status Changed:</strong><br>
+                    <strong>From:</strong> <?php echo htmlspecialchars($event['previous_status']); ?><br>
+                    <strong>To:</strong> <?php echo htmlspecialchars($event['new_status']); ?><br>
+                    <small class="text-muted"><?php echo date('Y-m-d H:i:s', $event['changed_at']); ?></small>
+
+                <?php elseif ($event['type'] === 'assignment'): ?>
+                    <strong>Assigned To:</strong> <?php echo htmlspecialchars($event['assigned_to']); ?><br>
+                    <small class="text-muted"><?php echo date('Y-m-d H:i:s', $event['assigned_at']); ?></small>
+                <?php endif; ?>
+            </li>
+        <?php endforeach; ?>
+    </ul>
+</div>
     </div>
     </div>
     
