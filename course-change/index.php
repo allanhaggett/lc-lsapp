@@ -90,16 +90,17 @@ require($path);
             }
         }
         ?>
-
-        <form action="controller.php" method="post" enctype="multipart/form-data" class="needs-validation" novalidate>
+        
+        <form action="controller.php" method="post" enctype="multipart/form-data" class="needs-validation mt-3" novalidate>
 
             <!-- Hidden Fields -->
             <input type="hidden" name="courseid" value="<?php echo $courseid; ?>">
             <input type="hidden" name="changeid" value="<?php echo $changeid; ?>">
-
-            <div class="mb-3 form-check">
+            <div class="alert alert-secondary mb-3">
+            <div class="form-check">
                 <input type="checkbox" id="urgent" name="urgent" class="form-check-input" value="yes" <?php echo $formData['urgent'] ? 'checked' : ''; ?>>
                 <label for="urgent" class="form-check-label">Urgent</label>
+            </div>
             </div>
             <div class="row">
             <div class="col">
@@ -207,7 +208,7 @@ require($path);
                         <?php foreach ($formData['files'] as $file): ?>
                             <?php
                             // Extract the file name without the ID part
-                            $shortFileName = preg_replace("/^course-\d+-change-\d+-/", '', $file);
+                            $shortFileName = preg_replace("/^course-\d+-change-[a-z0-9]+-/", '', $file);
                             ?>
                             <li class="list-group-item">
                                 <a href="requests/files/<?php echo $file; ?>" target="_blank"><?php echo $shortFileName; ?></a>
@@ -222,7 +223,7 @@ require($path);
             <div class="mb-3">
                 <label for="uploaded_files" class="form-label">Upload Files</label>
                 <input type="file" id="uploaded_files" name="uploaded_files[]" class="form-control" multiple>
-                <small class="text-muted">You can upload multiple files. Max size: 5MB each.</small>
+                <small class="text-muted">You can upload multiple files. Max size: 20MB each.</small>
             </div>
 
 
@@ -233,6 +234,7 @@ require($path);
             <div class="mb-3">
                 <label for="new_comment" class="form-label">Add New Comment</label>
                 <textarea id="new_comment" name="new_comment" class="form-control" rows="3"></textarea>
+                <button type="submit" class="btn btn-primary w-100">Add Comment</button>
             </div>
 
             
@@ -252,12 +254,14 @@ require($path);
                 <ul class="list-group">
                         <?php foreach ($formData['comments'] as $index => $comment): ?>
                             <li class="list-group-item">
-                                <form action="delete.php" method="post" class="float-end">
+                                <?php if($comment['commented_by'] === LOGGED_IN_IDIR): ?>
+                                <form action="delete-comment.php" method="post" class="float-end">
                                     <input type="hidden" name="courseid" value="<?php echo htmlspecialchars($courseid); ?>">
                                     <input type="hidden" name="changeid" value="<?php echo htmlspecialchars($changeid); ?>">
                                     <input type="hidden" name="comment_id" value="<?php echo htmlspecialchars($comment['id']); ?>">
                                     <button type="submit" class="btn btn-secondary btn-sm">x</button>
                                 </form>
+                                <?php endif ?>
                                 <strong><?php echo htmlspecialchars($comment['commented_by']); ?></strong>
                                 <small class="text-muted"><?php echo date('Y-m-d H:i:s', $comment['commented_at']); ?></small>
                                 <p><?php echo htmlspecialchars($comment['comment']); ?></p>
@@ -269,6 +273,14 @@ require($path);
         <!-- History Section -->
     <div class="mt-4">
         <h2>History</h2>
+        <div>
+        <?php if(!empty($formData['date_created'])): ?>
+        Created <?php echo date('Y-m-d H:i:s', $formData['date_created']); ?>
+        <?php endif ?>
+        <?php if(!empty($formData['created_by'])): ?>
+        by <?php echo $formData['created_by']; ?>
+        <?php endif ?>
+        </div>
         <div class="card">
             <div class="card-body">
                 <h3>Assignment History</h3>

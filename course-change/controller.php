@@ -68,6 +68,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             // Merge status history into the new data
             $data['status_history'] = $existingData['status_history'];
+            
 
 
             // Maintain comment history
@@ -127,9 +128,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $size = $_FILES['uploaded_files']['size'][$key];
 
             // Basic validation (you can expand this)
-            if ($error === UPLOAD_ERR_OK && $size <= 5 * 1024 * 1024) { // Max 5MB
+            if ($error === UPLOAD_ERR_OK && $size <= 20 * 1024 * 1024) { // Max 5MB
                 // Normalize the file name
-                $normalizedFilename = strtolower(preg_replace('/[^a-z0-9\-\.]/', '', str_replace(' ', '-', $name)));
+                $normalizedFilename = strtolower(str_replace(' ', '-', $name));
                 $uniqueName = "course-{$courseid}-change-{$changeid}-{$normalizedFilename}";
                 $destination = $uploadDir . $uniqueName;
                 if (move_uploaded_file($tmpName, $destination)) {
