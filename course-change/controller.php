@@ -1,11 +1,12 @@
-<?php 
+<?php
 opcache_reset();
 $path = '../inc/lsapp.php';
-require($path); 
+require($path);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    
     $changeid = $_POST['changeid'] ?? null;
+    $date_created = time();
+
     // Collect form data
     $data = [
         'changeid' => $changeid,
@@ -21,9 +22,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     ];
 
     $comment = $_POST['new_comment'] ?? null;
-    $logged_in_user = LOGGED_IN_IDIR; // Assuming constant is available.
+    $logged_in_user = LOGGED_IN_IDIR;
 
-    
     $courseid = $data['courseid'];
 
     if ($changeid) {
@@ -33,81 +33,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Load existing data
             $existingData = json_decode(file_get_contents($filename), true);
 
-            // Maintain assignment history
-            if (!isset($existingData['assign_to_history'])) {
-                $existingData['assign_to_history'] = [];
-            }
-            if ($existingData['assign_to'] !== $data['assign_to']) {
-                $assignid = uniqid();
-                $existingData['assign_to_history'][] = [
-                    'id' => $assignid,
-                    'name' => $existingData['assign_to'],
-                    'assigned_at' => $existingData['last_assigned_at'] ?? time(),
-                ];
-                $data['last_assigned_at'] = time();
-            } else {
-                $data['last_assigned_at'] = $existingData['last_assigned_at'] ?? time();
+            // Preserve `date_created` and `created_by`
+            $data['date_created'] = $existingData['date_created'] ?? $date_created;
+            $data['created_by'] = $existingData['created_by'] ?? LOGGED_IN_IDIR;
+
+            // Always update `date_modified`
+            $data['date_modified'] = time();
+
+            // Ensure `timeline` exists
+            if (!isset($existingData['timeline'])) {
+                $existingData['timeline'] = [];
             }
 
-            // Merge history into the new data
-            $data['assign_to_history'] = $existingData['assign_to_history'];
-
-            // Maintain status history
-            if (!isset($existingData['status_history'])) {
-                $existingData['status_history'] = [];
+            // Track changes to all fields (only on updates)
+            $trackedFields = ['assign_to', 'crm_ticket_reference', 'category', 'description', 'scope', 'approval_status', 'status', 'urgent'];
+            foreach ($trackedFields as $field) {
+                if (isset($existingData[$field]) && $existingData[$field] !== $data[$field]) {
+                    $existingData['timeline'][] = [
+                        'field' => $field,
+                        'previous_value' => $existingData[$field],
+                        'new_value' => $data[$field],
+                        'changed_by' => $logged_in_user,
+                        'changed_at' => time(),
+                    ];
+                }
             }
-            if ($existingData['status'] !== $data['status']) {
-                $historyid = uniqid();
-                $existingData['status_history'][] = [
-                    'id' => $historyid,
-                    'previous_status' => $existingData['status'],
-                    'new_status' => $data['status'],
+
+            // Add a new comment to the timeline
+            if ($comment) {
+                $commentId = uniqid();
+                $existingData['timeline'][] = [
+                    'field' => 'comment',
+                    'comment_id' => $commentId,
+                    'new_value' => $comment,
+                    'changed_by' => $logged_in_user,
                     'changed_at' => time(),
                 ];
             }
 
-            // Merge status history into the new data
-            $data['status_history'] = $existingData['status_history'];
-            
+            // Retain files
+            $data['files'] = $existingData['files'] ?? [];
 
-
-            // Maintain comment history
-            if (!isset($existingData['comments'])) {
-                $existingData['comments'] = [];
-            }
-
-            // Add new comment if provided
-            if ($comment) {
-                $commentId = uniqid(); // Generate a unique identifier for the comment
-                $existingData['comments'][] = [
-                    'id' => $commentId,
-                    'comment' => $comment,
-                    'commented_by' => $logged_in_user,
-                    'commented_at' => time(),
-                ];
-            }
-
-            $data['comments'] = $existingData['comments'];
-
-            $data['files'] = $existingData['files'] ?? []; // Retain existing files
+            // Merge timeline back into data
+            $data['timeline'] = $existingData['timeline'];
         }
     } else {
-
         // Creating a new entry
-        $changeid = uniqid(); // Generate a unique identifier for the comment
-        $date_created = time();
+        $changeid = uniqid();
         $filename = "requests/course-{$courseid}-{$changeid}.json";
+
         $data['changeid'] = $changeid;
         $data['date_created'] = $date_created;
-        $data['date_modififed'] = $date_created;
+        $data['date_modified'] = $date_created;
         $data['created_by'] = LOGGED_IN_IDIR;
-        $data['last_assigned_at'] = time();
-        $data['assign_to_history'] = [];
-        $data['status_history'] = []; // Initialize status history
-        $data['comments'] = [];
-        // Add initial comment if provided
+        $data['timeline'] = []; // Initialize timeline but do not populate it for the first create
+        $data['files'] = [];
+        
+        // Add an initial timeline entry for creation
+        $data['timeline'][] = [
+            'field' => 'creation',
+            'previous_value' => null,
+            'new_value' => "Change created by {$logged_in_user}",
+            'changed_by' => $logged_in_user,
+            'changed_at' => $date_created,
+        ];
+        // Add initial comment to the data, but not the timeline
         if ($comment) {
-            $commentId = uniqid(); // Generate a unique identifier for the comment
+            $commentId = uniqid();
             $data['comments'][] = [
                 'id' => $commentId,
                 'comment' => $comment,
@@ -115,26 +107,36 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'commented_at' => time(),
             ];
         }
-        
     }
 
     // Handle file uploads
     if (!empty($_FILES['uploaded_files']['name'][0])) {
         $uploadDir = "requests/files/";
-        
+
         foreach ($_FILES['uploaded_files']['name'] as $key => $name) {
             $tmpName = $_FILES['uploaded_files']['tmp_name'][$key];
             $error = $_FILES['uploaded_files']['error'][$key];
             $size = $_FILES['uploaded_files']['size'][$key];
 
-            // Basic validation (you can expand this)
-            if ($error === UPLOAD_ERR_OK && $size <= 20 * 1024 * 1024) { // Max 5MB
+            // Basic validation
+            if ($error === UPLOAD_ERR_OK && $size <= 20 * 1024 * 1024) { // Max 20MB
                 // Normalize the file name
                 $normalizedFilename = strtolower(str_replace(' ', '-', $name));
                 $uniqueName = "course-{$courseid}-change-{$changeid}-{$normalizedFilename}";
                 $destination = $uploadDir . $uniqueName;
+
                 if (move_uploaded_file($tmpName, $destination)) {
                     $data['files'][] = $uniqueName;
+
+                    // Add file upload to the timeline only for updates
+                    if ($changeid) {
+                        $data['timeline'][] = [
+                            'field' => 'file_upload',
+                            'new_value' => $uniqueName,
+                            'changed_by' => $logged_in_user,
+                            'changed_at' => time(),
+                        ];
+                    }
                 }
             }
         }
@@ -143,11 +145,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Save or update JSON file
     file_put_contents($filename, json_encode($data, JSON_PRETTY_PRINT));
 
-    // echo "Request " . ($changeid ? "updated" : "saved") . " successfully!";
-     // Redirect to the change details page
-     header("Location: ./?courseid={$courseid}&changeid={$changeid}");
-     exit;
+    // Redirect to the change details page
+    header("Location: ./?courseid={$courseid}&changeid={$changeid}");
+    exit;
 } else {
     echo "Invalid request method!";
 }
-?>

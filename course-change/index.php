@@ -239,90 +239,46 @@ require($path);
 
             
         </form>
-        <?php
-// Merge comments, status history, and assignment history into a unified timeline
-$timeline = [];
-
-// Add comments to the timeline
-if (!empty($formData['comments'])) {
-    foreach ($formData['comments'] as $comment) {
-        $timeline[] = [
-            'type' => 'comment',
-            'id' => $comment['id'], // Include the unique ID
-            'commented_by' => $comment['commented_by'],
-            'commented_at' => $comment['commented_at'],
-            'comment' => $comment['comment'],
-        ];
-    }
-}
-
-// Add status history to the timeline
-if (!empty($formData['status_history'])) {
-    foreach ($formData['status_history'] as $status) {
-        $timeline[] = [
-            'type' => 'status',
-            'id' => $status['id'], // Include the unique ID
-            'previous_status' => $status['previous_status'],
-            'new_status' => $status['new_status'],
-            'changed_at' => $status['changed_at'],
-        ];
-    }
-}
-
-// Add assignment history to the timeline
-if (!empty($formData['assign_to_history'])) {
-    foreach ($formData['assign_to_history'] as $assignment) {
-        $timeline[] = [
-            'type' => 'assignment',
-            'id' => $assignment['id'], // Include the unique ID
-            'assigned_to' => $assignment['name'],
-            'assigned_at' => $assignment['assigned_at'],
-        ];
-    }
-}
-
-// Sort the timeline by timestamp in reverse chronological order
-usort($timeline, function ($a, $b) {
-    $aTime = $a['commented_at'] ?? $a['changed_at'] ?? $a['assigned_at'] ?? 0;
-    $bTime = $b['commented_at'] ?? $b['changed_at'] ?? $b['assigned_at'] ?? 0;
-    return $aTime <=> $bTime;
-});
-?>
-
-<div class="mt-4">
+        <div class="mt-4">
     <h2>Timeline</h2>
+    <?php
+    // Ensure the timeline is sorted in reverse chronological order
+    if (!empty($formData['timeline'])) {
+        usort($formData['timeline'], function ($a, $b) {
+            return $b['changed_at'] <=> $a['changed_at']; // Sort by changed_at in descending order
+        });
+    }
+    ?>
     <ul class="list-group">
-        <?php foreach ($timeline as $event): ?>
-            <li class="list-group-item">
-                <?php if ($event['type'] === 'comment'): ?>
-                    <strong>Commented By:</strong> <?php echo htmlspecialchars($event['commented_by'] ?? ''); ?><br>
-                    <small class="text-muted"><?php echo date('Y-m-d H:i:s', $event['commented_at'] ?? ''); ?></small>
-                    <p><?php echo htmlspecialchars($event['comment'] ?? ''); ?></p>
-                    <?php if ($event['commented_by'] === LOGGED_IN_IDIR): ?>
-                        <form action="delete-comment.php" method="post" class="mt-2">
-                            <input type="hidden" name="courseid" value="<?php echo htmlspecialchars($courseid ?? ''); ?>">
-                            <input type="hidden" name="changeid" value="<?php echo htmlspecialchars($changeid ?? ''); ?>">
-                            <input type="hidden" name="comment_id" value="<?php echo htmlspecialchars($event['id'] ?? ''); ?>">
-                            <button type="submit" class="btn btn-secondary btn-sm">Delete</button>
-                        </form>
-                    <?php endif; ?>
-
-                <?php elseif ($event['type'] === 'status'): ?>
-                    <strong>Status Changed:</strong><br>
-                    <strong>From:</strong> <?php echo htmlspecialchars($event['previous_status']); ?><br>
-                    <strong>To:</strong> <?php echo htmlspecialchars($event['new_status']); ?><br>
-                    <small class="text-muted"><?php echo date('Y-m-d H:i:s', $event['changed_at']); ?></small>
-
-                <?php elseif ($event['type'] === 'assignment'): ?>
-                    <strong>Assigned To:</strong> <?php echo htmlspecialchars($event['assigned_to']); ?><br>
-                    <small class="text-muted"><?php echo date('Y-m-d H:i:s', $event['assigned_at']); ?></small>
+    <?php foreach ($formData['timeline'] as $event): ?>
+        <li class="list-group-item">
+            <?php if ($event['field'] === 'comment'): ?>
+                <?php if ($event['changed_by'] === LOGGED_IN_IDIR): ?>
+                    <form action="delete-comment.php" method="post" class="float-end">
+                        <input type="hidden" name="courseid" value="<?php echo htmlspecialchars($formData['courseid']); ?>">
+                        <input type="hidden" name="changeid" value="<?php echo htmlspecialchars($formData['changeid']); ?>">
+                        <input type="hidden" name="comment_id" value="<?php echo htmlspecialchars($event['comment_id'] ?? ''); ?>">
+                        <button type="submit" class="btn btn-danger btn-sm">x</button>
+                    </form>
                 <?php endif; ?>
-            </li>
-        <?php endforeach; ?>
+                <p><strong>Comment:</strong> <?php echo htmlspecialchars($event['new_value']); ?></p>
+                <strong>Commented By:</strong> <?php echo htmlspecialchars($event['changed_by']); ?><br>
+                <small class="text-muted">At: <?php echo date('Y-m-d H:i:s', $event['changed_at']); ?></small>
+            <?php else: ?>
+                <strong>Field Changed:</strong> <?php echo htmlspecialchars($event['field']); ?><br>
+                <strong>Previous Value:</strong> <?php echo htmlspecialchars($event['previous_value'] ?? 'N/A'); ?><br>
+                <strong>New Value:</strong> <?php echo htmlspecialchars($event['new_value']); ?><br>
+                <strong>Changed By:</strong> <?php echo htmlspecialchars($event['changed_by']); ?><br>
+                <small class="text-muted">At: <?php echo date('Y-m-d H:i:s', $event['changed_at']); ?></small>
+            <?php endif; ?>
+        </li>
+    <?php endforeach; ?>
     </ul>
 </div>
-    </div>
-    </div>
+        
+</div>
+</div>
+</div>
     
 
 
