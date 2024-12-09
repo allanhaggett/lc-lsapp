@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if ($changeid) {
         // Determine file path
-        $filename = "requests/course-{$courseid}-{$changeid}.json";
+        $filename = "requests/course-{$courseid}-change-{$changeid}.json";
         if (file_exists($filename)) {
             // Load existing data
             $existingData = json_decode(file_get_contents($filename), true);
@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } else {
         // Creating a new entry
         $changeid = uniqid();
-        $filename = "requests/course-{$courseid}-{$changeid}.json";
+        $filename = "requests/course-{$courseid}-change-{$changeid}.json";
 
         $data['changeid'] = $changeid;
         $data['date_created'] = $date_created;

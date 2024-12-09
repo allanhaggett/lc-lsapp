@@ -13,7 +13,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // Find the JSON file for the given change ID
-    $filename = "requests/course-{$courseid}-{$changeid}.json";
+    $filename = "requests/course-{$courseid}-change-{$changeid}.json";
 
     if (!file_exists($filename)) {
         die("Error: Change ID {$changeid} not found.");

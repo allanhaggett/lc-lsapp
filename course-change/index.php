@@ -25,11 +25,12 @@ require($path);
 ];
 
 if ($changeid) {
-    $filePath = "requests/course-$courseid-$changeid.json";
+    $filePath = "requests/course-$courseid-change-$changeid.json";
     if (file_exists($filePath)) {
         $formData = json_decode(file_get_contents($filePath), true);
     } else {
         echo '<div class="alert alert-warning">Warning: Change ID not found. Starting a new form.</div>';
+        echo $filePath;
     }
 }
 ?>
@@ -198,7 +199,7 @@ if ($changeid) {
                         <?php foreach ($formData['files'] as $file): ?>
                             <?php
                             // Extract the file name without the ID part
-                            $shortFileName = preg_replace("/^course-\d+-change-[a-z0-9]+-/", '', $file);
+                            $shortFileName = preg_replace("/^course-[a-zA-Z0-9\-]+-change-[a-z0-9]+-/", '', $file);
                             ?>
                             <li class="list-group-item">
                                 <form action="delete-file.php" method="post" class="float-end">

@@ -415,7 +415,7 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
         <?php
 		$comped = 0;
         // Fetch all matching request files for the course ID
-        $files = glob("course-change/requests/course-{$courseid}-*.json");
+        $files = glob("course-change/requests/course-{$courseid}-change-*.json");
         if (empty($files)) {
             echo '<p>No requests found for this course.</p>';
         } else {
@@ -423,13 +423,18 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
 			foreach ($files as $file) {
 				$request = json_decode(file_get_contents($file), true);
 				if($request['status'] != 'completed') {
-					$filenameParts = explode('-', basename($file, '.json')); // Parse file name
-					$chid = $filenameParts[2]; // Extract change ID (second part of the name)
+					$filenameParts = explode('-change-', basename($file, '.json')); // Parse file name
+					if (count($filenameParts) === 2) {
+						$courseid = explode('course-',$filenameParts[0]); // Everything before "-change-"
+						$chid = $filenameParts[1]; // Everything after "-change-"
+					} else {
+						die("Error: Invalid file name format.");
+					}
 					echo '<li class="list-group-item">';
 					echo "Created " . date('Y-m-d H:i:s', $request['date_created'] ?? time()) . " ";
 					echo "by " . $request['created_by'] . "<br>";
 					echo "<strong>Request ID:</strong>";
-					echo "<a href='course-change/?courseid={$courseid}&changeid={$chid}'>{$chid}</a><br>";
+					echo "<a href='course-change/?courseid={$courseid[1]}&changeid={$chid}'>{$chid}</a><br>";
 					echo "<strong>Assigned To:</strong> {$request['assign_to']}<br>";
 					echo "<strong>Status:</strong> {$request['status']}<br>";
 					echo "<strong>Description:</strong> {$request['description']}<br>";
