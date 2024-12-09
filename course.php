@@ -336,8 +336,7 @@ $stewsdevs = getCoursePeople($courseid);
 </div>
 
 <div class="col-md-6">
-	<div><a href="/lsapp/class-bulk-insert.php?courseid=<?= $deets[0] ?>" class="btn btn-primary btn-block">New Date Requests</a></div>
-	<hr>
+	<div class="mb-2"><a href="/lsapp/class-bulk-insert.php?courseid=<?= $deets[0] ?>" class="btn btn-primary btn-block">New Date Requests</a></div>
 <?php 
 $inactive = 0;
 $closed = 0;
@@ -356,21 +355,10 @@ $finalcount = $upcount - $inactive - $closed;
 
 <?php if($finalcount > 0): ?>
 <div class="mb-3" id="upcoming-classes">
-	<div class="mb-3 p-3 bg-light-subtle sticky-top shadow-sm">
+	<div class="mb-3 sticky-top shadow-sm">
 		<h3><span class="classcount"><?= $finalcount ?></span>  Current Offering<?php if($finalcount > 1) echo 's' ?></h3>
 	</div>
-	
-<!-- <div class="btn-group">
-<a href="course-classes-export.php?courseid=<?= $deets[0] ?>" class="btn btn-primary">Export to Excel</a>
-<button class="btn btn-primary copy" 
-	href="https://gww.bcpublicservice.gov.bc.ca/lsapp/ical-course.php?courseid=<?= $deets[0] ?>"
-	data-clipboard-text="https://gww.bcpublicservice.gov.bc.ca/lsapp/ical-course.php?courseid=<?= $deets[0] ?>"
-	title="All scheduled classes for this course">
-	Calendar Subscribe
-</button>
-</div> -->
-<!-- <input class="search form-control my-2" placeholder="search"> -->
-<table class="table table-sm">
+<table class="table table-sm mb-5">
 <tbody class="list">
 <?php foreach($classes as $class): ?>
 <?php
@@ -415,32 +403,39 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
 
 <div class="">
 
-	<h3 class="mb-1">
-		Change Requests
-		<a class="badge text-light-emphasis bg-light-subtle" href="/lsapp/course-change/?courseid=<?= $deets[0] ?>">New Request</a>
+	<div class="mb-1 float-end">
+		<a class="btn btn-sm btn-primary" href="/lsapp/course-change/?courseid=<?= $deets[0] ?>">
+			New Change Request
+		</a>
+	</div>
+	<h3 class="mb-1 clearfix">
+		Open Change Requests
 	</h3>
 	
 	
-        <div id="otherchanges" class="">
+        <div id="uncompleted-changes" class="">
         <?php
         // Fetch all matching request files for the course ID
         $files = glob("course-change/requests/course-{$courseid}-*.json");
         if (empty($files)) {
             echo '<p>No requests found for this course.</p>';
         } else {
-            echo '<ul class="list-group mb-4">';
-            foreach ($files as $file) {
-                $request = json_decode(file_get_contents($file), true);
-                $filenameParts = explode('-', basename($file, '.json')); // Parse file name
-                $chid = $filenameParts[2]; // Extract change ID (second part of the name)
-                echo '<li class="list-group-item">';
-                echo "<strong>Request ID:</strong> {$chid}<br>";
-                echo "<strong>Assigned To:</strong> {$request['assign_to']}<br>";
-                echo "<strong>Status:</strong> {$request['status']}<br>";
-                echo "<strong>Last Assigned:</strong> " . date('Y-m-d H:i:s', $request['last_assigned_at'] ?? time()) . "<br>";
-                echo "<strong>Description:</strong> {$request['description']}<br>";
-                echo "<a href='course-change/?courseid={$courseid}&changeid={$chid}' class='btn btn-sm btn-primary mt-2'>Edit</a>";
-                echo '</li>';
+			echo '<ul class="list-group mb-4">';
+			foreach ($files as $file) {
+				$request = json_decode(file_get_contents($file), true);
+				if($request['status'] != 'completed') {
+					$filenameParts = explode('-', basename($file, '.json')); // Parse file name
+					$chid = $filenameParts[2]; // Extract change ID (second part of the name)
+					echo '<li class="list-group-item">';
+					echo "Created " . date('Y-m-d H:i:s', $request['date_created'] ?? time()) . " ";
+					echo "by " . $request['created_by'] . "<br>";
+					echo "<strong>Request ID:</strong>";
+					echo "<a href='course-change/?courseid={$courseid}&changeid={$chid}'>{$chid}</a><br>";
+					echo "<strong>Assigned To:</strong> {$request['assign_to']}<br>";
+					echo "<strong>Status:</strong> {$request['status']}<br>";
+					echo "<strong>Description:</strong> {$request['description']}<br>";
+					echo '</li>';
+				}
             }
             echo '</ul>';
         }
@@ -448,8 +443,35 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
 
         </div>
 
+		<details>
+			<summary>Completed Changes</summary>
+			<div id="completed-changes" class="">
+			<?php
+			if (empty($files)) {
+				echo '<p>No requests found for this course.</p>';
+			} else {
+				echo '<ul class="list-group mb-4">';
+				foreach ($files as $file) {
+					$request = json_decode(file_get_contents($file), true);
+					if($request['status'] == 'completed') {
+						$filenameParts = explode('-', basename($file, '.json')); // Parse file name
+						$chid = $filenameParts[2]; // Extract change ID (second part of the name)
+						echo '<li class="list-group-item">';
+						echo "<strong>Request ID:</strong> {$chid}<br>";
+						echo "<strong>Assigned To:</strong> {$request['assign_to']}<br>";
+						echo "<strong>Status:</strong> {$request['status']}<br>";
+						echo "<strong>Last Assigned:</strong> " . date('Y-m-d H:i:s', $request['last_assigned_at'] ?? time()) . "<br>";
+						echo "<strong>Description:</strong> {$request['description']}<br>";
+						echo "<a href='course-change/?courseid={$courseid}&changeid={$chid}' class='btn btn-sm btn-primary mt-2'>Edit</a>";
+						echo '</li>';
+					}
+				}
+				echo '</ul>';
+			}
+			?>
 
-
+			</div>
+		</details>
 
 </div>
 
@@ -464,22 +486,6 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
 </div>
 </div>
 
-<?php if(isSuper()): ?>
-<!-- <div>
-<div class="col-md-6">
-<div class="alert alert-warning">
-A WORK IN PROGRESS. Please don't mess with it :)
-<form method="post" action="communication-template-create.php">
-<input type="hidden" name="CourseID" id="CourseID" value="<?= h($deets[0]) ?>">
-Template Name: <input type="text" id="TemplateName" name="TemplateName" class="form-control"><br>
-Template:<br>
-<textarea class="form-control summernote" name="Template" id="Template"></textarea>
-<input type="submit" class="btn btn-block btn-success" value="Add Template">
-</form>
-</div>
-</div>
-</div> -->
-<?php endif ?>
 
 
 </div>

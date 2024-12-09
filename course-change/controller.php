@@ -88,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $data['created_by'] = LOGGED_IN_IDIR;
         $data['timeline'] = []; // Initialize timeline but do not populate it for the first create
         $data['files'] = [];
-        
+
         // Add an initial timeline entry for creation
         $data['timeline'][] = [
             'field' => 'creation',
@@ -97,14 +97,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'changed_by' => $logged_in_user,
             'changed_at' => $date_created,
         ];
-        // Add initial comment to the data, but not the timeline
         if ($comment) {
             $commentId = uniqid();
-            $data['comments'][] = [
-                'id' => $commentId,
-                'comment' => $comment,
-                'commented_by' => $logged_in_user,
-                'commented_at' => time(),
+            $data['timeline'][] = [
+                'field' => 'comment',
+                'comment_id' => $commentId,
+                'new_value' => $comment, // The actual comment content
+                'changed_by' => $logged_in_user, // The user who made the comment
+                'changed_at' => time(), // Timestamp of when the comment was made
             ];
         }
     }
@@ -146,7 +146,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     file_put_contents($filename, json_encode($data, JSON_PRETTY_PRINT));
 
     // Redirect to the change details page
-    header("Location: ./?courseid={$courseid}&changeid={$changeid}");
+    header("Location: ./?courseid={$courseid}&changeid={$changeid}&message=Success");
     exit;
 } else {
     echo "Invalid request method!";

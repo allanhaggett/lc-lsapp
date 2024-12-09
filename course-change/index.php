@@ -11,6 +11,27 @@ require($path);
      exit;
  }
  $deets = getCourse($courseid);
+    // Prefill data if updating an existing change
+    $formData = [
+    'assign_to' => '',
+    'crm_ticket_reference' => '',
+    'category' => '',
+    'description' => '',
+    'scope' => '',
+    'approval_status' => '',
+    'urgent' => false,
+    'comments' => '',
+    'status' => ''
+];
+
+if ($changeid) {
+    $filePath = "requests/course-$courseid-$changeid.json";
+    if (file_exists($filePath)) {
+        $formData = json_decode(file_get_contents($filePath), true);
+    } else {
+        echo '<div class="alert alert-warning">Warning: Change ID not found. Starting a new form.</div>';
+    }
+}
 ?>
 
 <?php if(canACcess()): ?>
@@ -27,69 +48,12 @@ require($path);
     <div class="row justify-content-md-center">
         <div class="col">
             <h1 class=""><a href="/lsapp/course.php?courseid=<?= $deets[0] ?>"><?= $deets[2] ?></a></h1>
-            <h2>Course Change Request</h2>
+            <h2>Course Change Request <small><?= $formData['changeid'] ?? '' ?></small></h2>
         </div>
     </div>
     
-    <!-- <div><a href="change.php?courseid=<?= $courseid ?>&changeid=<?= $changeid ?>" class="btn btn-sm btn-secondary mt-2">View</a></div> -->
-        <a class="btn btn-primary" data-bs-toggle="collapse" href="#otherchanges" role="button" aria-expanded="false" aria-controls="otherchanges">
-            Other Changes
-        </a>
-        <div id="otherchanges" class="collapse">
-        <?php
-        // Fetch all matching request files for the course ID
-        $files = glob("requests/course-{$courseid}-*.json");
-        if (empty($files)) {
-            echo '<p>No requests found for this course.</p>';
-        } else {
-            echo '<ul class="list-group mb-4">';
-            foreach ($files as $file) {
-                $request = json_decode(file_get_contents($file), true);
-                $filenameParts = explode('-', basename($file, '.json')); // Parse file name
-                $chid = $filenameParts[2]; // Extract change ID (second part of the name)
-                echo '<li class="list-group-item">';
-                echo "<strong>Request ID:</strong> {$changeid}<br>";
-                echo "<strong>Assigned To:</strong> {$request['assign_to']}<br>";
-                echo "<strong>Status:</strong> {$request['status']}<br>";
-                echo "<strong>Last Assigned:</strong> " . date('Y-m-d H:i:s', $request['last_assigned_at'] ?? time()) . "<br>";
-                echo "<strong>Description:</strong> {$request['description']}<br>";
-                echo "<a href='?courseid={$courseid}&changeid={$chid}' class='btn btn-sm btn-primary mt-2'>Edit</a>";
-                echo '</li>';
-            }
-            echo '</ul>';
-        }
-        ?>
-
-        </div>
-
-
-        <div class="row justify-content-md-center">
+    <div class="row justify-content-md-center">
         <div class="col-md-5">
-        <?php
-       
-
-        // Prefill data if updating an existing change
-        $formData = [
-            'assign_to' => '',
-            'crm_ticket_reference' => '',
-            'category' => '',
-            'description' => '',
-            'scope' => '',
-            'approval_status' => '',
-            'urgent' => false,
-            'comments' => '',
-            'status' => ''
-        ];
-
-        if ($changeid) {
-            $filePath = "requests/course-$courseid-$changeid.json";
-            if (file_exists($filePath)) {
-                $formData = json_decode(file_get_contents($filePath), true);
-            } else {
-                echo '<div class="alert alert-warning">Warning: Change ID not found. Starting a new form.</div>';
-            }
-        }
-        ?>
         
         <form action="controller.php" method="post" enctype="multipart/form-data" class="needs-validation mt-3" novalidate>
 
@@ -196,29 +160,8 @@ require($path);
                 <textarea id="description" name="description" class="form-control" rows="4" required><?php echo $formData['description']; ?></textarea>
                 <div class="invalid-feedback">Please provide a description of the request.</div>
             </div>
-            <!-- Submit Button -->
-            <button type="submit" class="btn btn-primary w-100"><?php echo $changeid ? 'Update' : 'Submit'; ?></button>
-            </div>
-            <div class="col-md-3">
-            <!-- Existing Files -->
-            <div class="mb-3">
-                <label for="existing_files" class="form-label">Files</label>
-                <ul class="list-group">
-                    <?php if (!empty($formData['files'])): ?>
-                        <?php foreach ($formData['files'] as $file): ?>
-                            <?php
-                            // Extract the file name without the ID part
-                            $shortFileName = preg_replace("/^course-\d+-change-[a-z0-9]+-/", '', $file);
-                            ?>
-                            <li class="list-group-item">
-                                <a href="requests/files/<?php echo $file; ?>" target="_blank"><?php echo $shortFileName; ?></a>
-                            </li>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <li class="list-group-item">No files uploaded yet.</li>
-                    <?php endif; ?>
-                </ul>
-            </div>
+
+            
             <!-- Add New Files -->
             <div class="mb-3">
                 <label for="uploaded_files" class="form-label">Upload Files</label>
@@ -226,6 +169,8 @@ require($path);
                 <small class="text-muted">You can upload multiple files. Max size: 20MB each.</small>
             </div>
 
+            <!-- Submit Button -->
+            <button type="submit" class="btn btn-primary w-100"><?php echo $changeid ? 'Update' : 'Submit'; ?></button>
 
             </div>
             <div class="col-md-4">
@@ -239,6 +184,32 @@ require($path);
 
             
         </form>
+        <!-- Existing Files -->
+        <div class="mb-3">
+                <label for="existing_files" class="form-label">Files</label>
+                <ul class="list-group">
+                    <?php if (!empty($formData['files'])): ?>
+                        <?php foreach ($formData['files'] as $file): ?>
+                            <?php
+                            // Extract the file name without the ID part
+                            $shortFileName = preg_replace("/^course-\d+-change-[a-z0-9]+-/", '', $file);
+                            ?>
+                            <li class="list-group-item">
+                                <a href="requests/files/<?php echo $file; ?>" target="_blank"><?php echo $shortFileName; ?></a>
+                                <form action="delete-file.php" method="post" class="d-inline">
+                                    <input type="hidden" name="courseid" value="<?php echo htmlspecialchars($formData['courseid']); ?>">
+                                    <input type="hidden" name="changeid" value="<?php echo htmlspecialchars($formData['changeid']); ?>">
+                                    <input type="hidden" name="file" value="<?php echo htmlspecialchars($file); ?>">
+                                    <button type="submit" class="btn btn-danger btn-sm">x</button>
+                                </form>
+                            </li>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <li class="list-group-item">No files uploaded yet.</li>
+                    <?php endif; ?>
+                </ul>
+            </div>
+        <?php if(!empty($formData['timeline'])): ?>
         <div class="mt-4">
     <h2>Timeline</h2>
     <?php
@@ -267,14 +238,15 @@ require($path);
             <?php else: ?>
                 <strong>Field Changed:</strong> <?php echo htmlspecialchars($event['field']); ?><br>
                 <strong>Previous Value:</strong> <?php echo htmlspecialchars($event['previous_value'] ?? 'N/A'); ?><br>
-                <strong>New Value:</strong> <?php echo htmlspecialchars($event['new_value']); ?><br>
-                <strong>Changed By:</strong> <?php echo htmlspecialchars($event['changed_by']); ?><br>
-                <small class="text-muted">At: <?php echo date('Y-m-d H:i:s', $event['changed_at']); ?></small>
+                <strong>New Value:</strong> <?php echo htmlspecialchars($event['new_value'] ?? ''); ?><br>
+                <strong>Changed By:</strong> <?php echo htmlspecialchars($event['changed_by'] ?? ''); ?><br>
+                <small class="text-muted">At: <?php echo date('Y-m-d H:i:s', $event['changed_at'] ?? ''); ?></small>
             <?php endif; ?>
         </li>
     <?php endforeach; ?>
     </ul>
 </div>
+<?php endif; // $formData['timeline'] check ?>
         
 </div>
 </div>
