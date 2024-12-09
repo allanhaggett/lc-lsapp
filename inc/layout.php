@@ -200,13 +200,16 @@ function getNavigation($context = NULL) {
 		<li class="nav-item">
 			<a class="nav-link" href="/lsapp/classes-past.php">Past</a>
 		</li>
-		<!-- <li class="nav-item">
-			<a class="nav-link" href="/lsapp/classes-calendar.php">Calendar</a>
-		</li>		 -->
-		<li class="nav-item">
-			<a class="nav-link" href="/lsapp/courses.php?sort=dateadded">Courses</a>
-		</li>
 
+    <li class="nav-item dropdown">
+			<a class="nav-link dropdown-toggle" href="#" id="teamsdrop" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				Courses 
+			</a>
+			<div class="dropdown-menu" aria-labelledby="teamsdrop">
+				<a class="dropdown-item" href="/lsapp/courses.php?sort=dateadded">Courses</a>
+				<a class="dropdown-item" href="/lsapp/course-change/dashboard.php">Course Changes</a>
+      </div>
+    </li>
 
 		<li class="nav-item dropdown">
 			<a class="nav-link dropdown-toggle" href="#" id="teamsdrop" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -214,7 +217,6 @@ function getNavigation($context = NULL) {
 			</a>
 			<div class="dropdown-menu" aria-labelledby="teamsdrop">
 				<a class="dropdown-item" href="https://bcgov.sharepoint.com/teams/00440" target="_blank" rel="noopener">Learning Centre SharePoint</a>
-				<a class="dropdown-item" href="/lsapp/course-change/dashboard.php">All Course Changes</a>
 				<a class="dropdown-item" href="/lsapp/venues.php">Venues</a>
 				<span class="dropdown-item-text fw-bold">Teams &amp; People</span>
 				<a class="dropdown-item" href="/lsapp/teams.php?teamname=Governance">Planning, Evaluation, &amp; Governance</a>
