@@ -310,8 +310,6 @@ $stewsdevs = getCoursePeople($courseid);
 	<?php if($deets[35]): ?>
 	<div class=mb-3">Evaluations link: <?= $deets[35] ?></div>
 	<?php endif ?>
-
-	
 	
 	
 	<div>
@@ -415,6 +413,7 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
 	
         <div id="uncompleted-changes" class="">
         <?php
+		$comped = 0;
         // Fetch all matching request files for the course ID
         $files = glob("course-change/requests/course-{$courseid}-*.json");
         if (empty($files)) {
@@ -435,6 +434,8 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
 					echo "<strong>Status:</strong> {$request['status']}<br>";
 					echo "<strong>Description:</strong> {$request['description']}<br>";
 					echo '</li>';
+				} else {
+					$comped = 1;
 				}
             }
             echo '</ul>';
@@ -442,7 +443,7 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
         ?>
 
         </div>
-
+		<?php if($comped): ?>
 		<details>
 			<summary>Completed Changes</summary>
 			<div id="completed-changes" class="">
@@ -472,6 +473,7 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
 
 			</div>
 		</details>
+		<?php endif ?>
 
 </div>
 

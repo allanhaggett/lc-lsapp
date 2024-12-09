@@ -46,9 +46,15 @@ if ($changeid) {
 
 <div class="container">
     <div class="row justify-content-md-center">
-        <div class="col">
+        <div class="col-9">
             <h1 class=""><a href="/lsapp/course.php?courseid=<?= $deets[0] ?>"><?= $deets[2] ?></a></h1>
             <h2>Course Change Request <small><?= $formData['changeid'] ?? '' ?></small></h2>
+            <?php if(!empty($formData['date_created'])): ?>
+            <div>
+                Created <?php echo date('Y-m-d H:i:s', $formData['date_created']); ?> 
+                by <?= $formData['created_by'] ?? '' ?>
+            </div>
+            <?php endif ?>
         </div>
     </div>
     
@@ -195,13 +201,13 @@ if ($changeid) {
                             $shortFileName = preg_replace("/^course-\d+-change-[a-z0-9]+-/", '', $file);
                             ?>
                             <li class="list-group-item">
-                                <a href="requests/files/<?php echo $file; ?>" target="_blank"><?php echo $shortFileName; ?></a>
-                                <form action="delete-file.php" method="post" class="d-inline">
+                                <form action="delete-file.php" method="post" class="float-end">
                                     <input type="hidden" name="courseid" value="<?php echo htmlspecialchars($formData['courseid']); ?>">
                                     <input type="hidden" name="changeid" value="<?php echo htmlspecialchars($formData['changeid']); ?>">
                                     <input type="hidden" name="file" value="<?php echo htmlspecialchars($file); ?>">
                                     <button type="submit" class="btn btn-danger btn-sm">x</button>
                                 </form>
+                                <a href="requests/files/<?php echo $file; ?>" target="_blank"><?php echo $shortFileName; ?></a>
                             </li>
                         <?php endforeach; ?>
                     <?php else: ?>
