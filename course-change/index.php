@@ -33,6 +33,17 @@ if ($changeid) {
         echo $filePath;
     }
 }
+
+// Load categories from the JSON file
+$categoriesFile = 'guidance.json';
+$categories = [];
+
+if (file_exists($categoriesFile)) {
+    $categories = json_decode(file_get_contents($categoriesFile), true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        die("Error reading categories.json: " . json_last_error_msg());
+    }
+}
 ?>
 
 <?php if(canACcess()): ?>
@@ -75,17 +86,24 @@ if ($changeid) {
             </div>
             <div class="row">
             <div class="col">
-            <!-- Scope -->
             <div class="mb-3">
-                <label for="scope" class="form-label">Scope</label>
-                <select id="scope" name="scope" class="form-select" required>
-                    <option value="" disabled>Choose a scope</option>
-                    <option value="minor" <?php echo $formData['scope'] === 'minor' ? 'selected' : ''; ?>>Minor Change (1-2 hours)</option>
-                    <option value="moderate" <?php echo $formData['scope'] === 'moderate' ? 'selected' : ''; ?>>Moderate Change (2-24 hours)</option>
-                    <option value="major" <?php echo $formData['scope'] === 'major' ? 'selected' : ''; ?>>Major Change (&gt;24 hours)</option>
-                </select>
-                <div class="invalid-feedback">Please select the scope of the request.</div>
+            <label for="category" class="form-label">Category</label>
+            <select id="category" name="category" class="form-select" required>
+                <option value="" disabled>Choose a category</option>
+                <?php foreach ($categories as $cat): ?>
+                    <option value="<?php echo htmlspecialchars($cat['category']); ?>"
+                        <?php echo (isset($formData['category']) && $formData['category'] === $cat['category']) ? 'selected' : ''; ?>>
+                        <?php echo htmlspecialchars($cat['category']); ?>
+                    </option>
+                <?php endforeach; ?>
+                <!-- <option value="open_course" <?php echo $formData['category'] === 'open_course' ? 'selected' : ''; ?>>Open Course</option>
+                <option value="close_course" <?php echo $formData['category'] === 'close_course' ? 'selected' : ''; ?>>Close Course</option>
+                <option value="course_update" <?php echo $formData['category'] === 'course_update' ? 'selected' : ''; ?>>Course Update</option>
+                <option value="other" <?php echo $formData['category'] === 'other' ? 'selected' : ''; ?>>Other</option> -->
+            </select>
+            <div class="invalid-feedback">Please select a category.</div>
             </div>
+            
             </div>
             <!-- Approval Status -->
             <div class="col">
@@ -114,15 +132,17 @@ if ($changeid) {
             </div>
 
             <div class="col">
-                <label for="category" class="form-label">Category</label>
-                <select id="category" name="category" class="form-select" required>
-                    <option value="" disabled>Choose a category</option>
-                    <option value="open_course" <?php echo $formData['category'] === 'open_course' ? 'selected' : ''; ?>>Open Course</option>
-                    <option value="close_course" <?php echo $formData['category'] === 'close_course' ? 'selected' : ''; ?>>Close Course</option>
-                    <option value="course_update" <?php echo $formData['category'] === 'course_update' ? 'selected' : ''; ?>>Course Update</option>
-                    <option value="other" <?php echo $formData['category'] === 'other' ? 'selected' : ''; ?>>Other</option>
+                <!-- Scope -->
+
+                <label for="scope" class="form-label">Scope</label>
+                <select id="scope" name="scope" class="form-select" required>
+                    <option value="" disabled>Choose a scope</option>
+                    <option value="minor" <?php echo $formData['scope'] === 'minor' ? 'selected' : ''; ?>>Minor Change (1-2 hours)</option>
+                    <option value="moderate" <?php echo $formData['scope'] === 'moderate' ? 'selected' : ''; ?>>Moderate Change (2-24 hours)</option>
+                    <option value="major" <?php echo $formData['scope'] === 'major' ? 'selected' : ''; ?>>Major Change (&gt;24 hours)</option>
                 </select>
-                <div class="invalid-feedback">Please select a category.</div>
+                <div class="invalid-feedback">Please select the scope of the request.</div>
+
             </div>
             </div>
 

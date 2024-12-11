@@ -1,0 +1,18 @@
+[
+    {
+        "category": "Open Course",
+        "guidance": "Ensure all course materials are up-to-date before submitting."
+    },
+    {
+        "category": "Close Course",
+        "guidance": "Provide a full description of the new course requirements."
+    },
+    {
+        "category": "Course Update",
+        "guidance": "Include a clear description of the issue and steps to reproduce."
+    },
+    {
+        "category": "Other",
+        "guidance": "Specify the areas of the course requiring review."
+    }
+]
