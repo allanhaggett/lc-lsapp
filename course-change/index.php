@@ -102,8 +102,26 @@ if (file_exists($categoriesFile)) {
                 <option value="other" <?php echo $formData['category'] === 'other' ? 'selected' : ''; ?>>Other</option> -->
             </select>
             <div class="invalid-feedback">Please select a category.</div>
+            <div id="category-guidance" class="mt-3 text-muted">
+                <p>Select a category to view its guidance.</p>
             </div>
-            
+            <script>
+                const categories = <?php echo json_encode($categories); ?>;
+                const categoryDropdown = document.getElementById('category');
+                const guidanceDiv = document.getElementById('category-guidance');
+
+                categoryDropdown.addEventListener('change', function () {
+                    const selectedCategory = this.value;
+                    const selected = categories.find(cat => cat.category === selectedCategory);
+
+                    if (selected) {
+                        guidanceDiv.innerHTML = `<p>${selected.guidance}</p>`;
+                    } else {
+                        guidanceDiv.innerHTML = `<p>Select a category to view its guidance.</p>`;
+                    }
+                });
+            </script>
+            </div>
             </div>
             <!-- Approval Status -->
             <div class="col">
@@ -198,7 +216,8 @@ if (file_exists($categoriesFile)) {
 
             <!-- Submit Button -->
             <button type="submit" class="btn btn-primary w-100"><?php echo $changeid ? 'Update' : 'Submit'; ?></button>
-
+        
+        
             </div>
             <div class="col-md-4">
 
