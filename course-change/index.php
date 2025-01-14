@@ -58,7 +58,7 @@ if (file_exists($categoriesFile)) {
 
 <div class="container">
     <div class="row justify-content-md-center">
-        <div class="col-9">
+        <div class="col">
             <h1 class=""><a href="/lsapp/course.php?courseid=<?= $deets[0] ?>"><?= $deets[2] ?></a></h1>
             <h2>Course Change Request <small><?= $formData['changeid'] ?? '' ?></small></h2>
             <?php if(!empty($formData['date_created'])): ?>
@@ -71,7 +71,7 @@ if (file_exists($categoriesFile)) {
     </div>
     
     <div class="row justify-content-md-center">
-        <div class="col-md-5">
+        <div class="col-md-6">
         
         <form action="controller.php" method="post" enctype="multipart/form-data" class="needs-validation mt-3" novalidate>
 
@@ -109,11 +109,9 @@ if (file_exists($categoriesFile)) {
                 const categories = <?php echo json_encode($categories); ?>;
                 const categoryDropdown = document.getElementById('category');
                 const guidanceDiv = document.getElementById('category-guidance');
-
                 categoryDropdown.addEventListener('change', function () {
                     const selectedCategory = this.value;
                     const selected = categories.find(cat => cat.category === selectedCategory);
-
                     if (selected) {
                         guidanceDiv.innerHTML = `<p>${selected.guidance}</p>`;
                     } else {
@@ -219,7 +217,7 @@ if (file_exists($categoriesFile)) {
         
         
             </div>
-            <div class="col-md-4">
+            <div class="col-md-6">
 
             <!-- Add New Comment -->
             <div class="mb-3">
@@ -257,7 +255,7 @@ if (file_exists($categoriesFile)) {
             </div>
         <?php if(!empty($formData['timeline'])): ?>
         <div class="mt-4">
-    <h2>Timeline</h2>
+    <h2>Comments</h2>
     <?php
     // Ensure the timeline is sorted in reverse chronological order
     if (!empty($formData['timeline'])) {
@@ -268,8 +266,8 @@ if (file_exists($categoriesFile)) {
     ?>
     <ul class="list-group">
     <?php foreach ($formData['timeline'] as $event): ?>
-        <li class="list-group-item">
-            <?php if ($event['field'] === 'comment'): ?>
+        <?php if ($event['field'] === 'comment'): ?>
+            <li class="list-group-item">
                 <?php if ($event['changed_by'] === LOGGED_IN_IDIR): ?>
                     <form action="delete-comment.php" method="post" class="float-end">
                         <input type="hidden" name="courseid" value="<?php echo htmlspecialchars($formData['courseid']); ?>">
@@ -281,19 +279,47 @@ if (file_exists($categoriesFile)) {
                 <p><strong>Comment:</strong> <?php echo htmlspecialchars($event['new_value']); ?></p>
                 <strong>Commented By:</strong> <?php echo htmlspecialchars($event['changed_by']); ?><br>
                 <small class="text-muted">At: <?php echo date('Y-m-d H:i:s', $event['changed_at']); ?></small>
-            <?php else: ?>
-                <strong>Field Changed:</strong> <?php echo htmlspecialchars($event['field']); ?><br>
-                <strong>Previous Value:</strong> <?php echo htmlspecialchars($event['previous_value'] ?? 'N/A'); ?><br>
-                <strong>New Value:</strong> <?php echo htmlspecialchars($event['new_value'] ?? ''); ?><br>
-                <strong>Changed By:</strong> <?php echo htmlspecialchars($event['changed_by'] ?? ''); ?><br>
-                <small class="text-muted">At: <?php echo date('Y-m-d H:i:s', $event['changed_at'] ?? ''); ?></small>
+            </li>
             <?php endif; ?>
-        </li>
     <?php endforeach; ?>
     </ul>
 </div>
 <?php endif; // $formData['timeline'] check ?>
         
+</div>
+</div>
+<hr class="mt-5">
+<div class="row">
+<div class="col">
+<h2 class="mt-5">Timeline</h2>
+<table class="table table-striped">
+    <tr>
+        <th>Field Changed</th> 
+        <th width="400">Previous Value</th> 
+        <th width="400">New Value</th> 
+        <th>Changed By</th> 
+        <th>When</th>
+    </tr>
+<?php foreach ($formData['timeline'] as $event): ?>
+<?php if ($event['field'] !== 'comment'): ?>
+    <tr>
+        <!-- <form action="delete-comment.php" method="post" class="float-end">
+            <input type="hidden" name="courseid" value="<?php echo htmlspecialchars($formData['courseid']); ?>">
+            <input type="hidden" name="changeid" value="<?php echo htmlspecialchars($formData['changeid']); ?>">
+            <input type="hidden" name="comment_id" value="<?php echo htmlspecialchars($event['comment_id'] ?? ''); ?>">
+            <button type="submit" class="btn btn-danger btn-sm">x</button>
+        </form> -->
+        <td><?php echo htmlspecialchars($event['field']); ?></td>
+        <td><?php echo htmlspecialchars($event['previous_value'] ?? 'N/A'); ?></td>
+        <td><?php echo htmlspecialchars($event['new_value'] ?? ''); ?></td>
+        <td><?php echo htmlspecialchars($event['changed_by'] ?? ''); ?></td>
+        <td><?php echo date('Y-m-d H:i:s', $event['changed_at'] ?? ''); ?></td>
+
+    </tr>
+<?php endif; // not a comment ?>
+<?php endforeach; ?>
+</table>
+
 </div>
 </div>
 </div>
