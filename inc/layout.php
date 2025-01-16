@@ -207,7 +207,7 @@ function getNavigation($context = NULL) {
 			</a>
 			<div class="dropdown-menu" aria-labelledby="teamsdrop">
 				<a class="dropdown-item" href="/lsapp/courses.php?sort=dateadded">Courses</a>
-				<a class="dropdown-item" href="/lsapp/course-change/dashboard.php">Course Changes</a>
+				<a class="dropdown-item" href="/lsapp/course-change/index.php">Course Changes</a>
       </div>
     </li>
 

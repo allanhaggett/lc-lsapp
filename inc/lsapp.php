@@ -2186,3 +2186,11 @@ function removeOutlookSafeLinks($link) {
     return $url;
 };
 
+function truncateStringByWords($string, $wordLimit, $ellipsis = true) {
+    $words = explode(' ', $string);
+    if (count($words) > $wordLimit) {
+        $truncated = implode(' ', array_slice($words, 0, $wordLimit));
+        return $truncated . ($ellipsis ? '...' : '');
+    }
+    return $string;
+}

@@ -1,15 +1,15 @@
 [
     {
         "category": "Open Course",
-        "guidance": "Ensure all course materials are up-to-date before submitting."
+        "guidance": "Here are all the things you need to do to open a course."
     },
     {
         "category": "Close Course",
-        "guidance": "Provide a full description of the new course requirements."
+        "guidance": "Here are all the things you need to do to close a course."
     },
     {
         "category": "Course Update",
-        "guidance": "Include a clear description of the issue and steps to reproduce."
+        "guidance": "Here are all the things you need to do to do a general update of course."
     },
     {
         "category": "Other",

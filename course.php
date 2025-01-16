@@ -25,6 +25,34 @@ $stewsdevs = getCoursePeople($courseid);
 // 10-CourseOwner,11-MinMax,12-CourseNotes,
 // 13-Requested, 14-RequestedBy,15-EffectiveDate,16-CourseDescription,17-CourseAbstract,18-Prerequisites,19-Keywords,
 // 20-Category,21-Method,22-elearning
+// Load categories from the JSON file
+$categoriesFile = 'course-change/guidance.json';
+$categories = [];
+
+if (file_exists($categoriesFile)) {
+    $categories = json_decode(file_get_contents($categoriesFile), true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        die("Error reading categories.json: " . json_last_error_msg());
+    }
+
+    foreach ($categories as $key => $cat) {
+        if ($deets[1] === 'Active') {
+            // If the course is active and the guidance is "Open Course", remove it from the list
+            if ($cat['category'] === 'Open Course') {
+                unset($categories[$key]);
+            }
+        } else {
+            // If the course is not active and the guidance is "Close Course", remove it from the list
+            if ($cat['category'] === 'Close Course') {
+                unset($categories[$key]);
+            }
+        }
+    }
+
+    // Reindex the array after unsetting
+    $categories = array_values($categories);
+}
+
 ?>
 <?php getHeader() ?>
 
@@ -57,8 +85,23 @@ $stewsdevs = getCoursePeople($courseid);
 	<div class="col-6 col-md-3"><strong>Delivery method:</strong><br> <?= $deets[21] ?></div>
 </div>
 <?php if(isAdmin()): ?>
-	<div class="float-right">
-		<a href="course-update.php?courseid=<?= $courseid ?>" class="btn btn-light float-end">Edit course</a>
+	<div class="btn-group float-end">
+		<a href="course-update.php?courseid=<?= $courseid ?>" class="btn btn-light float-end">Edit details</a>
+		<div class="btn-group">
+			<button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+				Change request
+			</button>
+			<ul class="dropdown-menu">
+				<?php foreach ($categories as $cat): ?>
+				<li class="dropdown-item">
+					<a href="course-change/create.php?cat=<?php echo htmlspecialchars(urlencode($cat['category'])); ?>&courseid=<?= $deets[0] ?>">
+						<?php echo htmlspecialchars($cat['category']); ?>
+					</a>
+				</li>
+                <?php endforeach; ?>
+			</ul>
+		</div>
+
 	</div>
 	<?php endif ?>
 <h1><?= $deets[2] ?></h1>
@@ -401,17 +444,11 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
 
 <div class="">
 
-	<div class="mb-1 float-end">
-		<a class="btn btn-sm btn-primary" href="/lsapp/course-change/?courseid=<?= $deets[0] ?>">
-			New Change Request
-		</a>
-	</div>
 	<h3 class="mb-1 clearfix">
 		Open Change Requests
 	</h3>
-	
-	
-        <div id="uncompleted-changes" class="">
+		
+	<div id="uncompleted-changes" class="">
         <?php
 		$comped = 0;
         // Fetch all matching request files for the course ID
@@ -431,13 +468,13 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
 						die("Error: Invalid file name format.");
 					}
 					echo '<li class="list-group-item">';
-					echo "Created " . date('Y-m-d H:i:s', $request['date_created'] ?? time()) . " ";
-					echo "by " . $request['created_by'] . "<br>";
 					echo "<strong>Request ID:</strong>";
-					echo "<a href='course-change/?courseid={$courseid[1]}&changeid={$chid}'>{$chid}</a><br>";
+					echo "<a href='course-change/view.php?courseid={$courseid[1]}&changeid={$chid}'>{$chid}</a><br>";
 					echo "<strong>Assigned To:</strong> {$request['assign_to']}<br>";
 					echo "<strong>Status:</strong> {$request['status']}<br>";
-					echo "<strong>Description:</strong> {$request['description']}<br>";
+					echo "<div class='p-3 bg-light-subtle rounded-3'>" . truncateStringByWords($request['description'], 20) . "</div>";
+					echo "Created " . date('Y-m-d H:i:s', $request['date_created'] ?? time()) . " ";
+					echo "by " . $request['created_by'] . "<br>";
 					echo '</li>';
 				} else {
 					$comped = 1;
