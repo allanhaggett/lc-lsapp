@@ -2,6 +2,8 @@
 opcache_reset();
 $path = '../inc/lsapp.php';
 require($path); 
+require('../inc/Parsedown.php');
+$Parsedown = new Parsedown();
  // Get parameters from the URL
  $courseid = isset($_GET['courseid']) ? htmlspecialchars($_GET['courseid']) : null;
  $changeid = isset($_GET['changeid']) ? htmlspecialchars($_GET['changeid']) : null;
@@ -93,27 +95,148 @@ $categoriesFile = 'guidance.json';
 $guidance = getGuidanceByCategory($cat, $categoriesFile);
 
 ?>
-<h3><?= $cat ?></h3>
-<div><?= $guidance ?></div>
+        <div class="p-3 rounded-3 bg-light-subtle">
+            <h3><?= $cat ?></h3>
+            <?= $Parsedown->text($guidance) ?>
+        </div>
         
         <form action="controller.php" method="post" enctype="multipart/form-data" class="needs-validation mt-3" novalidate>
 
             <!-- Hidden Fields -->
             <input type="hidden" name="courseid" value="<?php echo $courseid; ?>">
             <input type="hidden" name="changeid" value="<?php echo $changeid; ?>">
-            <div class="alert alert-secondary mb-3">
+            <input type="hidden" name="category" value="<?php echo urlencode($cat); ?>">
+   
+            <div class="row">
+            <div class="col">
+            <div class="alert alert-secondary">
             <div class="form-check">
                 <input type="checkbox" id="urgent" name="urgent" class="form-check-input" value="yes" <?php echo $formData['urgent'] ? 'checked' : ''; ?>>
-                <label for="urgent" class="form-check-label">Urgent</label>
+                <label for="urgent" class="form-check-label">Urgent?</label>
             </div>
             </div>
-            <div class="row">
-           
-            <!-- Approval Status -->
+            </div>
             <div class="col">
+                <!-- Scope -->
+                <label for="scope" class="form-label">Scope</label>
+                <select id="scope" name="scope" class="form-select" required>
+                    <option value="" disabled>Choose a scope</option>
+                    <option value="minor" <?php echo $formData['scope'] === 'minor' ? 'selected' : ''; ?>>Minor Change (1-2 hours)</option>
+                    <option value="moderate" <?php echo $formData['scope'] === 'moderate' ? 'selected' : ''; ?>>Moderate Change (2-24 hours)</option>
+                    <option value="major" <?php echo $formData['scope'] === 'major' ? 'selected' : ''; ?>>Major Change (&gt;24 hours)</option>
+                </select>
+                <div class="invalid-feedback">Please select the scope of the request.</div>
+                <details>
+                    <summary>Scope details</summary>
+                        <div class="p-3">
+                            <h3>Minor Change</h3>
+                            <div><strong>1-2 hours </strong></div>
+                            <p>Small revisions to existing content that don’t significantly change the 
+                                meaning/consultation with the business owner is not required (e.g., typos, 
+                                updating links to existing or new versions of small assets (e.g., images), 
+                                minor big fixes that don’t significantly alter the user experience, changes 
+                                that don’t require extensive testing, small adjustments to quiz questions 
+                                in Moodle or HTML).</p>
+                        </div>
+                        <div class="p-3">
+                            <h3>Moderate </h3>
+                            <div><strong>2 hours – 24 hours </strong></div>
+                            <p>Moderate changes to content (needing business owner approval), updating or 
+                                reorganizing content in multiple lessons or modules, adding/updating evaluation 
+                                surveys, adjustments to quizzes built in Storyline, updating videos/interactive 
+                                activities, adding new activities/quizzes, multiple changes from an annual 
+                                review, or changes that require more than one person (e.g., developer). </p>
+                        </div>
+                        <div class="p-3">
+                            <h3>Major</h3>
+                            <div><strong>> 24 hours </strong></div>
+                            <p>Course overhauls or complete reorganization of existing content, revising learning 
+                                objectives, creating videos, simulations, requires extensive consultation with 
+                                business owners.</p>
+                        </div>   
+                    
+                </details>
+
+            </div>
+            <!-- Description -->
+            <div class="my-3">
+
+                <div id="toolbar" class="btn-group">
+                    <button class="btn btn-sm bg-light-subtle" type="button" onclick="applyMarkdown('**', '**')">Bold</button>
+                    <button class="btn btn-sm bg-light-subtle" type="button" onclick="applyMarkdown('_', '_')">Italic</button>
+                    <button class="btn btn-sm bg-light-subtle" type="button" onclick="applyLink()">Link</button>
+                    <button class="btn btn-sm bg-light-subtle" type="button" onclick="applyList('unordered')">Unordered List</button>
+                    <button class="btn btn-sm bg-light-subtle" type="button" onclick="applyList('ordered')">Ordered List</button>
+                </div>
+                <textarea id="description" name="description" class="form-control" rows="4" required><?php echo $formData['description']; ?></textarea>
+                <div class="invalid-feedback">Please provide a description of the request.</div>
+                <script>
+                    function applyMarkdown(before, after) {
+                    const textarea = document.getElementById("description");
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+                    const selectedText = textarea.value.slice(start, end);
+
+                    // Apply Markdown symbols
+                    const newText = before + selectedText + after;
+                    textarea.setRangeText(newText);
+
+                    // Re-select the newly formatted text
+                    textarea.setSelectionRange(start + before.length, end + before.length);
+                    textarea.focus();
+                    }
+
+                    function applyLink() {
+                    const textarea = document.getElementById("description");
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+                    const selectedText = textarea.value.slice(start, end);
+
+                    // Default link format
+                    const newText = `[${selectedText || 'text'}](http://example.com)`;
+                    textarea.setRangeText(newText);
+
+                    // Re-select the text to allow easy editing of the link
+                    if (!selectedText) {
+                        textarea.setSelectionRange(start + 1, start + 5); // Select 'text'
+                    } else {
+                        textarea.setSelectionRange(start + newText.length - 19, start + newText.length - 1); // Select 'http://example.com'
+                    }
+                    textarea.focus();
+                    }
+
+                    function applyList(type) {
+                    const textarea = document.getElementById("description");
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+                    const selectedText = textarea.value.slice(start, end);
+
+                    // Split selected text by lines
+                    const lines = selectedText.split('\n');
+                    
+                    // Prefix each line with list markdown symbols
+                    const newLines = lines.map((line, index) => {
+                        if (type === 'unordered') {
+                        return `- ${line}`;
+                        } else if (type === 'ordered') {
+                        return `${index + 1}. ${line}`;
+                        }
+                        return line;
+                    });
+                    
+                    const newText = newLines.join('\n');
+                    textarea.setRangeText(newText);
+
+                    // Re-select the newly formatted text
+                    textarea.setSelectionRange(start, start + newText.length);
+                    textarea.focus();
+                    }
+                    </script>
+            </div>
+            <!-- Approval Status -->
+            <div class="col-md-6">
                 <label for="approval_status" class="form-label">Approval Status</label>
                 <select id="approval_status" name="approval_status" class="form-select" required>
-                    <option value="" disabled>Choose approval status</option>
                     <option value="approved" <?php echo $formData['approval_status'] === 'approved' ? 'selected' : ''; ?>>Approved</option>
                     <option value="pending" <?php echo $formData['approval_status'] === 'pending' ? 'selected' : ''; ?>>Pending Approval</option>
                     <option value="denied" <?php echo $formData['approval_status'] === 'denied' ? 'selected' : ''; ?>>Denied</option>
@@ -121,8 +244,6 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
                 </select>
                 <div class="invalid-feedback">Please select the approval status.</div>
             </div>
-            </div>
-            <div class="row mb-3">
             <!-- Status -->
             <div class="col">
                 <label for="status" class="form-label">Status</label>
@@ -134,71 +255,10 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
                 <div class="invalid-feedback">Please select the status.</div>
             </div>
 
-            <div class="col">
-                <!-- Scope -->
-                <label for="scope" class="form-label">Scope</label>
-                <!-- Button trigger modal -->
-                <button type="button" class="btn btn-text rounded-lg" data-bs-toggle="modal" data-bs-target="#scopedetails">
-                    ?
-                </button>
-                <select id="scope" name="scope" class="form-select" required>
-                    <option value="" disabled>Choose a scope</option>
-                    <option value="minor" <?php echo $formData['scope'] === 'minor' ? 'selected' : ''; ?>>Minor Change (1-2 hours)</option>
-                    <option value="moderate" <?php echo $formData['scope'] === 'moderate' ? 'selected' : ''; ?>>Moderate Change (2-24 hours)</option>
-                    <option value="major" <?php echo $formData['scope'] === 'major' ? 'selected' : ''; ?>>Major Change (&gt;24 hours)</option>
-                </select>
-                <div class="invalid-feedback">Please select the scope of the request.</div>
-                <!-- Modal -->
-                <div class="modal fade" id="scopedetails" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                    <div class="modal-header">
-                        <h1 class="modal-title fs-5" id="exampleModalLabel">Scope Details</h1>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                    <div class="p-3">
-                        <h3>Minor Change</h3>
-                        <div><strong>1-2 hours </strong></div>
-                        <p>Small revisions to existing content that don’t significantly change the 
-                            meaning/consultation with the business owner is not required (e.g., typos, 
-                            updating links to existing or new versions of small assets (e.g., images), 
-                            minor big fixes that don’t significantly alter the user experience, changes 
-                            that don’t require extensive testing, small adjustments to quiz questions 
-                            in Moodle or HTML).</p>
-                    </div>
-                    <div class="p-3">
-                        <h3>Moderate </h3>
-                        <div><strong>2 hours – 24 hours </strong></div>
-                        <p>Moderate changes to content (needing business owner approval), updating or 
-                            reorganizing content in multiple lessons or modules, adding/updating evaluation 
-                            surveys, adjustments to quizzes built in Storyline, updating videos/interactive 
-                            activities, adding new activities/quizzes, multiple changes from an annual 
-                            review, or changes that require more than one person (e.g., developer). </p>
-                    </div>
-                    <div class="p-3">
-                        <h3>Major</h3>
-                        <div><strong>> 24 hours </strong></div>
-                        <p>Course overhauls or complete reorganization of existing content, revising learning 
-                            objectives, creating videos, simulations, requires extensive consultation with 
-                            business owners.</p>
-                    </div>   
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    </div>
-                    </div>
-                </div>
-                </div>
-
-                
-                
-
-
-            </div>
+            
             </div>
 
-            <div class="row mb-3">
+            <div class="row my-3">
             <div class="col">
                 <label for="assign_to" class="form-label">Assigned To</label>
                 <!-- <input type="text" id="assign_to" name="assign_to" class="form-control" value="<?php echo $formData['assign_to']; ?>" required> -->
@@ -233,12 +293,7 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
                 <input type="text" id="crm_ticket_reference" name="crm_ticket_reference" class="form-control" value="<?php echo $formData['crm_ticket_reference']; ?>">
             </div>
             </div>
-            <!-- Description -->
-            <div class="mb-3">
-                <label for="description" class="form-label">Description</label>
-                <textarea id="description" name="description" class="form-control" rows="4" required><?php echo $formData['description']; ?></textarea>
-                <div class="invalid-feedback">Please provide a description of the request.</div>
-            </div>
+
 
             
             <!-- Add New Files -->

@@ -2,6 +2,7 @@
 opcache_reset();
 $path = '../inc/lsapp.php';
 require($path); 
+require('../inc/Parsedown.php');
  // Get parameters from the URL
  $courseid = isset($_GET['courseid']) ? htmlspecialchars($_GET['courseid']) : null;
  $changeid = isset($_GET['changeid']) ? htmlspecialchars($_GET['changeid']) : null;

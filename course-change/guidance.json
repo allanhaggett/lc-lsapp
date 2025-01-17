@@ -1,18 +1,14 @@
 [
     {
         "category": "Open Course",
-        "guidance": "Here are all the things you need to do to open a course."
+        "guidance": "Here are all the things you need to do to open a course: \r\n\r\n1. Edit the course in ELM and make the course \"Active.\"\r\n2. Ensure that the class offering is also \"Active.\"\r\n3. Another thing that we need.\r\n4. Mark this issue completed."
     },
     {
         "category": "Close Course",
-        "guidance": "Here are all the things you need to do to close a course."
+        "guidance": "Jumps off balcony gives owner dead mouse at present then poops in litter box snatches yarn and fights with dog cat chases laser then plays in grass finds tiny spot in cupboard and sleeps all day jumps in bathtub and meows when owner fills food dish the cat knocks over the food dish cat slides down the water slide and into pool and swims even though it does not like water push your water glass on the floor."
     },
     {
         "category": "Course Update",
         "guidance": "Here are all the things you need to do to do a general update of course."
-    },
-    {
-        "category": "Other",
-        "guidance": "Specify the areas of the course requiring review."
     }
 ]
