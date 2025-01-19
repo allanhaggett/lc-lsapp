@@ -129,13 +129,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ];
     
                 // Add to timeline
-                // $data['timeline'][] = [
-                //     'field' => 'link',
-                //     'new_value' => $link,
-                //     'description' => $description,
-                //     'changed_by' => $logged_in_user,
-                //     'changed_at' => time(),
-                // ];
+                $data['timeline'][] = [
+                    'field' => 'link',
+                    'new_value' => $link,
+                    'description' => $description,
+                    'changed_by' => $logged_in_user,
+                    'changed_at' => time(),
+                ];
             }
         }
     }
