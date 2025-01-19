@@ -13,12 +13,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'courseid' => $_POST['courseid'],
         'assign_to' => $_POST['assign_to'],
         'crm_ticket_reference' => $_POST['crm_ticket_reference'] ?? null,
-        'category' => $_POST['category'],
+        'category' => urldecode($_POST['category']),
         'description' => $_POST['description'],
         'scope' => $_POST['scope'],
         'approval_status' => $_POST['approval_status'],
         'urgent' => isset($_POST['urgent']) ? true : false,
         'status' => $_POST['status'],
+        'links' => [], // Initialize links array
     ];
 
     $comment = $_POST['new_comment'] ?? null;
@@ -71,8 +72,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ];
             }
 
-            // Retain files
+            // Retain files and links
             $data['files'] = $existingData['files'] ?? [];
+            $data['links'] = $existingData['links'] ?? [];
 
             // Merge timeline back into data
             $data['timeline'] = $existingData['timeline'];
@@ -88,6 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $data['created_by'] = LOGGED_IN_IDIR;
         $data['timeline'] = []; // Initialize timeline but do not populate it for the first create
         $data['files'] = [];
+        $data['links'] = [];
 
         // Add an initial timeline entry for creation
         $data['timeline'][] = [
@@ -97,18 +100,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'changed_by' => $logged_in_user,
             'changed_at' => $date_created,
         ];
+
         if ($comment) {
             $commentId = uniqid();
             $data['timeline'][] = [
                 'field' => 'comment',
                 'comment_id' => $commentId,
-                'new_value' => $comment, // The actual comment content
-                'changed_by' => $logged_in_user, // The user who made the comment
-                'changed_at' => time(), // Timestamp of when the comment was made
+                'new_value' => $comment,
+                'changed_by' => $logged_in_user,
+                'changed_at' => time(),
             ];
         }
     }
 
+    // Handle file uploads (existing logic remains unchanged)
+
+    // Handle hyperlinks and descriptions
+    if (!empty($_POST['hyperlinks'])) {
+        foreach ($_POST['hyperlinks'] as $index => $link) {
+            $link = filter_var(trim($link), FILTER_SANITIZE_URL);
+            $description = $_POST['descriptions'][$index] ?? null;
+            $description = filter_var(trim($description), FILTER_SANITIZE_SPECIAL_CHARS);
+    
+            if (!empty($link)) {
+                $data['links'][] = [
+                    'url' => $link,
+                    'description' => $description,
+                ];
+    
+                // Add to timeline
+                // $data['timeline'][] = [
+                //     'field' => 'link',
+                //     'new_value' => $link,
+                //     'description' => $description,
+                //     'changed_by' => $logged_in_user,
+                //     'changed_at' => time(),
+                // ];
+            }
+        }
+    }
     // Handle file uploads
     if (!empty($_FILES['uploaded_files']['name'][0])) {
         $uploadDir = "requests/files/";
@@ -146,7 +176,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     file_put_contents($filename, json_encode($data, JSON_PRETTY_PRINT));
 
     // Redirect to the change details page
-    header("Location: ./?courseid={$courseid}&changeid={$changeid}&message=Success");
+    header("Location: view.php?courseid={$courseid}&changeid={$changeid}&message=Success");
     exit;
 } else {
     echo "Invalid request method!";
