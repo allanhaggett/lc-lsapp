@@ -235,10 +235,13 @@ $stewsdevs = getCoursePeople($courseid);
 			<?php endif ?>
 			<?php if(!empty($deets[8])): ?>
 				<a href="<?= $deets[8] ?>" target="_blank" class="btn btn-primary">PreWork</a>
-				<?php endif ?>
-				<?php if(!empty($deets[9])): ?>
-					<a href="<?= $deets[9] ?>" target="_blank" class="btn btn-primary">PostWork</a>
-					<?php endif ?>
+			<?php endif ?>
+			<?php if(!empty($deets[9])): ?>
+				<a href="<?= $deets[9] ?>" target="_blank" class="btn btn-primary">PostWork</a>
+			<?php endif ?>
+			<?php if($deets[35]): ?>
+				<a href="<?= $deets[35] ?>" target="_blank" class="btn btn-primary">Evaluation Report</a>
+			<?php endif ?>
 					<!-- <a href="https://learning.gov.bc.ca/psc/CHIPSPLM/EMPLOYEE/ELM/c/LM_OD_EMPLOYEE_FL.LM_FND_LRN_FL.GBL?Page=LM_FND_LRN_RSLT_FL&Action=U&MODE=ADV&TITLE=<?php echo urlencode($deets[2]) ?>"
 					target="_blank" 
 					class="btn btn-dark">
@@ -305,13 +308,6 @@ $stewsdevs = getCoursePeople($courseid);
 		</div>
 </details>
 
-
-	
-	<?php if($deets[35]): ?>
-	<div class=mb-3">Evaluations link: <?= $deets[35] ?></div>
-	<?php endif ?>
-
-	
 	
 	
 	<div>
