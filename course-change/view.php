@@ -70,7 +70,9 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
 <title><?= $deets[2] ?> Change Request</title>
 
 <?php getScripts(); ?>
-</body>
+
+<body>
+
 <?php getNavigation(); ?>
 
 <div class="container mt-4">
@@ -88,7 +90,7 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
             <?php endif; ?>
             <span class="badge bg-success"><?= htmlspecialchars($formData['approval_status']) ?></span>
             </div>
-            <h2 class="mb-4"><?= htmlspecialchars($formData['category']) ?> Request <small class="text-muted"><?= $formData['changeid'] ?? '' ?></small></h2>
+            <h2 class="my-2"><?= htmlspecialchars($formData['category']) ?> Request <small class="text-muted"><?= $formData['changeid'] ?? '' ?></small></h2>
             
         </div>
     </div>
@@ -101,12 +103,12 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
         <strong>Progress:</strong> <?= htmlspecialchars($formData['status']) ?>
         <strong>Assigned To:</strong> <?= htmlspecialchars($formData['assign_to']) ?>
     </div>
-            <div class="my-2 p-3 bg-light-subtle rounded-3">
+            <div class="my-2 p-3 bg-dark-subtle rounded-3">
             <?= $Parsedown->text($formData['description']) ?>
             </div>
             <?php if ($formData['crm_ticket_reference']): ?>
-            <div class="">
-                <strong>CRM Ticket #:</strong> <?= htmlspecialchars($formData['crm_ticket_reference'] ?? 'N/A') ?>
+            <div class="mb-2">
+                <strong><a href="https://rightnow.gov.bc.ca" target="_blank" rel="noopener">CRM Ticket</a> #:</strong> <?= htmlspecialchars($formData['crm_ticket_reference'] ?? 'N/A') ?>
             </div>
             <?php endif; ?>
 
@@ -114,7 +116,7 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
             // Assuming $data['links'] contains the hyperlinks and descriptions
             if (!empty($formData['links'])): ?>
                 <h4>Links</h4>
-                <ul class="list-group">
+                <ul class="list-group mb-3">
                     <?php foreach ($formData['links'] as $link): ?>
                         <?php 
                             $url = htmlspecialchars($link['url']);
@@ -145,44 +147,14 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
                 </ul>
 
     <?php endif; ?>
-    <details>
-        <summary>Add a comment</summary>
-    <!-- Comments Section -->
-    <form action="comment-add.php" method="post" class="mt-4">
-    <!-- Hidden Fields -->
-    <input type="hidden" name="courseid" value="<?= $courseid ?>">
-    <input type="hidden" name="changeid" value="<?= $changeid ?>">
-
-    <!-- Comment Field -->
-    <div class="mb-3">
-        <label for="new_comment" class="form-label visually-hidden">Add Comment</label>
-        <textarea id="new_comment" name="new_comment" class="form-control" rows="4" placeholder="Enter your comment here..." required></textarea>
-    </div>
-
-    <!-- Submit Button -->
-    <button type="submit" class="btn btn-primary">Submit Comment</button>
-    </form>
-    </details>
-    <?php if (!empty($formData['timeline'])): ?>
-
-                <h4>Comments</h4>
-                <ul class="list-group">
-                    <?php foreach ($formData['timeline'] as $event): ?>
-                        <?php if ($event['field'] === 'comment'): ?>
-                            <li class="list-group-item">
-                                <strong><?= htmlspecialchars($event['changed_by']) ?>:</strong> 
-                                <?= nl2br(htmlspecialchars($event['new_value'])) ?>
-                                <br><small class="text-muted">At: <?= date('Y-m-d H:i:s', $event['changed_at']) ?></small>
-                            </li>
-                        <?php endif; ?>
-                    <?php endforeach; ?>
-                </ul>
-
-    <?php endif; ?>
+    
 
         </div>
         
         <div class="col-md-6">
+            <h3>Guidance</h3>
+            <div class="p-3 rounded-3 bg-light-subtle">
+
             <div><a href="#">Process documentation</a></div>
             <details>
                 <summary><?= $cat ?> guidance</summary>
@@ -218,22 +190,65 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
                 </div>   
             
             </details>
+
+
+            </div>
+
+
+            <h4 class="fs-5 mt-5">Comments</h4>
+            <details class="">
+        <summary>Add a comment</summary>
+    <!-- Comments Section -->
+    <form action="comment-add.php" method="post" class="mt-4">
+    <!-- Hidden Fields -->
+    <input type="hidden" name="courseid" value="<?= $courseid ?>">
+    <input type="hidden" name="changeid" value="<?= $changeid ?>">
+
+    <!-- Comment Field -->
+    <div class="mb-3">
+        <label for="new_comment" class="form-label visually-hidden">Add Comment</label>
+        <textarea id="new_comment" name="new_comment" class="form-control" rows="4" placeholder="Enter your comment here..." required></textarea>
+    </div>
+
+    <!-- Submit Button -->
+    <button type="submit" class="btn btn-primary">Submit Comment</button>
+    </form>
+    </details>
+    <?php if (!empty($formData['timeline'])): ?>
+
+                <ul class="list-group">
+                    <?php foreach ($formData['timeline'] as $event): ?>
+                        <?php if ($event['field'] === 'comment'): ?>
+                            <li class="list-group-item bg-dark-subtle">
+                                <strong><?= htmlspecialchars($event['changed_by']) ?>:</strong> 
+                                <?= nl2br(htmlspecialchars($event['new_value'])) ?>
+                                <br><small class="text-muted">At: <?= date('Y-m-d H:i:s', $event['changed_at']) ?></small>
+                            </li>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </ul>
+
+    <?php endif; ?>
+
+
+
+
+
+
+
+
         </div>
-                        </div>
+    </div>
 
+    <div class="mt-3">
+        <strong>Created:</strong> <?= date('Y-m-d H:i:s', $formData['date_created']) ?> 
+        by <?= htmlspecialchars($formData['created_by'] ?? '') ?>
+    </div>
+    <div class="mb-3">
+        <strong>Last modified:</strong> <?= date('Y-m-d H:i:s', $formData['date_modified']) ?> 
+        by <?= htmlspecialchars($formData['created_by'] ?? '') ?>
+    </div>
 
-
-            <?php if (!empty($formData['date_created'])): ?>
-                
-                <div>
-                    <strong>Created:</strong> <?= date('Y-m-d H:i:s', $formData['date_created']) ?> 
-                    by <?= htmlspecialchars($formData['created_by'] ?? '') ?>
-                </div>
-                <div>
-                    <strong>Last modified:</strong> <?= date('Y-m-d H:i:s', $formData['date_modified']) ?> 
-                    by <?= htmlspecialchars($formData['created_by'] ?? '') ?>
-                </div>
-            <?php endif; ?>
     <!-- Timeline Section -->
     <?php if (!empty($formData['timeline'])): ?>
         

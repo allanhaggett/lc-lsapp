@@ -89,7 +89,7 @@ if (file_exists($categoriesFile)) {
 		<a href="course-update.php?courseid=<?= $courseid ?>" class="btn btn-light float-end">Edit details</a>
 		<div class="btn-group">
 			<button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-				Change request
+				Requests
 			</button>
 			<ul class="dropdown-menu">
 				<?php foreach ($categories as $cat): ?>
@@ -99,6 +99,9 @@ if (file_exists($categoriesFile)) {
 					</a>
 				</li>
                 <?php endforeach; ?>
+				<li class="dropdown-item">
+					<a href="/lsapp/class-bulk-insert.php?courseid=<?= $deets[0] ?>">New Class Date</a>
+				</li>
 			</ul>
 		</div>
 
@@ -377,7 +380,7 @@ if (file_exists($categoriesFile)) {
 </div>
 
 <div class="col-md-6">
-	<div class="mb-2"><a href="/lsapp/class-bulk-insert.php?courseid=<?= $deets[0] ?>" class="btn btn-primary btn-block">New Date Requests</a></div>
+
 <?php 
 $inactive = 0;
 $closed = 0;
@@ -396,7 +399,7 @@ $finalcount = $upcount - $inactive - $closed;
 
 <?php if($finalcount > 0): ?>
 <div class="mb-3" id="upcoming-classes">
-	<div class="mb-3 sticky-top shadow-sm">
+	<div class="mb-3 shadow-sm">
 		<h3><span class="classcount"><?= $finalcount ?></span>  Current Offering<?php if($finalcount > 1) echo 's' ?></h3>
 	</div>
 <table class="table table-sm mb-5">
@@ -449,40 +452,68 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
 	</h3>
 		
 	<div id="uncompleted-changes" class="">
-        <?php
-		$comped = 0;
-        // Fetch all matching request files for the course ID
-        $files = glob("course-change/requests/course-{$courseid}-change-*.json");
-        if (empty($files)) {
-            echo '<p>No requests found for this course.</p>';
-        } else {
-			echo '<ul class="list-group mb-4">';
-			foreach ($files as $file) {
+	<?php
+	$comped = 0;
+	// Fetch all matching request files for the course ID
+	$files = glob("course-change/requests/course-{$courseid}-change-*.json");
+	if (empty($files)): ?>
+		<p>No requests found for this course.</p>
+	<?php else: ?>
+		<ul class="list-group mb-4">
+			<?php foreach ($files as $file): 
 				$request = json_decode(file_get_contents($file), true);
-				if($request['status'] != 'completed') {
-					$filenameParts = explode('-change-', basename($file, '.json')); // Parse file name
-					if (count($filenameParts) === 2) {
-						$courseid = explode('course-',$filenameParts[0]); // Everything before "-change-"
-						$chid = $filenameParts[1]; // Everything after "-change-"
-					} else {
+				if ($request['status'] != 'completed'):
+					$filenameParts = explode('-change-', basename($file, '.json')); 
+					if (count($filenameParts) === 2):
+						$courseidParts = explode('course-', $filenameParts[0]);
+						$chid = $filenameParts[1];
+					else:
 						die("Error: Invalid file name format.");
-					}
-					echo '<li class="list-group-item">';
-					echo "<strong>Request ID:</strong>";
-					echo "<a href='course-change/view.php?courseid={$courseid[1]}&changeid={$chid}'>{$chid}</a><br>";
-					echo "<strong>Assigned To:</strong> {$request['assign_to']}<br>";
-					echo "<strong>Status:</strong> {$request['status']}<br>";
-					echo "<div class='p-3 bg-light-subtle rounded-3'>" . truncateStringByWords($request['description'], 20) . "</div>";
-					echo "Created " . date('Y-m-d H:i:s', $request['date_created'] ?? time()) . " ";
-					echo "by " . $request['created_by'] . "<br>";
-					echo '</li>';
-				} else {
+					endif; ?>
+
+					<li class="list-group-item">
+					<div class="">
+						<?php if ($request['urgent']): ?>
+						<span class="badge bg-danger">
+							<strong>Urgent</strong>
+						</span>
+						<?php endif; ?>
+						<span class="badge bg-success"><?= htmlspecialchars($request['approval_status']) ?></span>
+						</div>
+						<h4 class="my-1 fs-5">
+							<a href="course-change/view.php?courseid=<?= htmlspecialchars($courseidParts[1]) ?>&changeid=<?= htmlspecialchars($chid) ?>">
+								<?= htmlspecialchars($request['category']) ?> Request <small><?= $request['changeid'] ?? '' ?></small>
+							</a>
+						</h4>
+						<div class="mb-1">
+							<strong>Status:</strong> <?= htmlspecialchars($request['status']) ?>
+							<strong>Assigned To:</strong> <?= htmlspecialchars($request['assign_to']) ?>
+						</div>
+						<div class="p-3 bg-light-subtle rounded-3">
+							<?= htmlspecialchars(truncateStringByWords($request['description'], 20)) ?>
+						</div>
+						<div class="mt-1">
+							<strong>Files:</strong> <?= isset($request['files']) ? count($request['files']) : 0 ?> 
+							<strong>Hyperlinks:</strong> <?= isset($request['links']) ? count($request['links']) : 0 ?> 
+							<strong>Comments:</strong> <?= isset($request['timeline']) ? count(array_filter($request['timeline'], fn($entry) => $entry['field'] === 'comment')) : 0 ?><br>
+						</div>
+							
+						<div class="mt-1">
+							<strong>Created:</strong> <?= date('Y-m-d H:i:s', $request['date_created']) ?> 
+							by <?= htmlspecialchars($request['created_by'] ?? '') ?>
+						</div>
+						<div class="mb-1">
+							<strong>Last modified:</strong> <?= date('Y-m-d H:i:s', $request['date_modified']) ?> 
+							by <?= htmlspecialchars($request['created_by'] ?? '') ?>
+						</div>
+					</li>
+				<?php else: 
 					$comped = 1;
-				}
-            }
-            echo '</ul>';
-        }
-        ?>
+				endif;
+			endforeach; ?>
+		</ul>
+	<?php endif; ?>
+
 
         </div>
 		<?php if($comped): ?>
@@ -496,17 +527,19 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
 				echo '<ul class="list-group mb-4">';
 				foreach ($files as $file) {
 					$request = json_decode(file_get_contents($file), true);
-					if($request['status'] == 'completed') {
+					if ($request['status'] == 'completed') {
 						$filenameParts = explode('-', basename($file, '.json')); // Parse file name
 						$chid = $filenameParts[2]; // Extract change ID (second part of the name)
-						echo '<li class="list-group-item">';
-						echo "<strong>Request ID:</strong> {$chid}<br>";
-						echo "<strong>Assigned To:</strong> {$request['assign_to']}<br>";
-						echo "<strong>Status:</strong> {$request['status']}<br>";
-						echo "<strong>Last Assigned:</strong> " . date('Y-m-d H:i:s', $request['last_assigned_at'] ?? time()) . "<br>";
-						echo "<strong>Description:</strong> {$request['description']}<br>";
-						echo "<a href='course-change/?courseid={$courseid}&changeid={$chid}' class='btn btn-sm btn-primary mt-2'>Edit</a>";
-						echo '</li>';
+						?>
+						<li class="list-group-item">
+							<strong>Request ID:</strong> <?= htmlspecialchars($chid) ?><br>
+							<strong>Assigned To:</strong> <?= htmlspecialchars($request['assign_to']) ?><br>
+							<strong>Status:</strong> <?= htmlspecialchars($request['status']) ?><br>
+							<strong>Last Assigned:</strong> <?= date('Y-m-d H:i:s', $request['last_assigned_at'] ?? time()) ?><br>
+							<strong>Description:</strong> <?= htmlspecialchars($request['description']) ?><br>
+							<a href="course-change/?courseid=<?= htmlspecialchars($courseid) ?>&changeid=<?= htmlspecialchars($chid) ?>" class="btn btn-sm btn-primary mt-2">Edit</a>
+						</li>
+						<?php
 					}
 				}
 				echo '</ul>';

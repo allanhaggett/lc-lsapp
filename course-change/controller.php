@@ -19,7 +19,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'approval_status' => $_POST['approval_status'],
         'urgent' => isset($_POST['urgent']) ? true : false,
         'status' => $_POST['status'],
-        'links' => [], // Initialize links array
     ];
 
     $comment = $_POST['new_comment'] ?? null;
@@ -72,9 +71,73 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 ];
             }
 
-            // Retain files and links
+            if (!empty($_POST['hyperlinks'])) {
+                $updatedLinks = [];
+                $removedLinks = isset($_POST['removed_links']) ? (is_array($_POST['removed_links']) ? $_POST['removed_links'] : explode(',', $_POST['removed_links'])) : [];
+            
+                foreach ($_POST['hyperlinks'] as $index => $link) {
+                    $link = filter_var(trim($link), FILTER_SANITIZE_URL);
+                    $description = $_POST['descriptions'][$index] ?? null;
+                    $description = filter_var(trim($description), FILTER_SANITIZE_SPECIAL_CHARS);
+            
+                    if (!empty($link)) {
+                        if (isset($_POST['link_ids'][$index]) && isset($existingData['links'][$_POST['link_ids'][$index]])) {
+                            $linkId = $_POST['link_ids'][$index];
+            
+                            // Skip if the link is marked for removal
+                            if (!in_array($linkId, $removedLinks)) {
+                                // Update timeline only if changes are made
+                                if ($existingData['links'][$linkId]['url'] !== $link || $existingData['links'][$linkId]['description'] !== $description) {
+                                    $existingData['timeline'][] = [
+                                        'field' => 'link',
+                                        'previous_value' => $existingData['links'][$linkId],
+                                        'new_value' => [
+                                            'url' => $link,
+                                            'description' => $description,
+                                        ],
+                                        'changed_by' => $logged_in_user,
+                                        'changed_at' => time(),
+                                    ];
+                                }
+            
+                                // Update the link
+                                $updatedLinks[$linkId] = [
+                                    'url' => $link,
+                                    'description' => $description,
+                                ];
+                            }
+                        } else {
+                            // Add new link
+                            $updatedLinks[] = [
+                                'url' => $link,
+                                'description' => $description,
+                            ];
+                        }
+                    }
+                }
+            
+                // Remove links marked for deletion
+                foreach ($removedLinks as $linkId) {
+                    if (isset($existingData['links'][$linkId])) {
+                        $existingData['timeline'][] = [
+                            'field' => 'link_removed',
+                            'previous_value' => $existingData['links'][$linkId],
+                            'new_value' => null,
+                            'changed_by' => $logged_in_user,
+                            'changed_at' => time(),
+                        ];
+                    }
+                }
+            
+                // Overwrite with updated links
+                $data['links'] = $updatedLinks;
+            } else {
+                // Handle the case when no links are submitted
+                $data['links'] = [];
+            }
+
+            // Retain files
             $data['files'] = $existingData['files'] ?? [];
-            $data['links'] = $existingData['links'] ?? [];
 
             // Merge timeline back into data
             $data['timeline'] = $existingData['timeline'];
@@ -113,32 +176,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Handle file uploads (existing logic remains unchanged)
-
-    // Handle hyperlinks and descriptions
-    if (!empty($_POST['hyperlinks'])) {
-        foreach ($_POST['hyperlinks'] as $index => $link) {
-            $link = filter_var(trim($link), FILTER_SANITIZE_URL);
-            $description = $_POST['descriptions'][$index] ?? null;
-            $description = filter_var(trim($description), FILTER_SANITIZE_SPECIAL_CHARS);
-    
-            if (!empty($link)) {
-                $data['links'][] = [
-                    'url' => $link,
-                    'description' => $description,
-                ];
-    
-                // Add to timeline
-                $data['timeline'][] = [
-                    'field' => 'link',
-                    'new_value' => $link,
-                    'description' => $description,
-                    'changed_by' => $logged_in_user,
-                    'changed_at' => time(),
-                ];
-            }
-        }
-    }
     // Handle file uploads
     if (!empty($_FILES['uploaded_files']['name'][0])) {
         $uploadDir = "requests/files/";

@@ -199,16 +199,70 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
             </div>
 
 
-                <!-- Add Hyperlinks with Descriptions -->
-                <div class="mb-3" id="hyperlinks-section">
+            <!-- Add Hyperlinks with Descriptions -->
+            <div class="mb-3" id="hyperlinks-section">
                 <label for="hyperlink_1" class="form-label">Hyperlinks</label>
-                <div class="input-group mb-2" id="hyperlink-group-1">
-                    <input type="url" id="hyperlink_1" name="hyperlinks[]" class="form-control" placeholder="Enter hyperlink (e.g., https://example.com)">
-                    <input type="text" id="description_1" name="descriptions[]" class="form-control" placeholder="Enter description (optional)">
-                    <button type="button" class="btn btn-success" onclick="addHyperlinkField()" title="Add another hyperlink">+</button>
+                <?php if (!empty($formData['links'])): ?>
+                    <?php foreach ($formData['links'] as $index => $link): ?>
+                        <div class="input-group mb-2" id="hyperlink-group-<?= $index + 1 ?>">
+                            <input type="hidden" name="link_ids[]" value="<?= $index ?>">
+                            <input type="url" id="hyperlink_<?= $index + 1 ?>" name="hyperlinks[]" class="form-control" value="<?= htmlspecialchars($link['url']) ?>" placeholder="Enter hyperlink (e.g., https://example.com)">
+                            <input type="text" id="description_<?= $index + 1 ?>" name="descriptions[]" class="form-control" value="<?= htmlspecialchars($link['description'] ?? '') ?>" placeholder="Enter description (optional)">
+                            <button type="button" class="btn btn-danger" onclick="removeHyperlinkField(<?= $index + 1 ?>)" title="Remove this hyperlink">−</button>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+
+                <!-- Template for new hyperlinks -->
+                <div class="input-group mb-2" id="hyperlink-group-template" style="display: none;">
+                    <input type="url" name="hyperlinks[]" class="form-control" placeholder="Enter hyperlink (e.g., https://example.com)">
+                    <input type="text" name="descriptions[]" class="form-control" placeholder="Enter description (optional)">
+                    <button type="button" class="btn btn-danger" onclick="removeHyperlinkField(this)" title="Remove this hyperlink">−</button>
                 </div>
-                <small class="text-muted">Add one or more hyperlinks with optional descriptions. Click "+" to add additional fields.</small>
+
+                <!-- Add Button -->
+                <button type="button" class="btn btn-success mt-2" onclick="addHyperlinkField()" title="Add another hyperlink">+</button>
+                <small class="text-muted d-block mt-2">Add one or more hyperlinks with optional descriptions. Click "+" to add additional fields.</small>
             </div>
+
+            <script>
+                let hyperlinkCount = <?= !empty($formData['links']) ? count($formData['links']) : 0 ?>;
+
+                function addHyperlinkField() {
+                    hyperlinkCount++;
+                    const template = document.getElementById("hyperlink-group-template");
+                    const clone = template.cloneNode(true);
+                    clone.style.display = "flex";
+                    clone.id = `hyperlink-group-${hyperlinkCount}`;
+
+                    const inputs = clone.querySelectorAll("input");
+                    inputs[0].id = `hyperlink_${hyperlinkCount}`;
+                    inputs[1].id = `description_${hyperlinkCount}`;
+
+                    template.parentNode.insertBefore(clone, template);
+                }
+
+                function removeHyperlinkField(element) {
+                    const group = typeof element === 'number' 
+                        ? document.getElementById(`hyperlink-group-${element}`)
+                        : element.closest(".input-group");
+                    group.remove();
+
+                    // Mark the link for deletion
+                    const removedLinksInput = document.getElementById("removed_links");
+                    if (!removedLinksInput) {
+                        const input = document.createElement("input");
+                        input.type = "hidden";
+                        input.name = "removed_links[]";
+                        input.id = "removed_links";
+                        document.getElementById("hyperlinks-section").appendChild(input);
+                    }
+                    const linkId = group.querySelector("input[name='link_ids[]']").value;
+                    document.getElementById("removed_links").value += linkId + ",";
+                }
+            </script>
+
+
 
             <div class="mb-3">
                 <label for="uploaded_files" class="form-label">Upload Files</label>

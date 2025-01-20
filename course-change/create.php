@@ -272,7 +272,7 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
                 <label for="hyperlink_1" class="form-label">Hyperlinks</label>
                 <div class="input-group mb-2" id="hyperlink-group-1">
                     <input type="url" id="hyperlink_1" name="hyperlinks[]" class="form-control" placeholder="Enter hyperlink (e.g., https://example.com)">
-                    <input type="text" id="description_1" name="descriptions[]" class="form-control" placeholder="Enter description (optional)">
+                    <input type="text" id="description_1" name="descriptions[]" class="form-control" placeholder="Enter title (optional)">
                     <button type="button" class="btn btn-success" onclick="addHyperlinkField()" title="Add another hyperlink">+</button>
                 </div>
                 <small class="text-muted">Add one or more hyperlinks with optional descriptions. Click "+" to add additional fields.</small>
