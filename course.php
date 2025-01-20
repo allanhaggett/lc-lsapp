@@ -249,7 +249,6 @@ $stewsdevs = getCoursePeople($courseid);
 		<!-- <a href="class-request.php?courseid=<?= $deets[0] ?>" class="btn btn-success">New Date Request</a> -->
 		</div>
 	</details>
-
 	
 	<details class="mb-3 p-2 border border-secondary-subtle rounded-3">
 		<summary>Reviews</summary>
@@ -282,10 +281,7 @@ $stewsdevs = getCoursePeople($courseid);
 	<?php endif ?>
 	</details>
 
-
 <div>
-
-	
 
 	<!-- <div class="">Color:</div> 
 		<div class="">
