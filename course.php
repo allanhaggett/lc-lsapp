@@ -217,7 +217,6 @@ $stewsdevs = getCoursePeople($courseid);
 </div>
 <?php endif ?>
 
-	
 	<details class="mb-3 p-2 border border-secondary-subtle rounded-3">
 		<summary>File Paths &amp; URLs</summary>
 		<div class="p-3 mb-3 bg-light-subtle">
@@ -232,22 +231,24 @@ $stewsdevs = getCoursePeople($courseid);
 		<div><strong>Teams Path:</strong> <?= $deets[46] ?> <button class="copy btn btn-sm btn-light" data-clipboard-text="<?= $deets[46] ?>">Copy</button></div>
 		<?php if(!empty($deets[7])): ?>
 			<!-- <a href="<?= $deets[7] ?>" target="_blank" class="btn btn-success">ELM</a> -->
-			<?php endif ?>
-			<?php if(!empty($deets[8])): ?>
-				<a href="<?= $deets[8] ?>" target="_blank" class="btn btn-primary">PreWork</a>
-				<?php endif ?>
-				<?php if(!empty($deets[9])): ?>
-					<a href="<?= $deets[9] ?>" target="_blank" class="btn btn-primary">PostWork</a>
-					<?php endif ?>
-					<!-- <a href="https://learning.gov.bc.ca/psc/CHIPSPLM/EMPLOYEE/ELM/c/LM_OD_EMPLOYEE_FL.LM_FND_LRN_FL.GBL?Page=LM_FND_LRN_RSLT_FL&Action=U&MODE=ADV&TITLE=<?php echo urlencode($deets[2]) ?>"
-					target="_blank" 
-					class="btn btn-dark">
-					ELM Search
-				</a> -->
-				<!-- <a href="class-request.php?courseid=<?= $deets[0] ?>" class="btn btn-success">New Date Request</a> -->
-			</div>
+		<?php endif ?>
+		<?php if(!empty($deets[8])): ?>
+			<a href="<?= $deets[8] ?>" target="_blank" class="btn btn-primary">PreWork</a>
+		<?php endif ?>
+		<?php if(!empty($deets[9])): ?>
+			<a href="<?= $deets[9] ?>" target="_blank" class="btn btn-primary">PostWork</a>
+		<?php endif ?>
+		<?php if(!empty($deets[35])): ?>
+			<a href="<?= $deets[35] ?>" target="_blank" class="btn btn-primary">Evaluation Report</a>
+		<?php endif ?>
+		<!-- <a href="https://learning.gov.bc.ca/psc/CHIPSPLM/EMPLOYEE/ELM/c/LM_OD_EMPLOYEE_FL.LM_FND_LRN_FL.GBL?Page=LM_FND_LRN_RSLT_FL&Action=U&MODE=ADV&TITLE=<?php echo urlencode($deets[2]) ?>"
+			target="_blank" 
+			class="btn btn-dark">
+			ELM Search
+			</a> -->
+		<!-- <a href="class-request.php?courseid=<?= $deets[0] ?>" class="btn btn-success">New Date Request</a> -->
+		</div>
 	</details>
-
 	
 	<details class="mb-3 p-2 border border-secondary-subtle rounded-3">
 		<summary>Reviews</summary>
@@ -280,10 +281,7 @@ $stewsdevs = getCoursePeople($courseid);
 	<?php endif ?>
 	</details>
 
-
 <div>
-
-	
 
 	<!-- <div class="">Color:</div> 
 		<div class="">
@@ -305,13 +303,6 @@ $stewsdevs = getCoursePeople($courseid);
 		</div>
 </details>
 
-
-	
-	<?php if($deets[35]): ?>
-	<div class=mb-3">Evaluations link: <?= $deets[35] ?></div>
-	<?php endif ?>
-
-	
 	
 	
 	<div>
