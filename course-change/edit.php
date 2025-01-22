@@ -219,6 +219,8 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
                     <input type="text" name="descriptions[]" class="form-control" placeholder="Enter description (optional)">
                     <button type="button" class="btn btn-danger" onclick="removeHyperlinkField(this)" title="Remove this hyperlink">−</button>
                 </div>
+                <!-- Hidden Input for Removed Links -->
+                <input type="hidden" id="removed_links" name="removed_links[]" value="">
 
                 <!-- Add Button -->
                 <button type="button" class="btn btn-success mt-2" onclick="addHyperlinkField()" title="Add another hyperlink">+</button>
@@ -246,19 +248,25 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
                     const group = typeof element === 'number' 
                         ? document.getElementById(`hyperlink-group-${element}`)
                         : element.closest(".input-group");
-                    group.remove();
 
-                    // Mark the link for deletion
-                    const removedLinksInput = document.getElementById("removed_links");
-                    if (!removedLinksInput) {
-                        const input = document.createElement("input");
-                        input.type = "hidden";
-                        input.name = "removed_links[]";
-                        input.id = "removed_links";
-                        document.getElementById("hyperlinks-section").appendChild(input);
+                    const linkIdInput = group.querySelector("input[name='link_ids[]']");
+                    if (linkIdInput) {
+                        // Add the removed link ID to the hidden input
+                        const removedLinksInput = document.getElementById("removed_links");
+                        if (!removedLinksInput) {
+                            const input = document.createElement("input");
+                            input.type = "hidden";
+                            input.name = "removed_links[]";
+                            input.id = "removed_links";
+                            document.getElementById("hyperlinks-section").appendChild(input);
+                        }
+
+                        // Add the link ID to the removed list
+                        const removedLinks = document.getElementById("removed_links");
+                        removedLinks.value += `${linkIdInput.value},`;
                     }
-                    const linkId = group.querySelector("input[name='link_ids[]']").value;
-                    document.getElementById("removed_links").value += linkId + ",";
+
+                    group.remove(); // Remove the link UI group
                 }
             </script>
 
@@ -269,6 +277,52 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
                 <input type="file" id="uploaded_files" name="uploaded_files[]" class="form-control" multiple>
                 <small class="text-muted">You can upload multiple files. Max size: 20MB each.</small>
             </div>
+            <!-- Existing Files Section -->
+            <?php if (!empty($formData['files'])): ?>
+                <div class="mb-3">
+                    <label for="existing_files" class="form-label">Existing Files</label>
+                    <ul class="list-group" id="existing-files-list">
+                        <?php foreach ($formData['files'] as $index => $file): ?>
+                            <?php
+                            // Extract file name for display
+                            $shortFileName = preg_replace("/^course-[a-zA-Z0-9\-]+-change-[a-z0-9]+-/", '', $file);
+                            ?>
+                            <li class="list-group-item d-flex justify-content-between align-items-center" data-file-id="<?= $index ?>">
+                                <a href="requests/files/<?= htmlspecialchars($file) ?>" target="_blank"><?= htmlspecialchars($shortFileName) ?></a>
+                                <button type="button" class="btn btn-danger btn-sm delete-file-button" data-file-id="<?= $index ?>" title="Delete this file">×</button>
+                                <input type="hidden" name="existing_files[]" value="<?= htmlspecialchars($file) ?>">
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                </div>
+            <?php else: ?>
+                <p class="text-muted">No files uploaded yet.</p>
+            <?php endif; ?>
+
+            <!-- Hidden Field to Track Removed Files -->
+            <input type="hidden" name="removed_files" id="removed_files" value="">
+
+            <script>
+                document.addEventListener('DOMContentLoaded', () => {
+                    // Attach click event to all delete buttons
+                    document.querySelectorAll('.delete-file-button').forEach(button => {
+                        button.addEventListener('click', function () {
+                            const fileId = this.getAttribute('data-file-id');
+                            const removedFilesInput = document.getElementById('removed_files');
+                            
+                            // Add the file ID to the removed_files input
+                            const currentValue = removedFilesInput.value;
+                            removedFilesInput.value = currentValue ? `${currentValue},${fileId}` : fileId;
+
+                            // Remove the file entry from the list
+                            const fileItem = this.closest('.list-group-item');
+                            if (fileItem) {
+                                fileItem.remove();
+                            }
+                        });
+                    });
+                });
+            </script>
             
 
             <!-- Submit Button -->

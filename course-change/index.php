@@ -36,6 +36,7 @@ foreach ($files as $file) {
 <title>Change Request Dashboard</title>
 
 <?php getScripts() ?>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/list.js/2.3.1/list.min.js"></script>
 </body>
 <?php getNavigation() ?>
 
@@ -45,50 +46,61 @@ foreach ($files as $file) {
         <h1>Change Requests Dashboard</h1>
         <div class="mb-4">Incomplete change requests</div>
         <?php if (!empty($changeRequests)): ?>
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>Change ID</th>
-                        <th>Course</th>
-                        <th>Assigned To</th>
-                        <th>Status</th>
-                        <th>Urgent</th>
-                        <th>Date Created</th>
-                        <th>Date Modified</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php foreach ($changeRequests as $request): ?>
-                        <?php if($request['status'] !== 'completed'): ?>
+            <!-- Search and sort controls -->
+            <div id="change-requests-list">
+                <input class="search form-control mb-3" placeholder="Search Change Requests" />
+
+                <table class="table table-striped table-hover">
+                    <thead>
                         <tr>
-                            <td><?php echo htmlspecialchars($request['changeid']); ?></td>
-                            <td>
-                                <?php $deets = getCourse($request['courseid']) ?>
-                                <a href="/lsapp/course.php?courseid=<?php echo htmlspecialchars($request['courseid']); ?>">
-                                    <?php echo $deets[2] ?>
-                                </a>
-                            </td>
-                            <td><?php echo htmlspecialchars($request['assign_to']); ?></td>
-                            <td><?php echo htmlspecialchars($request['status']); ?></td>
-                            <td><?php echo htmlspecialchars($request['urgent']); ?></td>
-                            <td><?php echo htmlspecialchars($request['date_created']); ?></td>
-                            <td><?php echo htmlspecialchars($request['date_modified']); ?></td>
-                            <td>
-                                <a href="view.php?courseid=<?php echo htmlspecialchars($request['courseid']); ?>&changeid=<?php echo htmlspecialchars($request['changeid']); ?>" class="btn btn-primary btn-sm">View</a>
-                            </td>
+                            <th><button class="sort" data-sort="course">Course</button></th>
+                            <th><button class="sort" data-sort="urgent">Urgent</button></th>
+                            <th><button class="sort" data-sort="assigned">Assigned To</button></th>
+                            <th><button class="sort" data-sort="status">Status</button></th>
+                            <th><button class="sort" data-sort="date-created">Date Created</button></th>
+                            <th><button class="sort" data-sort="date-modified">Date Modified</button></th>
+                            <th>Actions</th>
                         </tr>
-                        <?php endif ?>
-                    <?php endforeach; ?>
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody class="list">
+                        <?php foreach ($changeRequests as $request): ?>
+                            <?php if($request['status'] !== 'completed'): ?>
+                            <tr>
+                                <td class="course">
+                                    <?php $deets = getCourse($request['courseid']); ?>
+                                    <a href="/lsapp/course.php?courseid=<?php echo htmlspecialchars($request['courseid']); ?>">
+                                        <?php echo htmlspecialchars($deets[2]); ?>
+                                    </a>
+                                </td>
+                                <td class="urgent"><?php echo htmlspecialchars($request['urgent']); ?></td>
+                                <td class="assigned"><?php echo htmlspecialchars($request['assign_to']); ?></td>
+                                <td class="status"><?php echo htmlspecialchars($request['status']); ?></td>
+                                <td class="date-created"><?php echo htmlspecialchars($request['date_created']); ?></td>
+                                <td class="date-modified"><?php echo htmlspecialchars($request['date_modified']); ?></td>
+                                <td>
+                                    <a href="view.php?courseid=<?php echo htmlspecialchars($request['courseid']); ?>&changeid=<?php echo htmlspecialchars($request['changeid']); ?>" class="btn btn-primary btn-sm">View</a>
+                                </td>
+                            </tr>
+                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
         <?php else: ?>
             <div class="alert alert-warning">No change requests found.</div>
         <?php endif; ?>
     </div>
 
+    <script>
+    var options = {
+        valueNames: ['course', 'assigned', 'status', 'urgent', 'date-created', 'date-modified']
+    };
 
+    var changeRequestsList = new List('change-requests-list', options);
+</script>
     <?php endif ?>
-
+</div>
+</div>
+</div>
 <?php require('../templates/javascript.php') ?>
 <?php require('../templates/footer.php') ?>

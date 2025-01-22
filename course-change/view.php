@@ -269,8 +269,22 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
                             <?php if ($event['field'] !== 'comment'): ?>
                                 <tr>
                                     <td><?= htmlspecialchars($event['field']) ?></td>
-                                    <td><?= htmlspecialchars($event['previous_value'] ?? 'N/A') ?></td>
-                                    <td><?= htmlspecialchars($event['new_value'] ?? '') ?></td>
+                                    <td>
+                                    <?php if($event['field'] === 'link_updated'): ?>
+                                        <?= $event['previous_value']['description'] ?? '' ?> - 
+                                        <?= $event['previous_value']['url'] ?>
+                                    <?php else: ?>
+                                        <?= $event['previous_value'] ?? '' ?>
+                                    <?php endif ?>    
+                                    </td>
+                                    <td>
+                                    <?php if($event['field'] === 'link_added' || $event['field'] === 'link_updated'): ?>
+                                        <?= $event['new_value']['description'] ?? '' ?> - 
+                                        <?= $event['new_value']['url'] ?>
+                                    <?php else: ?>
+                                        <?= $event['new_value'] ?? '' ?>
+                                    <?php endif ?>
+                                    </td>
                                     <td><?= htmlspecialchars($event['changed_by'] ?? '') ?></td>
                                     <td><?= date('Y-m-d H:i:s', $event['changed_at'] ?? 0) ?></td>
                                 </tr>

@@ -517,38 +517,64 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
 
         </div>
 		<?php if($comped): ?>
-		<details>
-			<summary>Completed Changes</summary>
-			<div id="completed-changes" class="">
-			<?php
-			if (empty($files)) {
-				echo '<p>No requests found for this course.</p>';
-			} else {
-				echo '<ul class="list-group mb-4">';
-				foreach ($files as $file) {
-					$request = json_decode(file_get_contents($file), true);
-					if ($request['status'] == 'completed') {
-						$filenameParts = explode('-', basename($file, '.json')); // Parse file name
-						$chid = $filenameParts[2]; // Extract change ID (second part of the name)
-						?>
-						<li class="list-group-item">
-							<strong>Request ID:</strong> <?= htmlspecialchars($chid) ?><br>
-							<strong>Assigned To:</strong> <?= htmlspecialchars($request['assign_to']) ?><br>
-							<strong>Status:</strong> <?= htmlspecialchars($request['status']) ?><br>
-							<strong>Last Assigned:</strong> <?= date('Y-m-d H:i:s', $request['last_assigned_at'] ?? time()) ?><br>
-							<strong>Description:</strong> <?= htmlspecialchars($request['description']) ?><br>
-							<a href="course-change/?courseid=<?= htmlspecialchars($courseid) ?>&changeid=<?= htmlspecialchars($chid) ?>" class="btn btn-sm btn-primary mt-2">Edit</a>
-						</li>
-						<?php
-					}
-				}
-				echo '</ul>';
-			}
-			?>
-
-			</div>
-		</details>
-		<?php endif ?>
+    <details>
+        <summary>Completed Changes</summary>
+        <div id="completed-changes" class="">
+            <?php
+            if (empty($files)) {
+                echo '<p>No requests found for this course.</p>';
+            } else {
+                echo '<ul class="list-group mb-4">';
+                foreach ($files as $file) {
+                    $request = json_decode(file_get_contents($file), true);
+                    if ($request['status'] == 'completed') {
+                        $filenameParts = explode('-', basename($file, '.json')); // Parse file name
+                        $chid = $filenameParts[3]; // Extract change ID (second part of the name)
+                        ?>
+                        <li class="list-group-item">
+                            <div class="mb-2">
+                                <?php if ($request['urgent']): ?>
+                                    <span class="badge bg-danger">
+                                        <strong>Urgent</strong>
+                                    </span>
+                                <?php endif; ?>
+                                <span class="badge bg-success">Approval: <?= htmlspecialchars($request['approval_status']) ?></span>
+                            </div>
+                            <h4 class="my-1 fs-5">
+                                <a href="course-change/view.php?courseid=<?= htmlspecialchars($courseid) ?>&changeid=<?= htmlspecialchars($chid) ?>">
+                                    <?= htmlspecialchars($request['category']) ?> Request <small><?= $request['changeid'] ?? '' ?></small>
+                                </a>
+                            </h4>
+                            <div class="mb-1">
+                                <strong>Status:</strong> <?= htmlspecialchars($request['status']) ?>
+                                <strong>Assigned To:</strong> <?= htmlspecialchars($request['assign_to']) ?>
+                            </div>
+                            <div class="p-3 bg-light-subtle rounded-3">
+                                <?= htmlspecialchars(truncateStringByWords($request['description'], 20)) ?>
+                            </div>
+                            <div class="mt-1">
+                                <strong>Files:</strong> <?= isset($request['files']) ? count($request['files']) : 0 ?> 
+                                <strong>Hyperlinks:</strong> <?= isset($request['links']) ? count($request['links']) : 0 ?> 
+                                <strong>Comments:</strong> <?= isset($request['timeline']) ? count(array_filter($request['timeline'], fn($entry) => $entry['field'] === 'comment')) : 0 ?>
+                            </div>
+                            <div class="mt-1">
+                                <strong>Created:</strong> <?= date('Y-m-d H:i:s', $request['date_created']) ?> 
+                                by <?= htmlspecialchars($request['created_by'] ?? '') ?>
+                            </div>
+                            <div class="mb-1">
+                                <strong>Last modified:</strong> <?= date('Y-m-d H:i:s', $request['date_modified']) ?> 
+                                by <?= htmlspecialchars($request['created_by'] ?? '') ?>
+                            </div>
+                        </li>
+                        <?php
+                    }
+                }
+                echo '</ul>';
+            }
+            ?>
+        </div>
+    </details>
+<?php endif; ?>
 
 </div>
 

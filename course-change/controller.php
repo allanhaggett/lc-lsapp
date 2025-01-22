@@ -27,135 +27,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $courseid = $data['courseid'];
 
     if ($changeid) {
-        // Determine file path
         $filename = "requests/course-{$courseid}-change-{$changeid}.json";
         if (file_exists($filename)) {
-            // Load existing data
             $existingData = json_decode(file_get_contents($filename), true);
 
-            // Preserve `date_created` and `created_by`
             $data['date_created'] = $existingData['date_created'] ?? $date_created;
             $data['created_by'] = $existingData['created_by'] ?? LOGGED_IN_IDIR;
-
-            // Always update `date_modified`
             $data['date_modified'] = time();
 
-            // Ensure `timeline` exists
-            if (!isset($existingData['timeline'])) {
-                $existingData['timeline'] = [];
-            }
+            $existingData['timeline'] = $existingData['timeline'] ?? [];
 
-            // Track changes to all fields (only on updates)
-            $trackedFields = ['assign_to', 'crm_ticket_reference', 'category', 'description', 'scope', 'approval_status', 'status', 'urgent'];
-            foreach ($trackedFields as $field) {
-                if (isset($existingData[$field]) && $existingData[$field] !== $data[$field]) {
-                    $existingData['timeline'][] = [
-                        'field' => $field,
-                        'previous_value' => $existingData[$field],
-                        'new_value' => $data[$field],
-                        'changed_by' => $logged_in_user,
-                        'changed_at' => time(),
-                    ];
-                }
-            }
+            // Log changes to other fields
+            logFieldChanges($data, $existingData, $existingData['timeline'], $logged_in_user);
 
-            // Add a new comment to the timeline
-            if ($comment) {
-                $commentId = uniqid();
-                $existingData['timeline'][] = [
-                    'field' => 'comment',
-                    'comment_id' => $commentId,
-                    'new_value' => $comment,
-                    'changed_by' => $logged_in_user,
-                    'changed_at' => time(),
-                ];
-            }
+            // Handle hyperlinks
+            $data['links'] = processLinks($_POST, $existingData, $existingData['timeline'], $logged_in_user);
 
-            if (!empty($_POST['hyperlinks'])) {
-                $updatedLinks = [];
-                $removedLinks = isset($_POST['removed_links']) ? (is_array($_POST['removed_links']) ? $_POST['removed_links'] : explode(',', $_POST['removed_links'])) : [];
-            
-                foreach ($_POST['hyperlinks'] as $index => $link) {
-                    $link = filter_var(trim($link), FILTER_SANITIZE_URL);
-                    $description = $_POST['descriptions'][$index] ?? null;
-                    $description = filter_var(trim($description), FILTER_SANITIZE_SPECIAL_CHARS);
-            
-                    if (!empty($link)) {
-                        if (isset($_POST['link_ids'][$index]) && isset($existingData['links'][$_POST['link_ids'][$index]])) {
-                            $linkId = $_POST['link_ids'][$index];
-            
-                            // Skip if the link is marked for removal
-                            if (!in_array($linkId, $removedLinks)) {
-                                // Update timeline only if changes are made
-                                if ($existingData['links'][$linkId]['url'] !== $link || $existingData['links'][$linkId]['description'] !== $description) {
-                                    $existingData['timeline'][] = [
-                                        'field' => 'link',
-                                        'previous_value' => $existingData['links'][$linkId],
-                                        'new_value' => [
-                                            'url' => $link,
-                                            'description' => $description,
-                                        ],
-                                        'changed_by' => $logged_in_user,
-                                        'changed_at' => time(),
-                                    ];
-                                }
-            
-                                // Update the link
-                                $updatedLinks[$linkId] = [
-                                    'url' => $link,
-                                    'description' => $description,
-                                ];
-                            }
-                        } else {
-                            // Add new link
-                            $updatedLinks[] = [
-                                'url' => $link,
-                                'description' => $description,
-                            ];
-                        }
-                    }
-                }
-            
-                // Remove links marked for deletion
-                foreach ($removedLinks as $linkId) {
-                    if (isset($existingData['links'][$linkId])) {
-                        $existingData['timeline'][] = [
-                            'field' => 'link_removed',
-                            'previous_value' => $existingData['links'][$linkId],
-                            'new_value' => null,
-                            'changed_by' => $logged_in_user,
-                            'changed_at' => time(),
-                        ];
-                    }
-                }
-            
-                // Overwrite with updated links
-                $data['links'] = $updatedLinks;
-            } else {
-                // Handle the case when no links are submitted
-                $data['links'] = [];
-            }
+            // Handle file uploads
+            $newFiles = processFiles($_FILES, $courseid, $changeid, $existingData, $existingData['timeline'], $logged_in_user);
 
-            // Retain files
-            $data['files'] = $existingData['files'] ?? [];
+            // Handle file deletions
+            $remainingFiles = deleteFiles($_POST, $existingData, $existingData['timeline'], $logged_in_user);
 
-            // Merge timeline back into data
+            // Merge new and remaining files
+            $data['files'] = array_merge($remainingFiles, $newFiles);
+
             $data['timeline'] = $existingData['timeline'];
         }
     } else {
-        // Creating a new entry
         $changeid = uniqid();
-        $filename = "requests/course-{$courseid}-change-{$changeid}.json";
+        $filename = "requests/course-{$courseid}-change-$changeid.json";
 
         $data['changeid'] = $changeid;
         $data['date_created'] = $date_created;
         $data['date_modified'] = $date_created;
         $data['created_by'] = LOGGED_IN_IDIR;
-        $data['timeline'] = []; // Initialize timeline but do not populate it for the first create
-        $data['files'] = [];
-        $data['links'] = [];
+        $data['timeline'] = [];
 
-        // Add an initial timeline entry for creation
+        $data['links'] = processLinks($_POST, [], $data['timeline'], $logged_in_user);
+        $data['files'] = processFiles($_FILES, $courseid, $changeid, [], $data['timeline'], $logged_in_user);
+
         $data['timeline'][] = [
             'field' => 'creation',
             'previous_value' => null,
@@ -165,10 +76,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ];
 
         if ($comment) {
-            $commentId = uniqid();
             $data['timeline'][] = [
                 'field' => 'comment',
-                'comment_id' => $commentId,
                 'new_value' => $comment,
                 'changed_by' => $logged_in_user,
                 'changed_at' => time(),
@@ -176,45 +85,151 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 
-    // Handle file uploads
-    if (!empty($_FILES['uploaded_files']['name'][0])) {
-        $uploadDir = "requests/files/";
+    file_put_contents($filename, json_encode($data, JSON_PRETTY_PRINT));
+    header("Location: view.php?courseid={$courseid}&changeid={$changeid}&message=Success");
+    exit;
+} else {
+    echo "Invalid request method!";
+}
 
-        foreach ($_FILES['uploaded_files']['name'] as $key => $name) {
-            $tmpName = $_FILES['uploaded_files']['tmp_name'][$key];
-            $error = $_FILES['uploaded_files']['error'][$key];
-            $size = $_FILES['uploaded_files']['size'][$key];
+/**
+ * Log changes to fields and update the timeline.
+ */
+function logFieldChanges($data, $existingData, &$timeline, $loggedInUser) {
+    $trackedFields = ['assign_to', 'crm_ticket_reference', 'category', 'description', 'scope', 'approval_status', 'status', 'urgent'];
+    foreach ($trackedFields as $field) {
+        if (isset($existingData[$field]) && $existingData[$field] !== $data[$field]) {
+            $timeline[] = [
+                'field' => $field,
+                'previous_value' => $existingData[$field],
+                'new_value' => $data[$field],
+                'changed_by' => $loggedInUser,
+                'changed_at' => time(),
+            ];
+        }
+    }
+}
 
-            // Basic validation
-            if ($error === UPLOAD_ERR_OK && $size <= 20 * 1024 * 1024) { // Max 20MB
-                // Normalize the file name
-                $normalizedFilename = strtolower(str_replace(' ', '-', $name));
-                $uniqueName = "course-{$courseid}-change-{$changeid}-{$normalizedFilename}";
-                $destination = $uploadDir . $uniqueName;
+/**
+ * Process hyperlinks and update the timeline.
+ */
+function processLinks($postData, $existingData, &$timeline, $loggedInUser) {
+    $links = [];
+    $removedLinks = [];
 
-                if (move_uploaded_file($tmpName, $destination)) {
-                    $data['files'][] = $uniqueName;
+    if (isset($postData['removed_links'])) {
+        $removedLinks = is_array($postData['removed_links']) ? $postData['removed_links'] : explode(',', $postData['removed_links']);
+    }
 
-                    // Add file upload to the timeline only for updates
-                    if ($changeid) {
-                        $data['timeline'][] = [
-                            'field' => 'file_upload',
-                            'new_value' => $uniqueName,
-                            'changed_by' => $logged_in_user,
-                            'changed_at' => time(),
-                        ];
+    $removedLinks = array_filter($removedLinks);
+
+    if (!empty($postData['hyperlinks'])) {
+        foreach ($postData['hyperlinks'] as $index => $link) {
+            $link = filter_var(trim($link), FILTER_SANITIZE_URL);
+            $description = $postData['descriptions'][$index] ?? null;
+            $description = filter_var(trim($description), FILTER_SANITIZE_SPECIAL_CHARS);
+
+            if (!empty($link)) {
+                if (isset($postData['link_ids'][$index]) && isset($existingData['links'][$postData['link_ids'][$index]])) {
+                    $linkId = $postData['link_ids'][$index];
+                    if (!in_array($linkId, $removedLinks)) {
+                        $existingLink = $existingData['links'][$linkId];
+                        if ($existingLink['url'] !== $link || $existingLink['description'] !== $description) {
+                            $timeline[] = [
+                                'field' => 'link_updated',
+                                'previous_value' => $existingLink,
+                                'new_value' => ['url' => $link, 'description' => $description],
+                                'changed_by' => $loggedInUser,
+                                'changed_at' => time(),
+                            ];
+                        }
+                        $links[$linkId] = ['url' => $link, 'description' => $description];
                     }
+                } else {
+                    $links[] = ['url' => $link, 'description' => $description];
+                    $timeline[] = [
+                        'field' => 'link_added',
+                        'new_value' => ['url' => $link, 'description' => $description],
+                        'changed_by' => $loggedInUser,
+                        'changed_at' => time(),
+                    ];
                 }
             }
         }
     }
 
-    // Save or update JSON file
-    file_put_contents($filename, json_encode($data, JSON_PRETTY_PRINT));
+    foreach ($removedLinks as $linkId) {
+        if (isset($existingData['links'][$linkId])) {
+            $timeline[] = [
+                'field' => 'link_removed',
+                'previous_value' => $existingData['links'][$linkId],
+                'new_value' => null,
+                'changed_by' => $loggedInUser,
+                'changed_at' => time(),
+            ];
+        }
+    }
 
-    // Redirect to the change details page
-    header("Location: view.php?courseid={$courseid}&changeid={$changeid}&message=Success");
-    exit;
-} else {
-    echo "Invalid request method!";
+    return $links;
+}
+
+/**
+ * Process file uploads and update the timeline.
+ */
+function processFiles($files, $courseid, $changeid, $existingData, &$timeline, $loggedInUser) {
+    $uploadedFiles = [];
+    $uploadDir = "requests/files/";
+
+    if (!empty($files['uploaded_files']['name'][0])) {
+        foreach ($files['uploaded_files']['name'] as $key => $name) {
+            $tmpName = $files['uploaded_files']['tmp_name'][$key];
+            $error = $files['uploaded_files']['error'][$key];
+            $size = $files['uploaded_files']['size'][$key];
+
+            if ($error === UPLOAD_ERR_OK && $size <= 20 * 1024 * 1024) {
+                $normalizedFilename = strtolower(str_replace(' ', '-', $name));
+                $uniqueName = "course-{$courseid}-change-{$changeid}-{$normalizedFilename}";
+                $destination = $uploadDir . $uniqueName;
+
+                if (move_uploaded_file($tmpName, $destination)) {
+                    $uploadedFiles[] = $uniqueName;
+                    $timeline[] = [
+                        'field' => 'file_added',
+                        'new_value' => $uniqueName,
+                        'changed_by' => $loggedInUser,
+                        'changed_at' => time(),
+                    ];
+                }
+            }
+        }
+    }
+
+    return $uploadedFiles;
+}
+
+/**
+ * Delete files and update the timeline.
+ */
+function deleteFiles($postData, $existingData, &$timeline, $loggedInUser) {
+    $files = $existingData['files'] ?? [];
+    $removedFiles = isset($postData['removed_files']) ? (is_array($postData['removed_files']) ? $postData['removed_files'] : explode(',', $postData['removed_files'])) : [];
+
+    foreach ($removedFiles as $fileId) {
+        if (isset($files[$fileId])) {
+            $filePath = "requests/files/" . $files[$fileId];
+            if (file_exists($filePath)) {
+                unlink($filePath);
+                $timeline[] = [
+                    'field' => 'file_removed',
+                    'previous_value' => $files[$fileId],
+                    'new_value' => null,
+                    'changed_by' => $loggedInUser,
+                    'changed_at' => time(),
+                ];
+            }
+            unset($files[$fileId]);
+        }
+    }
+
+    return array_values($files);
 }
