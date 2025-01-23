@@ -13,7 +13,10 @@ if (!$courseid) {
     exit;
 }
 
-$deets = getCourse($courseid);
+$course_deets = getCourse($courseid);
+$course_steward = getPerson($course_deets[10]);
+$course_developer = getPerson($course_deets[34]);
+
 $formData = [
     'assign_to' => '',
     'crm_ticket_reference' => '',
@@ -61,13 +64,94 @@ function getGuidanceByCategory($cat, $categoriesFile) {
 $cat = urldecode($formData['category']) ?? '';
 $categoriesFile = 'guidance.json';
 $guidance = getGuidanceByCategory($cat, $categoriesFile);
+
+$assignedtoemail = getPerson($formData['assign_to']);
+
+$email_addresses = [
+                    'steward' => $course_steward[3],
+                    'developer' => $course_developer[3], 
+                    'assigned' => $assignedtoemail[3]
+                    ];
+
+function generateMailtoLink($formData, $courseid, $changeid, $course_deets, $email_addresses) {
+    $subject = '';
+    if($formData['urgent']) {
+        $subject .= '[URGENT] ';    
+    }
+    $subject .= $course_deets[2] . ' - ' . htmlspecialchars($formData['category'] ?? 'N/A') . ' request';
+
+    $body = "This is just a notification. Please reply via the request page on LSApp.\n";
+    // Add a link back to the request
+    $requestLink = "https://gww.bcpublicservice.gov.bc.ca/lsapp/course-change/view.php?courseid=$courseid&changeid=$changeid";
+    $body .= "\nView the full request here: $requestLink\n\n";
+
+    // Build the body of the email
+    $body .= "Change Request Details:\n\n";
+    $body .= "Course ID: $courseid\n";
+    $body .= "Change ID: $changeid\n";
+    $body .= "Category: " . htmlspecialchars($formData['category'] ?? 'N/A') . "\n";
+    $body .= "Scope: " . htmlspecialchars($formData['scope'] ?? 'N/A') . "\n";
+    $body .= "Assigned To: " . htmlspecialchars($formData['assign_to'] ?? 'N/A') . "\n";
+    $body .= "Approval Status: " . htmlspecialchars($formData['approval_status'] ?? 'N/A') . "\n";
+    $body .= "Progress: " . htmlspecialchars($formData['status'] ?? 'N/A') . "\n";
+    $body .= "Description: \n" . strip_tags($formData['description'] ?? 'N/A') . "\n"; // Remove HTML tags
+
+    if (!empty($formData['crm_ticket_reference'])) {
+        $body .= "CRM Ticket Reference: " . htmlspecialchars($formData['crm_ticket_reference']) . "\n";
+    }
+
+    // Add links section
+    if (!empty($formData['links'])) {
+        $body .= "\nLinks:\n";
+        foreach ($formData['links'] as $link) {
+            $url = htmlspecialchars($link['url'] ?? 'N/A');
+            $description = htmlspecialchars($link['description'] ?? $url);
+            $body .= "- $description: $url\n";
+        }
+    }
+
+    // Add files section
+    if (!empty($formData['files'])) {
+        $body .= "\nUploaded Files:\n";
+        foreach ($formData['files'] as $file) {
+            $shortFileName = preg_replace("/^course-[a-zA-Z0-9\-]+-change-[a-z0-9]+-/", '', $file);
+            $fileUrl = "https://gww.bcpublicservice.gov.bc.ca/lsapp/requests/files/" . urlencode($file);
+            $body .= "- $shortFileName: $fileUrl\n";
+        }
+    }
+
+    // Add comments section
+    if (!empty($formData['timeline'])) {
+        $body .= "\nComments:\n";
+        foreach ($formData['timeline'] as $event) {
+            if ($event['field'] === 'comment') {
+                $comment = htmlspecialchars_decode($event['new_value'] ?? ''); // Decode special characters
+                $body .= "- " . htmlspecialchars($event['changed_by'] ?? 'Unknown') . " at " . date('Y-m-d H:i:s', $event['changed_at'] ?? 0) . ":\n";
+                $body .= "  $comment\n";
+            }
+        }
+    }
+
+
+    // Encode the subject and body for use in a mailto link
+    $mailto = 'mailto:' . $email_addresses['steward'] . ';' . $email_addresses['assigned'];
+    $mailto .= "?subject=" . rawurlencode($subject); // Use rawurlencode for proper space encoding
+    $mailto .= "&body=" . rawurlencode($body);
+
+    // Add course developer as CC
+    if (!empty($email_addresses['developer'])) {
+        $mailto .= "&cc=" . rawurlencode($email_addresses['developer']);
+    }
+    return $mailto;
+}
+
 ?>
 
 <?php if (canACcess()): ?>
 
 <?php getHeader(); ?>
 
-<title><?= $deets[2] ?> Change Request</title>
+<title><?= $course_deets[2] ?> Change Request</title>
 
 <?php getScripts(); ?>
 
@@ -80,7 +164,7 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
         <div class="col">
             <a href="edit.php?courseid=<?= $courseid ?>&changeid=<?= $changeid ?>" class="btn btn-primary mb-4 float-end">Edit request</a>
             <h1 class="mb-3">
-                <a href="/lsapp/course.php?courseid=<?= $deets[0] ?>" class="text-decoration-none"><?= $deets[2] ?></a>
+                <a href="/lsapp/course.php?courseid=<?= $course_deets[0] ?>" class="text-decoration-none"><?= $course_deets[2] ?></a>
             </h1>
             <div class="">
             <?php if ($formData['urgent']): ?>
@@ -103,7 +187,7 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
         <strong>Progress:</strong> <?= htmlspecialchars($formData['status']) ?>
         <strong>Assigned To:</strong> <?= htmlspecialchars($formData['assign_to']) ?>
     </div>
-            <div class="my-2 p-3 bg-dark-subtle rounded-3">
+            <div class="my-1 p-3 bg-dark-subtle rounded-3">
             <?= $Parsedown->text($formData['description']) ?>
             </div>
             <?php if ($formData['crm_ticket_reference']): ?>
@@ -111,6 +195,9 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
                 <strong><a href="https://rightnow.gov.bc.ca" target="_blank" rel="noopener">CRM Ticket</a> #:</strong> <?= htmlspecialchars($formData['crm_ticket_reference'] ?? 'N/A') ?>
             </div>
             <?php endif; ?>
+
+            <?php $mailtoLink = generateMailtoLink($formData, $courseid, $changeid, $course_deets, $email_addresses); ?>
+            <div><a href="<?= $mailtoLink ?>" class="mb-1 btn btn-sm btn-primary">Email this request</a></div>
 
             <?php
             // Assuming $data['links'] contains the hyperlinks and descriptions
@@ -216,22 +303,19 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
     </details>
     <?php if (!empty($formData['timeline'])): ?>
 
-                <ul class="list-group">
-                    <?php foreach ($formData['timeline'] as $event): ?>
-                        <?php if ($event['field'] === 'comment'): ?>
-                            <li class="list-group-item bg-dark-subtle">
-                                <strong><?= htmlspecialchars($event['changed_by']) ?>:</strong> 
-                                <?= nl2br(htmlspecialchars($event['new_value'])) ?>
-                                <br><small class="text-muted">At: <?= date('Y-m-d H:i:s', $event['changed_at']) ?></small>
-                            </li>
-                        <?php endif; ?>
-                    <?php endforeach; ?>
-                </ul>
+    <ul class="list-group">
+        <?php foreach ($formData['timeline'] as $event): ?>
+            <?php if ($event['field'] === 'comment'): ?>
+                <li class="list-group-item bg-dark-subtle">
+                    <strong><?= htmlspecialchars($event['changed_by']) ?>:</strong> 
+                    <?= nl2br(htmlspecialchars($event['new_value'])) ?>
+                    <br><small class="text-muted">At: <?= date('Y-m-d H:i:s', $event['changed_at']) ?></small>
+                </li>
+            <?php endif; ?>
+        <?php endforeach; ?>
+    </ul>
 
     <?php endif; ?>
-
-
-
 
 
 

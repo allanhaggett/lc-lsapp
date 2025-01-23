@@ -107,9 +107,9 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
                 <label for="scope" class="form-label visually-hidden">Scope</label>
                 <select id="scope" name="scope" class="form-select" required>
                     <option value="" disabled>Choose a scope</option>
-                    <option value="minor" <?php echo $formData['scope'] === 'minor' ? 'selected' : ''; ?>>Minor Change (1-2 hours)</option>
-                    <option value="moderate" <?php echo $formData['scope'] === 'moderate' ? 'selected' : ''; ?>>Moderate Change (2-24 hours)</option>
-                    <option value="major" <?php echo $formData['scope'] === 'major' ? 'selected' : ''; ?>>Major Change (&gt;24 hours)</option>
+                    <option value="Minor" <?php echo $formData['scope'] === 'Minor' ? 'selected' : ''; ?>>Minor Change (1-2 hours)</option>
+                    <option value="Moderate" <?php echo $formData['scope'] === 'Moderate' ? 'selected' : ''; ?>>Moderate Change (2-24 hours)</option>
+                    <option value="Major" <?php echo $formData['scope'] === 'Major' ? 'selected' : ''; ?>>Major Change (&gt;24 hours)</option>
                 </select>
                 <div class="invalid-feedback">Please select the scope of the request.</div>
             </div>
@@ -201,10 +201,10 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
             <div class="col-md-6">
                 <label for="approval_status" class="form-label">Approval Status</label>
                 <select id="approval_status" name="approval_status" class="form-select" required>
-                    <option value="approved" <?php echo $formData['approval_status'] === 'approved' ? 'selected' : ''; ?>>Approved</option>
-                    <option value="pending" <?php echo $formData['approval_status'] === 'pending' ? 'selected' : ''; ?>>Pending Approval</option>
-                    <option value="denied" <?php echo $formData['approval_status'] === 'denied' ? 'selected' : ''; ?>>Denied</option>
-                    <option value="on_hold" <?php echo $formData['approval_status'] === 'on_hold' ? 'selected' : ''; ?>>On Hold</option>
+                    <option value="Approved" <?php echo $formData['approval_status'] === 'Approved' ? 'selected' : ''; ?>>Approved</option>
+                    <option value="Pending" <?php echo $formData['approval_status'] === 'Pending' ? 'selected' : ''; ?>>Pending Approval</option>
+                    <option value="Denied" <?php echo $formData['approval_status'] === 'Denied' ? 'selected' : ''; ?>>Denied</option>
+                    <option value="On Hold" <?php echo $formData['approval_status'] === 'On Hold' ? 'selected' : ''; ?>>On Hold</option>
                 </select>
                 <div class="invalid-feedback">Please select the approval status.</div>
             </div>
@@ -212,9 +212,9 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
             <div class="col">
                 <label for="status" class="form-label">Status</label>
                 <select id="status" name="status" class="form-select" required>
-                    <option value="not_started" <?php echo $formData['status'] === 'not_started' ? 'selected' : ''; ?>>Not Started</option>
-                    <option value="in_progress" <?php echo $formData['status'] === 'in_progress' ? 'selected' : ''; ?>>In Progress</option>
-                    <option value="completed" <?php echo $formData['status'] === 'completed' ? 'selected' : ''; ?>>Completed</option>
+                    <option value="Not Started" <?php echo $formData['status'] === 'Not Started' ? 'selected' : ''; ?>>Not Started</option>
+                    <option value="In Progress" <?php echo $formData['status'] === 'In Progress' ? 'selected' : ''; ?>>In Progress</option>
+                    <option value="Completed" <?php echo $formData['status'] === 'Completed' ? 'selected' : ''; ?>>Completed</option>
                 </select>
                 <div class="invalid-feedback">Please select the status.</div>
             </div>

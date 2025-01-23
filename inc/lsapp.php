@@ -1064,7 +1064,9 @@ function getMaterial($matid) {
 // Get the details of a single person based on their IDIR 
 //
 function getPerson($idir) {
-	$f = fopen('data/people.csv', 'r');
+	$path = build_path(BASE_DIR, 'data', 'people.csv');
+	$f = fopen($path, 'r');
+	// $f = fopen('data/people.csv', 'r');
 	$user = '';
 	while ($row = fgetcsv($f)) {
 		if($row[0] == $idir) {

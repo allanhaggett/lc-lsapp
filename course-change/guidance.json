@@ -9,11 +9,11 @@
     },
     {
         "category": "Content Update",
-        "guidance": "Here are all the things you need to do to do a general update of course.\r\n\r\n[LSApp](https:\/\/gww.bcpublicservice.gov.bc.ca\/lsapp\/dashboard.php)"
+        "guidance": "Here are all the things you need to do to do a general update of course.\r\n\r\n- Step 1\r\n- Step 2"
     },
     {
         "category": "Name Change",
-        "guidance": "- Edit the course name in ELM and only there. \r\n- The course name will update in LSApp upon next sync process."
+        "guidance": "- Edit the course name in ELM and only there. \r\n- The course name will update in LSApp upon next sync process.\r\n- More guidance"
     },
     {
         "category": "New Moodle Cohort",

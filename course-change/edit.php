@@ -127,9 +127,9 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
                     <label for="scope" class="form-label visually-hidden">Scope</label>
                     <select id="scope" name="scope" class="form-select" required>
                         <option value="" disabled>Choose a scope</option>
-                        <option value="minor" <?= $formData['scope'] === 'minor' ? 'selected' : '' ?>>Minor Change (1-2 hours)</option>
-                        <option value="moderate" <?= $formData['scope'] === 'moderate' ? 'selected' : '' ?>>Moderate Change (2-24 hours)</option>
-                        <option value="major" <?= $formData['scope'] === 'major' ? 'selected' : '' ?>>Major Change (&gt;24 hours)</option>
+                        <option value="Minor" <?= $formData['scope'] === 'Minor' ? 'selected' : '' ?>>Minor Change (1-2 hours)</option>
+                        <option value="Moderate" <?= $formData['scope'] === 'Moderate' ? 'selected' : '' ?>>Moderate Change (2-24 hours)</option>
+                        <option value="Major" <?= $formData['scope'] === 'Major' ? 'selected' : '' ?>>Major Change (&gt;24 hours)</option>
                     </select>
                     <div class="invalid-feedback">Please select the scope of the request.</div>
                 </div>
@@ -179,10 +179,10 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
                 <div class="col">
                     <label for="approval_status" class="form-label">Approval Status</label>
                     <select id="approval_status" name="approval_status" class="form-select" required>
-                        <option value="approved" <?= $formData['approval_status'] === 'approved' ? 'selected' : '' ?>>Approved</option>
-                        <option value="pending" <?= $formData['approval_status'] === 'pending' ? 'selected' : '' ?>>Pending Approval</option>
-                        <option value="denied" <?= $formData['approval_status'] === 'denied' ? 'selected' : '' ?>>Denied</option>
-                        <option value="on_hold" <?= $formData['approval_status'] === 'on_hold' ? 'selected' : '' ?>>On Hold</option>
+                        <option value="Approved" <?= $formData['approval_status'] === 'Approved' ? 'selected' : '' ?>>Approved</option>
+                        <option value="Pending" <?= $formData['approval_status'] === 'Pending' ? 'selected' : '' ?>>Pending Approval</option>
+                        <option value="Denied" <?= $formData['approval_status'] === 'Denied' ? 'selected' : '' ?>>Denied</option>
+                        <option value="On Hold" <?= $formData['approval_status'] === 'On Hold' ? 'selected' : '' ?>>On Hold</option>
                     </select>
                     <div class="invalid-feedback">Please select the approval status.</div>
                 </div>
@@ -190,9 +190,9 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
                 <div class="col">
                     <label for="status" class="form-label">Status</label>
                     <select id="status" name="status" class="form-select" required>
-                        <option value="not_started" <?= $formData['status'] === 'not_started' ? 'selected' : '' ?>>Not Started</option>
-                        <option value="in_progress" <?= $formData['status'] === 'in_progress' ? 'selected' : '' ?>>In Progress</option>
-                        <option value="completed" <?= $formData['status'] === 'completed' ? 'selected' : '' ?>>Completed</option>
+                        <option value="Not Started" <?= $formData['status'] === 'Not Started' ? 'selected' : '' ?>>Not Started</option>
+                        <option value="In Progress" <?= $formData['status'] === 'In Progress' ? 'selected' : '' ?>>In Progress</option>
+                        <option value="Completed" <?= $formData['status'] === 'Completed' ? 'selected' : '' ?>>Completed</option>
                     </select>
                     <div class="invalid-feedback">Please select the status.</div>
                 </div>
