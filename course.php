@@ -462,7 +462,7 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
 		<ul class="list-group mb-4">
 			<?php foreach ($files as $file): 
 				$request = json_decode(file_get_contents($file), true);
-				if ($request['status'] != 'completed'):
+				if ($request['status'] != 'Completed'):
 					$filenameParts = explode('-change-', basename($file, '.json')); 
 					if (count($filenameParts) === 2):
 						$courseidParts = explode('course-', $filenameParts[0]);
@@ -527,7 +527,7 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
                 echo '<ul class="list-group mb-4">';
                 foreach ($files as $file) {
                     $request = json_decode(file_get_contents($file), true);
-                    if ($request['status'] == 'completed') {
+                    if ($request['status'] == 'Completed') {
                         $filenameParts = explode('-', basename($file, '.json')); // Parse file name
                         $chid = $filenameParts[3]; // Extract change ID (second part of the name)
                         ?>
