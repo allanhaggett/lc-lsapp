@@ -64,7 +64,7 @@ foreach ($files as $file) {
                     </thead>
                     <tbody class="list">
                         <?php foreach ($changeRequests as $request): ?>
-                            <?php if($request['status'] !== 'completed'): ?>
+                            <?php if($request['status'] !== 'Completed'): ?>
                             <tr>
                                 <td class="course">
                                     <?php $deets = getCourse($request['courseid']); ?>
