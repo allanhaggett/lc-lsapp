@@ -4,6 +4,7 @@ $path = '../inc/lsapp.php';
 require($path); 
 require('../inc/Parsedown.php');
 $Parsedown = new Parsedown();
+$Parsedown->setSafeMode(true);
 
 $courseid = isset($_GET['courseid']) ? htmlspecialchars($_GET['courseid']) : null;
 $changeid = isset($_GET['changeid']) ? htmlspecialchars($_GET['changeid']) : null;
@@ -68,11 +69,38 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
 $assignedtoemail = getPerson($formData['assign_to']);
 
 $email_addresses = [
-                    'steward' => $course_steward[3],
-                    'developer' => $course_developer[3], 
-                    'assigned' => $assignedtoemail[3]
+                    'steward' => $course_steward[3] ?? '',
+                    'developer' => $course_developer[3] ?? '', 
+                    'assigned' => $assignedtoemail[3] ?? ''
                     ];
+function buildMailtoLink($email_addresses, $subject, $body) {
+    // Collect the 'to' email addresses (steward and assigned)
+    $toEmails = array_unique([
+        $email_addresses['steward'] ?? null,
+        $email_addresses['assigned'] ?? null
+    ]);
 
+    // Filter out empty or null values
+    $toEmails = array_filter($toEmails);
+
+    // Check if the developer's email is unique and not already in the 'to' emails
+    $ccEmails = [];
+    if (!empty($email_addresses['developer']) && !in_array($email_addresses['developer'], $toEmails)) {
+        $ccEmails[] = $email_addresses['developer'];
+    }
+
+    // Build the mailto link
+    $mailto = 'mailto:' . implode(';', $toEmails);
+    $mailto .= "?subject=" . rawurlencode($subject);
+    $mailto .= "&body=" . rawurlencode($body);
+
+    // Add the CC field if there are any CC emails
+    if (!empty($ccEmails)) {
+        $mailto .= "&cc=" . rawurlencode(implode(';', $ccEmails));
+    }
+
+    return $mailto;
+}
 function generateMailtoLink($formData, $courseid, $changeid, $course_deets, $email_addresses) {
     $subject = '';
     if($formData['urgent']) {
@@ -86,19 +114,16 @@ function generateMailtoLink($formData, $courseid, $changeid, $course_deets, $ema
     $body .= "\nView the full request here: $requestLink\n\n";
 
     // Build the body of the email
-    $body .= "Change Request Details:\n\n";
-    $body .= "Course ID: $courseid\n";
-    $body .= "Change ID: $changeid\n";
+    $body .= "Course: $course_deets[2]\n";
     $body .= "Category: " . htmlspecialchars($formData['category'] ?? 'N/A') . "\n";
     $body .= "Scope: " . htmlspecialchars($formData['scope'] ?? 'N/A') . "\n";
     $body .= "Assigned To: " . htmlspecialchars($formData['assign_to'] ?? 'N/A') . "\n";
     $body .= "Approval Status: " . htmlspecialchars($formData['approval_status'] ?? 'N/A') . "\n";
     $body .= "Progress: " . htmlspecialchars($formData['status'] ?? 'N/A') . "\n";
-    $body .= "Description: \n" . strip_tags($formData['description'] ?? 'N/A') . "\n"; // Remove HTML tags
-
     if (!empty($formData['crm_ticket_reference'])) {
         $body .= "CRM Ticket Reference: " . htmlspecialchars($formData['crm_ticket_reference']) . "\n";
     }
+    $body .= "Description: \n" . htmlspecialchars(strip_tags($formData['description'] ?? 'N/A'), ENT_QUOTES, 'UTF-8') . "\n";
 
     // Add links section
     if (!empty($formData['links'])) {
@@ -132,18 +157,11 @@ function generateMailtoLink($formData, $courseid, $changeid, $course_deets, $ema
         }
     }
 
-
-    // Encode the subject and body for use in a mailto link
-    $mailto = 'mailto:' . $email_addresses['steward'] . ';' . $email_addresses['assigned'];
-    $mailto .= "?subject=" . rawurlencode($subject); // Use rawurlencode for proper space encoding
-    $mailto .= "&body=" . rawurlencode($body);
-
-    // Add course developer as CC
-    if (!empty($email_addresses['developer'])) {
-        $mailto .= "&cc=" . rawurlencode($email_addresses['developer']);
-    }
+    $mailto = buildMailtoLink($email_addresses, $subject, $body);
     return $mailto;
 }
+
+
 
 ?>
 
@@ -188,7 +206,9 @@ function generateMailtoLink($formData, $courseid, $changeid, $course_deets, $ema
         <strong>Assigned To:</strong> <?= htmlspecialchars($formData['assign_to']) ?>
     </div>
             <div class="my-1 p-3 bg-dark-subtle rounded-3">
-            <?= $Parsedown->text($formData['description']) ?>
+
+            <?= $Parsedown->text(htmlspecialchars($formData['description'] ?? 'N/A', ENT_QUOTES, 'UTF-8')) ?>
+
             </div>
             <?php if ($formData['crm_ticket_reference']): ?>
             <div class="mb-2">
@@ -243,7 +263,11 @@ function generateMailtoLink($formData, $courseid, $changeid, $course_deets, $ema
             <div class="p-3 rounded-3 bg-light-subtle">
 
             <div><a href="#">Process documentation</a></div>
+            <?php if($formData['assign_to'] === LOGGED_IN_IDIR): ?>
+            <details open>
+            <?php else: ?>
             <details>
+            <?php endif ?>
                 <summary><?= $cat ?> guidance</summary>
                 <?= $Parsedown->text($guidance) ?>
             </details>
@@ -302,7 +326,6 @@ function generateMailtoLink($formData, $courseid, $changeid, $course_deets, $ema
     </form>
     </details>
     <?php if (!empty($formData['timeline'])): ?>
-
     <ul class="list-group">
         <?php foreach ($formData['timeline'] as $event): ?>
             <?php if ($event['field'] === 'comment'): ?>
@@ -310,11 +333,18 @@ function generateMailtoLink($formData, $courseid, $changeid, $course_deets, $ema
                     <strong><?= htmlspecialchars($event['changed_by']) ?>:</strong> 
                     <?= nl2br(htmlspecialchars($event['new_value'])) ?>
                     <br><small class="text-muted">At: <?= date('Y-m-d H:i:s', $event['changed_at']) ?></small>
+                    
+                    <!-- Delete Comment Form -->
+                    <form action="delete-comment.php" method="post" style="display: inline;">
+                        <input type="hidden" name="courseid" value="<?= htmlspecialchars($formData['courseid']) ?>">
+                        <input type="hidden" name="changeid" value="<?= htmlspecialchars($formData['changeid']) ?>">
+                        <input type="hidden" name="comment_id" value="<?= htmlspecialchars($event['comment_id']) ?>">
+                        <button type="submit" class="btn btn-dark-subtle btn-sm">Delete</button>
+                    </form>
                 </li>
             <?php endif; ?>
         <?php endforeach; ?>
     </ul>
-
     <?php endif; ?>
 
 
@@ -349,32 +379,56 @@ function generateMailtoLink($formData, $courseid, $changeid, $course_deets, $ema
                         </tr>
                     </thead>
                     <tbody>
-                        <?php foreach ($formData['timeline'] as $event): ?>
-                            <?php if ($event['field'] !== 'comment'): ?>
-                                <tr>
-                                    <td><?= htmlspecialchars($event['field']) ?></td>
-                                    <td>
-                                    <?php if($event['field'] === 'link_updated'): ?>
-                                        <?= $event['previous_value']['description'] ?? '' ?> - 
-                                        <?= $event['previous_value']['url'] ?>
-                                    <?php else: ?>
-                                        <?= $event['previous_value'] ?? '' ?>
-                                    <?php endif ?>    
-                                    </td>
-                                    <td>
-                                    <?php if($event['field'] === 'link_added' || $event['field'] === 'link_updated'): ?>
-                                        <?= $event['new_value']['description'] ?? '' ?> - 
-                                        <?= $event['new_value']['url'] ?>
-                                    <?php else: ?>
-                                        <?= $event['new_value'] ?? '' ?>
-                                    <?php endif ?>
-                                    </td>
-                                    <td><?= htmlspecialchars($event['changed_by'] ?? '') ?></td>
-                                    <td><?= date('Y-m-d H:i:s', $event['changed_at'] ?? 0) ?></td>
-                                </tr>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
-                    </tbody>
+                    <?php foreach ($formData['timeline'] as $event): ?>
+                        <?php if (!empty($event['field']) && $event['field'] !== 'comment'): ?>
+                            <tr>
+                                <td><?= htmlspecialchars($event['field'], ENT_QUOTES, 'UTF-8') ?></td>
+                                <td>
+                                    <?php 
+                                    if ($event['field'] === 'link_updated') {
+                                        echo (!empty($event['previous_value']['description']) 
+                                            ? htmlspecialchars($event['previous_value']['description'], ENT_QUOTES, 'UTF-8') 
+                                            : 'N/A') . ' - ' . 
+                                            (!empty($event['previous_value']['url']) 
+                                            ? htmlspecialchars($event['previous_value']['url'], ENT_QUOTES, 'UTF-8') 
+                                            : 'N/A');
+                                    } else {
+                                        echo !empty($event['previous_value'])
+                                            ? htmlspecialchars($event['previous_value'], ENT_QUOTES, 'UTF-8')
+                                            : 'N/A';
+                                    }
+                                    ?>
+                                </td>
+                                <td>
+                                    <?php 
+                                    if (in_array($event['field'], ['link_added', 'link_updated'])) {
+                                        echo (!empty($event['new_value']['description']) 
+                                            ? htmlspecialchars($event['new_value']['description'], ENT_QUOTES, 'UTF-8') 
+                                            : 'N/A') . ' - ' . 
+                                            (!empty($event['new_value']['url']) 
+                                            ? htmlspecialchars($event['new_value']['url'], ENT_QUOTES, 'UTF-8') 
+                                            : 'N/A');
+                                    } else {
+                                        echo !empty($event['new_value'])
+                                            ? htmlspecialchars($event['new_value'], ENT_QUOTES, 'UTF-8')
+                                            : 'N/A';
+                                    }
+                                    ?>
+                                </td>
+                                <td>
+                                    <?= !empty($event['changed_by']) 
+                                        ? htmlspecialchars($event['changed_by'], ENT_QUOTES, 'UTF-8') 
+                                        : 'N/A' ?>
+                                </td>
+                                <td>
+                                    <?= !empty($event['changed_at']) 
+                                        ? date('Y-m-d H:i:s', $event['changed_at']) 
+                                        : 'N/A' ?>
+                                </td>
+                            </tr>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </tbody>
                 </table>
             </details>
 
