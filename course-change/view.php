@@ -169,7 +169,7 @@ function generateMailtoLink($formData, $courseid, $changeid, $course_deets, $ema
 
 <?php getHeader(); ?>
 
-<title><?= $course_deets[2] ?> Change Request</title>
+<title><?= $course_deets[2] ?> - <?= htmlspecialchars($formData['category']) ?> Request</title>
 
 <?php getScripts(); ?>
 
@@ -199,157 +199,149 @@ function generateMailtoLink($formData, $courseid, $changeid, $course_deets, $ema
     <div class="row">
     <div class="col-md-6">
     
-    <!-- Description Section -->
-    <div>
-        <strong>Scope:</strong> <?= htmlspecialchars($formData['scope']) ?>
-        <strong>Progress:</strong> <?= htmlspecialchars($formData['status']) ?>
-        <strong>Assigned To:</strong> <?= htmlspecialchars($formData['assign_to']) ?>
-    </div>
-            <div class="my-1 p-3 bg-dark-subtle rounded-3">
-
-            <?= $Parsedown->text(htmlspecialchars($formData['description'] ?? 'N/A', ENT_QUOTES, 'UTF-8')) ?>
-
-            </div>
-            <?php if ($formData['crm_ticket_reference']): ?>
-            <div class="mb-2">
-                <strong><a href="https://rightnow.gov.bc.ca" target="_blank" rel="noopener">CRM Ticket</a> #:</strong> <?= htmlspecialchars($formData['crm_ticket_reference'] ?? 'N/A') ?>
-            </div>
-            <?php endif; ?>
-
-            <?php $mailtoLink = generateMailtoLink($formData, $courseid, $changeid, $course_deets, $email_addresses); ?>
-            <div><a href="<?= $mailtoLink ?>" class="mb-1 btn btn-sm btn-primary">Email this request</a></div>
-
-            <?php
-            // Assuming $data['links'] contains the hyperlinks and descriptions
-            if (!empty($formData['links'])): ?>
-                <h4>Links</h4>
-                <ul class="list-group mb-3">
-                    <?php foreach ($formData['links'] as $link): ?>
-                        <?php 
-                            $url = htmlspecialchars($link['url']);
-                            $description = !empty($link['description']) ? htmlspecialchars($link['description']) : $url;
-                        ?>
-                        <li class="list-group-item">
-                            <a href="<?= $url ?>" target="_blank" rel="noopener noreferrer">
-                                <?= $description ?>
-                            </a>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
-
-            <?php endif; ?>
-
-
-    <!-- Files Section -->
-    <?php if (!empty($formData['files'])): ?>
-
-                <h4>Uploaded Files</h4>
-                <ul class="list-group">
-                    <?php foreach ($formData['files'] as $file): ?>
-                        <?php $shortFileName = preg_replace("/^course-[a-zA-Z0-9\-]+-change-[a-z0-9]+-/", '', $file); ?>
-                        <li class="list-group-item">
-                            <a href="requests/files/<?= htmlspecialchars($file) ?>" target="_blank"><?= htmlspecialchars($shortFileName) ?></a>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
-
-    <?php endif; ?>
-    
-
+        <!-- Description Section -->
+        <div>
+            <strong>Scope:</strong> <span class="badge bg-primary"><?= htmlspecialchars($formData['scope']) ?></span>
+            <strong>Progress:</strong> <span class="badge bg-primary"><?= htmlspecialchars($formData['status']) ?></span>
+            <strong>Assigned To:</strong> <a href="../person.php?idir=<?= htmlspecialchars($formData['assign_to']) ?>" class="badge bg-primary"><?= htmlspecialchars($formData['assign_to']) ?></a>
         </div>
-        
-        <div class="col-md-6">
-            <h3>Guidance</h3>
-            <div class="p-3 rounded-3 bg-light-subtle">
+        <div class="my-1 p-3 bg-dark-subtle rounded-3">
+            <?= $Parsedown->text(htmlspecialchars($formData['description'] ?? 'N/A', ENT_QUOTES, 'UTF-8')) ?>
+        </div>
+        <?php if ($formData['crm_ticket_reference']): ?>
+        <div class="mb-2">
+            <strong><a href="https://rightnow.gov.bc.ca" target="_blank" rel="noopener">CRM Ticket</a> #:</strong> 
+            <?= htmlspecialchars($formData['crm_ticket_reference'] ?? 'N/A') ?>
+        </div>
+        <?php endif; ?>
 
-            <div><a href="#">Process documentation</a></div>
+        <?php $mailtoLink = generateMailtoLink($formData, $courseid, $changeid, $course_deets, $email_addresses); ?>
+        <div class="mb-3"><a href="<?= $mailtoLink ?>" class="mb-1 btn btn-sm btn-success">Email this request</a></div>
+
+        <?php
+        // Assuming $data['links'] contains the hyperlinks and descriptions
+        if (!empty($formData['links'])): ?>
+        <h4>Links</h4>
+        <ul class="list-group mb-3">
+            <?php foreach ($formData['links'] as $link): ?>
+                <?php 
+                    $url = htmlspecialchars($link['url']);
+                    $description = !empty($link['description']) ? htmlspecialchars($link['description']) : $url;
+                ?>
+                <li class="list-group-item">
+                    <a href="<?= $url ?>" target="_blank" rel="noopener noreferrer">
+                        <?= $description ?>
+                    </a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+        <?php endif; ?>
+
+        <!-- Files Section -->
+        <?php if (!empty($formData['files'])): ?>
+        <h4>Uploaded Files</h4>
+        <ul class="list-group">
+            <?php foreach ($formData['files'] as $file): ?>
+                <?php $shortFileName = preg_replace("/^course-[a-zA-Z0-9\-]+-change-[a-z0-9]+-/", '', $file); ?>
+                <li class="list-group-item">
+                    <a href="requests/files/<?= htmlspecialchars($file) ?>" target="_blank"><?= htmlspecialchars($shortFileName) ?></a>
+                </li>
+            <?php endforeach; ?>
+        </ul>
+        <?php endif; ?>
+    
+        </div>
+        <div class="col-md-6">
+
+            <h3>Guidance</h3>
+            <div class="p-3 rounded-3 bg-dark-subtle">
+
+            <div class="mb-2"><a href="#" class="btn btn-secondary">Process documentation</a></div>
             <?php if($formData['assign_to'] === LOGGED_IN_IDIR): ?>
-            <details open>
+            <details class="mb-2" open>
             <?php else: ?>
-            <details>
+            <details class="mb-2">
             <?php endif ?>
-                <summary><?= $cat ?> guidance</summary>
+                <summary class="mb-2"><?= $cat ?> guidance</summary>
+                <div class="p-2 rounded-3 bg-light-subtle">
                 <?= $Parsedown->text($guidance) ?>
-            </details>
-            <details>
-            <summary>Scope guidance</summary>
-                <div class="p-3">
-                    <h3>Minor Change</h3>
-                    <div><strong>Less than 2 hours </strong></div>
-                    <p>Small revisions to existing content that don’t significantly change the 
-                        meaning/consultation with the business owner is not required (e.g., typos, 
-                        updating links to existing or new versions of small assets (e.g., images), 
-                        minor big fixes that don’t significantly alter the user experience, changes 
-                        that don’t require extensive testing, small adjustments to quiz questions 
-                        in Moodle or HTML).</p>
                 </div>
-                <div class="p-3">
-                    <h3>Moderate </h3>
-                    <div><strong>2 hours – 24 hours </strong></div>
-                    <p>Moderate changes to content (needing business owner approval), updating or 
-                        reorganizing content in multiple lessons or modules, adding/updating evaluation 
-                        surveys, adjustments to quizzes built in Storyline, updating videos/interactive 
-                        activities, adding new activities/quizzes, multiple changes from an annual 
-                        review, or changes that require more than one person (e.g., developer). </p>
-                </div>
-                <div class="p-3">
-                    <h3>Major</h3>
-                    <div><strong>> 24 hours </strong></div>
-                    <p>Course overhauls or complete reorganization of existing content, revising learning 
-                        objectives, creating videos, simulations, requires extensive consultation with 
-                        business owners.</p>
-                </div>   
-            
             </details>
+            <details id="scopeguide">
+                <summary class="mb-2">Scope guidance</summary>
+                    <div class="mb-2 p-2 bg-light-subtle rounded-2">
+                        <h3>Minor Change</h3>
+                        <div><strong>1-2 hours </strong></div>
+                        <p>Small revisions to existing content that don’t significantly change the 
+                            meaning/consultation with the business owner is not required (e.g., typos, 
+                            updating links to existing or new versions of small assets (e.g., images), 
+                            minor big fixes that don’t significantly alter the user experience, changes 
+                            that don’t require extensive testing, small adjustments to quiz questions 
+                            in Moodle or HTML).</p>
+                    </div>
+                    <div class="mb-2 p-2 bg-light-subtle rounded-2">
+                        <h3>Moderate </h3>
+                        <div><strong>2 hours – 24 hours </strong></div>
+                        <p>Moderate changes to content (needing business owner approval), updating or 
+                            reorganizing content in multiple lessons or modules, adding/updating evaluation 
+                            surveys, adjustments to quizzes built in Storyline, updating videos/interactive 
+                            activities, adding new activities/quizzes, multiple changes from an annual 
+                            review, or changes that require more than one person (e.g., developer). </p>
+                    </div>
+                    <div class="mb-2 p-2 bg-light-subtle rounded-2">
+                        <h3>Major</h3>
+                        <div><strong>> 24 hours </strong></div>
+                        <p>Course overhauls or complete reorganization of existing content, revising learning 
+                            objectives, creating videos, simulations, requires extensive consultation with 
+                            business owners.</p>
+                    </div>   
+                
+                </details>
 
 
             </div>
 
 
             <h4 class="fs-5 mt-5">Comments</h4>
-            <details class="">
-        <summary>Add a comment</summary>
-    <!-- Comments Section -->
-    <form action="comment-add.php" method="post" class="mt-4">
-    <!-- Hidden Fields -->
-    <input type="hidden" name="courseid" value="<?= $courseid ?>">
-    <input type="hidden" name="changeid" value="<?= $changeid ?>">
+            <details>
+                <summary class="mb-2">Add a comment</summary>
+                <!-- Comments Section -->
+                <form action="comment-add.php" method="post" class="mb-4">
+                <!-- Hidden Fields -->
+                <input type="hidden" name="courseid" value="<?= $courseid ?>">
+                <input type="hidden" name="changeid" value="<?= $changeid ?>">
 
-    <!-- Comment Field -->
-    <div class="mb-3">
-        <label for="new_comment" class="form-label visually-hidden">Add Comment</label>
-        <textarea id="new_comment" name="new_comment" class="form-control" rows="4" placeholder="Enter your comment here..." required></textarea>
-    </div>
+                <!-- Comment Field -->
+                <div class="mb-2">
+                    <label for="new_comment" class="form-label visually-hidden">Add Comment</label>
+                    <textarea id="new_comment" name="new_comment" class="form-control bg-dark-subtle" rows="4" placeholder="Enter your comment here..." required></textarea>
+                </div>
 
-    <!-- Submit Button -->
-    <button type="submit" class="btn btn-primary">Submit Comment</button>
-    </form>
-    </details>
-    <?php if (!empty($formData['timeline'])): ?>
-    <ul class="list-group">
-        <?php foreach ($formData['timeline'] as $event): ?>
-            <?php if ($event['field'] === 'comment'): ?>
-                <li class="list-group-item bg-dark-subtle">
-                    <strong><?= htmlspecialchars($event['changed_by']) ?>:</strong> 
-                    <?= nl2br(htmlspecialchars($event['new_value'])) ?>
-                    <br><small class="text-muted">At: <?= date('Y-m-d H:i:s', $event['changed_at']) ?></small>
-                    
-                    <!-- Delete Comment Form -->
-                    <form action="delete-comment.php" method="post" style="display: inline;">
-                        <input type="hidden" name="courseid" value="<?= htmlspecialchars($formData['courseid']) ?>">
-                        <input type="hidden" name="changeid" value="<?= htmlspecialchars($formData['changeid']) ?>">
-                        <input type="hidden" name="comment_id" value="<?= htmlspecialchars($event['comment_id']) ?>">
-                        <button type="submit" class="btn btn-dark-subtle btn-sm">Delete</button>
-                    </form>
-                </li>
-            <?php endif; ?>
-        <?php endforeach; ?>
-    </ul>
-    <?php endif; ?>
-
-
-
-
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-primary">Submit Comment</button>
+                </form>
+                </details>
+                <?php if (!empty($formData['timeline'])): ?>
+                <ul class="list-group">
+                    <?php foreach ($formData['timeline'] as $event): ?>
+                        <?php if ($event['field'] === 'comment'): ?>
+                            <li class="list-group-item bg-dark-subtle">
+                                <strong><?= htmlspecialchars($event['changed_by']) ?>:</strong> 
+                                <?= nl2br(htmlspecialchars($event['new_value'])) ?>
+                                <br><small class="text-muted">At: <?= date('Y-m-d H:i:s', $event['changed_at']) ?></small>
+                                
+                                <!-- Delete Comment Form -->
+                                <form action="delete-comment.php" method="post" style="display: inline;">
+                                    <input type="hidden" name="courseid" value="<?= htmlspecialchars($formData['courseid']) ?>">
+                                    <input type="hidden" name="changeid" value="<?= htmlspecialchars($formData['changeid']) ?>">
+                                    <input type="hidden" name="comment_id" value="<?= htmlspecialchars($event['comment_id']) ?>">
+                                    <button type="submit" class="btn btn-dark-subtle btn-sm">Delete</button>
+                                </form>
+                            </li>
+                        <?php endif; ?>
+                    <?php endforeach; ?>
+                </ul>
+                <?php endif; ?>
 
         </div>
     </div>
@@ -366,71 +358,71 @@ function generateMailtoLink($formData, $courseid, $changeid, $course_deets, $ema
     <!-- Timeline Section -->
     <?php if (!empty($formData['timeline'])): ?>
         
-            <details>
-                <summary>Timeline</summary>
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Field</th>
-                            <th>Previous Value</th>
-                            <th>New Value</th>
-                            <th>Changed By</th>
-                            <th>Changed At</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    <?php foreach ($formData['timeline'] as $event): ?>
-                        <?php if (!empty($event['field']) && $event['field'] !== 'comment'): ?>
-                            <tr>
-                                <td><?= htmlspecialchars($event['field'], ENT_QUOTES, 'UTF-8') ?></td>
-                                <td>
-                                    <?php 
-                                    if ($event['field'] === 'link_updated') {
-                                        echo (!empty($event['previous_value']['description']) 
-                                            ? htmlspecialchars($event['previous_value']['description'], ENT_QUOTES, 'UTF-8') 
-                                            : 'N/A') . ' - ' . 
-                                            (!empty($event['previous_value']['url']) 
-                                            ? htmlspecialchars($event['previous_value']['url'], ENT_QUOTES, 'UTF-8') 
-                                            : 'N/A');
-                                    } else {
-                                        echo !empty($event['previous_value'])
-                                            ? htmlspecialchars($event['previous_value'], ENT_QUOTES, 'UTF-8')
-                                            : 'N/A';
-                                    }
-                                    ?>
-                                </td>
-                                <td>
-                                    <?php 
-                                    if (in_array($event['field'], ['link_added', 'link_updated'])) {
-                                        echo (!empty($event['new_value']['description']) 
-                                            ? htmlspecialchars($event['new_value']['description'], ENT_QUOTES, 'UTF-8') 
-                                            : 'N/A') . ' - ' . 
-                                            (!empty($event['new_value']['url']) 
-                                            ? htmlspecialchars($event['new_value']['url'], ENT_QUOTES, 'UTF-8') 
-                                            : 'N/A');
-                                    } else {
-                                        echo !empty($event['new_value'])
-                                            ? htmlspecialchars($event['new_value'], ENT_QUOTES, 'UTF-8')
-                                            : 'N/A';
-                                    }
-                                    ?>
-                                </td>
-                                <td>
-                                    <?= !empty($event['changed_by']) 
-                                        ? htmlspecialchars($event['changed_by'], ENT_QUOTES, 'UTF-8') 
-                                        : 'N/A' ?>
-                                </td>
-                                <td>
-                                    <?= !empty($event['changed_at']) 
-                                        ? date('Y-m-d H:i:s', $event['changed_at']) 
-                                        : 'N/A' ?>
-                                </td>
-                            </tr>
-                        <?php endif; ?>
-                    <?php endforeach; ?>
-                </tbody>
-                </table>
-            </details>
+    <details>
+        <summary>Timeline</summary>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Field</th>
+                    <th>Previous Value</th>
+                    <th>New Value</th>
+                    <th>Changed By</th>
+                    <th>Changed At</th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($formData['timeline'] as $event): ?>
+                <?php if (!empty($event['field']) && $event['field'] !== 'comment'): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($event['field'], ENT_QUOTES, 'UTF-8') ?></td>
+                        <td>
+                            <?php 
+                            if ($event['field'] === 'link_updated') {
+                                echo (!empty($event['previous_value']['description']) 
+                                    ? htmlspecialchars($event['previous_value']['description'], ENT_QUOTES, 'UTF-8') 
+                                    : 'N/A') . ' - ' . 
+                                    (!empty($event['previous_value']['url']) 
+                                    ? htmlspecialchars($event['previous_value']['url'], ENT_QUOTES, 'UTF-8') 
+                                    : 'N/A');
+                            } else {
+                                echo !empty($event['previous_value'])
+                                    ? htmlspecialchars($event['previous_value'], ENT_QUOTES, 'UTF-8')
+                                    : 'N/A';
+                            }
+                            ?>
+                        </td>
+                        <td>
+                            <?php 
+                            if (in_array($event['field'], ['link_added', 'link_updated'])) {
+                                echo (!empty($event['new_value']['description']) 
+                                    ? htmlspecialchars($event['new_value']['description'], ENT_QUOTES, 'UTF-8') 
+                                    : 'N/A') . ' - ' . 
+                                    (!empty($event['new_value']['url']) 
+                                    ? htmlspecialchars($event['new_value']['url'], ENT_QUOTES, 'UTF-8') 
+                                    : 'N/A');
+                            } else {
+                                echo !empty($event['new_value'])
+                                    ? htmlspecialchars($event['new_value'], ENT_QUOTES, 'UTF-8')
+                                    : 'N/A';
+                            }
+                            ?>
+                        </td>
+                        <td>
+                            <?= !empty($event['changed_by']) 
+                                ? htmlspecialchars($event['changed_by'], ENT_QUOTES, 'UTF-8') 
+                                : 'N/A' ?>
+                        </td>
+                        <td>
+                            <?= !empty($event['changed_at']) 
+                                ? date('Y-m-d H:i:s', $event['changed_at']) 
+                                : 'N/A' ?>
+                        </td>
+                    </tr>
+                <?php endif; ?>
+            <?php endforeach; ?>
+        </tbody>
+        </table>
+    </details>
 
     <?php endif; ?>
 </div>

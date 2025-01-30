@@ -75,7 +75,40 @@ img {
 .fc-time{
    display : none;
 }
+/* Images and icons */
+img,
+iframe {
+    height: auto;
+    max-width: 100%;
+}
 
+.icon {
+    width: 2rem;
+    height: 100%;
+    margin: 0;
+}
+
+.icon-square {
+    width: 2.75rem;
+    height: 3rem;
+}
+
+.icon-svg {
+    display: inline-flex;
+    align-self: center;
+}
+
+.icon-svg.baseline-svg svg {
+    top: .125em;
+    position: relative;
+    overflow: visible;
+}
+
+.icon-svg svg {
+    height: 1em;
+    width: 1em;
+    margin-right: 0.5rem;
+}
 
 #footer .navbar-brand { display: none; }
 

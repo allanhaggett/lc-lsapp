@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         file_put_contents($filename, json_encode($changeData, JSON_PRETTY_PRINT));
 
         // Redirect back to the change details page
-        header("Location: ./?courseid={$courseid}&changeid={$changeid}");
+        header("Location: view.php?courseid={$courseid}&changeid={$changeid}");
         exit;
     } else {
         die("Error: Comment ID {$commentId} not found or already deleted.");

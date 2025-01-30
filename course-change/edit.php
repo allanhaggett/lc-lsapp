@@ -92,7 +92,7 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
     <div class="row justify-content-md-center">
         <div class="col-md-12">
             <a href="view.php?courseid=<?= $courseid ?>&changeid=<?= $changeid ?>" class="btn btn-primary mb-4 float-end">View request</a>
-            <form class="float-end" action="request-delete.php" method="post" onsubmit="return confirm('Are you sure you want to delete this request?');">
+            <form class="float-end" action="delete-request.php" method="post" onsubmit="return confirm('Are you sure you want to delete this request?');">
                 <!-- Hidden Fields -->
                 <input type="hidden" name="courseid" value="<?= htmlspecialchars($courseid) ?>">
                 <input type="hidden" name="changeid" value="<?= htmlspecialchars($changeid) ?>">
