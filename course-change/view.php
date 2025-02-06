@@ -1,7 +1,6 @@
-<?php 
+<?php
 opcache_reset();
-$path = '../inc/lsapp.php';
-require($path); 
+require('../inc/lsapp.php'); 
 require('../inc/Parsedown.php');
 $Parsedown = new Parsedown();
 $Parsedown->setSafeMode(true);
@@ -61,7 +60,7 @@ function getGuidanceByCategory($cat, $categoriesFile) {
     return "Category not found.";
 }
 
-// Example usage
+
 $cat = urldecode($formData['category']) ?? '';
 $categoriesFile = 'guidance.json';
 $guidance = getGuidanceByCategory($cat, $categoriesFile);
@@ -73,6 +72,8 @@ $email_addresses = [
                     'developer' => $course_developer[3] ?? '', 
                     'assigned' => $assignedtoemail[3] ?? ''
                     ];
+
+
 function buildMailtoLink($email_addresses, $subject, $body) {
     // Collect the 'to' email addresses (steward and assigned)
     $toEmails = array_unique([
@@ -190,7 +191,7 @@ function generateMailtoLink($formData, $courseid, $changeid, $course_deets, $ema
                 <strong>Urgent</strong>
             </span>
             <?php endif; ?>
-            <span class="badge bg-success"><?= htmlspecialchars($formData['approval_status']) ?></span>
+            <span class="badge bg-primary"><?= htmlspecialchars($formData['approval_status']) ?></span>
             </div>
             <h2 class="my-2"><?= htmlspecialchars($formData['category']) ?> Request <small class="text-muted"><?= $formData['changeid'] ?? '' ?></small></h2>
             
@@ -199,11 +200,34 @@ function generateMailtoLink($formData, $courseid, $changeid, $course_deets, $ema
     <div class="row">
     <div class="col-md-6">
     
-        <!-- Description Section -->
-        <div>
-            <strong>Scope:</strong> <span class="badge bg-primary"><?= htmlspecialchars($formData['scope']) ?></span>
-            <strong>Progress:</strong> <span class="badge bg-primary"><?= htmlspecialchars($formData['status']) ?></span>
+
+        <div class="mb-2 d-flex align-items-center gap-2">
+            <strong>Scope:</strong> <span class="badge bg-primary"><?= htmlspecialchars($formData['scope']) ?></span> 
+            <a aria-label="More information about scope" class="scopeinfo" role="button" id="toggle-scopeguide" title="Click to view guidance">
+                <span class="icon-svg baseline-svg">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+                        <path fill="#999" d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"></path>
+                    </svg>
+                </span>
+            </a>
+        </div>
+
+        <div class="row">
+        <div class="col">
             <strong>Assigned To:</strong> <a href="../person.php?idir=<?= htmlspecialchars($formData['assign_to']) ?>" class="badge bg-primary"><?= htmlspecialchars($formData['assign_to']) ?></a>
+            <?php if($formData['assign_to'] != LOGGED_IN_IDIR): ?>
+            <button class="btn btn-sm btn-success" id="claim-button" data-changeid="<?= $changeid ?>" data-courseid="<?= $courseid ?>">Claim</button>
+            <?php endif ?>
+        </div>
+        <div class="col">
+            <strong>Status:</strong>
+            <span id="status-badge" class="badge bg-primary">
+                <?= htmlspecialchars($formData['status']) ?>
+            </span>
+            <button class="btn btn-sm btn-success" id="status-button" data-changeid="<?= $changeid ?>" data-courseid="<?= $courseid ?>" data-status="<?= htmlspecialchars($formData['status']) ?>">
+                Mark as In Progress
+            </button>
+        </div>
         </div>
         <div class="my-1 p-3 bg-dark-subtle rounded-3">
             <?= $Parsedown->text(htmlspecialchars($formData['description'] ?? 'N/A', ENT_QUOTES, 'UTF-8')) ?>
@@ -426,7 +450,118 @@ function generateMailtoLink($formData, $courseid, $changeid, $course_deets, $ema
 
     <?php endif; ?>
 </div>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
 
+    document.getElementById('toggle-scopeguide').addEventListener('click', function (event) {
+        event.preventDefault(); // Prevent default behavior of the <a> tag
+        const detailsElement = document.getElementById('scopeguide');
+        if (detailsElement) {
+            detailsElement.open = !detailsElement.open; // Toggle the `open` attribute
+        }
+    });
+
+    // Status change stuff
+    const statusButton = document.getElementById('status-button');
+    const statusBadge = document.getElementById('status-badge');
+
+    if (!statusButton || !statusBadge) return;
+
+    // Define the status progression
+    const statusMap = {
+        'Not Started': 'In Progress',
+        'In Progress': 'Complete',
+        'Completed': 'Completed'
+    };
+
+    function updateUI(newStatus) {
+        // Update the button text
+        if (newStatus in statusMap) {
+            if (newStatus === 'Completed') {
+                statusButton.remove(); // Remove the button from the DOM
+            } else {
+                statusButton.textContent = statusMap[newStatus];
+            }
+        }
+
+        // Update the badge
+        statusBadge.textContent = newStatus;
+
+        // Adjust badge color (Bootstrap classes)
+        // statusBadge.className = 'badge ' + getStatusBadgeClass(newStatus);
+    }
+
+    function getStatusBadgeClass(status) {
+        switch (status) {
+            case 'Not Started': return 'bg-secondary';
+            case 'In Progress': return 'bg-warning';
+            case 'Completed': return 'bg-success';
+            default: return 'bg-primary';
+        }
+    }
+
+    // Set initial button text and badge color
+    let currentStatus = statusButton.getAttribute('data-status');
+    updateUI(currentStatus);
+
+    statusButton.addEventListener('click', function() {
+        const changeid = this.getAttribute('data-changeid');
+        const courseid = this.getAttribute('data-courseid');
+
+        if (!changeid || !courseid) {
+            alert('Invalid request data.');
+            return;
+        }
+
+        fetch('update-status.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `changeid=${changeid}&courseid=${courseid}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // alert(data.message);
+                currentStatus = data.new_status;
+                updateUI(currentStatus);
+            } else {
+                alert(`Error: ${data.message}`);
+            }
+        })
+        .catch(error => alert('Failed to update status. Please try again.'));
+    });
+
+    const claimButton = document.getElementById('claim-button');
+
+    if (claimButton) {
+        claimButton.addEventListener('click', function() {
+            const changeid = this.getAttribute('data-changeid');
+            const courseid = this.getAttribute('data-courseid');
+
+            if (!changeid || !courseid) {
+                alert('Invalid request data.');
+                return;
+            }
+
+            fetch('update-claim.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: `changeid=${changeid}&courseid=${courseid}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Request claimed successfully!');
+                    location.reload(); // Refresh page to reflect change
+                } else {
+                    alert(`Error: ${data.message}`);
+                }
+            })
+            .catch(error => alert('Failed to claim request. Please try again.'));
+        });
+    }
+});
+</script>
 <?php endif; ?>
 
 <?php require('../templates/javascript.php'); ?>

@@ -498,12 +498,12 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
 							<strong>Comments:</strong> <?= isset($request['timeline']) ? count(array_filter($request['timeline'], fn($entry) => $entry['field'] === 'comment')) : 0 ?><br>
 						</div>
 							
-						<div class="mt-1">
+						<!-- <div class="mt-1">
 							<strong>Created:</strong> <?= date('Y-m-d H:i:s', $request['date_created']) ?> 
 							by <?= htmlspecialchars($request['created_by'] ?? '') ?>
-						</div>
+						</div> -->
 						<div class="mb-1">
-							<strong>Last modified:</strong> <?= date('Y-m-d H:i:s', $request['date_modified']) ?> 
+							<strong>Modified:</strong> <?= date('Y-m-d H:i:s', $request['date_modified']) ?> 
 							by <?= htmlspecialchars($request['created_by'] ?? '') ?>
 						</div>
 					</li>
@@ -557,12 +557,12 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
                                 <strong>Hyperlinks:</strong> <?= isset($request['links']) ? count($request['links']) : 0 ?> 
                                 <strong>Comments:</strong> <?= isset($request['timeline']) ? count(array_filter($request['timeline'], fn($entry) => $entry['field'] === 'comment')) : 0 ?>
                             </div>
-                            <div class="mt-1">
+                            <!-- <div class="mt-1">
                                 <strong>Created:</strong> <?= date('Y-m-d H:i:s', $request['date_created']) ?> 
                                 by <?= htmlspecialchars($request['created_by'] ?? '') ?>
-                            </div>
+                            </div> -->
                             <div class="mb-1">
-                                <strong>Last modified:</strong> <?= date('Y-m-d H:i:s', $request['date_modified']) ?> 
+                                <strong>Modified:</strong> <?= date('Y-m-d H:i:s', $request['date_modified']) ?> 
                                 by <?= htmlspecialchars($request['created_by'] ?? '') ?>
                             </div>
                         </li>
