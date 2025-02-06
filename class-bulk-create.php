@@ -22,11 +22,14 @@ foreach($dates as $date) {
 	$coursecorrect = $coursedays - 1;
 	$enddate = date("Y-m-d", strtotime($date . ' + ' . $coursecorrect . ' days'));
 
-	if($course[21] == 'Classroom' || $course[21] == 'Blended') {
+	$shipdate = '';
+	if($course[23] == 'Yes') {
 		$doweship = 'To Ship';
+		$shipdate = date("Y-m-d", strtotime($date . ' - ' . 7 . ' days'));
 	} else {
 		$doweship = 'No Ship';
 	}
+
 	$facilitatorsclean = '';
 	$fac = $_POST['Facilitating'] ?? '';
 	if(!empty($fac)) { 

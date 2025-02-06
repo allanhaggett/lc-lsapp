@@ -580,7 +580,7 @@ someone tells to me enable it again
 <?php foreach($owned as $course): ?>
 <li class="list-group-item">
 	<?php if($course[1] == 'Active'): ?>
-	<a href="class-request.php?courseid=<?= $course[0] ?>" class="float-right btn btn-light ml-3">New Date</a>
+	<a href="class-bulk-insert.php?courseid=<?= $course[0] ?>" class="float-right btn btn-light ml-3">New Date</a>
 	<?php endif ?>
 	<a href="course.php?courseid=<?= $course[0] ?>"><?= $course[2] ?></a>
 	<?php if($course[1] == 'Inactive'): ?>

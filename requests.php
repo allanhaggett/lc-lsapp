@@ -41,15 +41,22 @@ If your course doesn't exist in <a href="courses.php">the course list</a>, you n
 		Please contact the LST with any questions.</p>
 </div>
 <p>To submit new requests, please choose from the courses below.</p>
-<form action="class-bulk-insert.php" method="get">
-<select name="courseid" id="courseid" class="form-select">
-	<option selected>Choose a course&hellip;</option>
+
 <?php $courses = getCoursesActive() ?>
-<?php foreach($courses as $c): ?>
-<option value="<?= $c[0] ?>"><?= $c[2] ?></option>
-<?php endforeach ?>
-</select>
-<button class="btn btn-primary mt-2">Create Service Requests</button>
+<?php // Sort the courses by CourseName
+usort($courses, function($a, $b) {
+	return $a[2] <=> $b[2];
+})
+?>
+
+<form action="class-bulk-insert.php" method="get">
+	<select name="courseid" id="courseid" class="form-select" required>
+		<option value="" selected>Choose a course&hellip;</option>
+		<?php foreach($courses as $c): ?>
+		<option value="<?= $c[0] ?>"><?= $c[2] ?></option>
+		<?php endforeach ?>
+	</select>
+	<button class="btn btn-primary mt-2">Create Service Requests</button>
 </form>
 
 <!-- <div class="my-3">
