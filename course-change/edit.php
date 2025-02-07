@@ -125,13 +125,31 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
             <div class="row">
                 <div class="col">
                     <label for="scope" class="form-label visually-hidden">Scope</label>
+                    <div class="d-flex align-items-center gap-2">
                     <select id="scope" name="scope" class="form-select" required>
                         <option value="" disabled>Choose a scope</option>
                         <option value="Minor" <?= $formData['scope'] === 'Minor' ? 'selected' : '' ?>>Minor Change (1-2 hours)</option>
                         <option value="Moderate" <?= $formData['scope'] === 'Moderate' ? 'selected' : '' ?>>Moderate Change (2-24 hours)</option>
                         <option value="Major" <?= $formData['scope'] === 'Major' ? 'selected' : '' ?>>Major Change (&gt;24 hours)</option>
                     </select>
+                    <a aria-label="More information about scope" class="scopeinfo" role="button" id="toggle-scopeguide">
+                        <span class="icon-svg baseline-svg">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+                                <path fill="#999" d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"></path>
+                            </svg>
+                        </span>
+                    </a>
+                    </div>
                     <div class="invalid-feedback">Please select the scope of the request.</div>
+                    <script>
+                    document.getElementById('toggle-scopeguide').addEventListener('click', function (event) {
+                        event.preventDefault(); // Prevent default behavior of the <a> tag
+                        const detailsElement = document.getElementById('scopeguide');
+                        if (detailsElement) {
+                            detailsElement.open = !detailsElement.open; // Toggle the `open` attribute
+                        }
+                    });
+                    </script>
                 </div>
                 <div class="col align-self-end">
                     <div class="form-check">
@@ -336,7 +354,7 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
         <summary><?= $cat ?> guidance</summary>
         <?= $Parsedown->text($guidance) ?>
     </details>
-    <details>
+    <details id="scopeguide">
     <summary>Scope guidance</summary>
         <div class="p-3">
             <h3>Minor Change</h3>
