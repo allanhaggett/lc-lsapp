@@ -450,6 +450,7 @@ function generateMailtoLink($formData, $courseid, $changeid, $course_deets, $ema
 
     <?php endif; ?>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -470,15 +471,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Define the status progression
     const statusMap = {
         'Not Started': 'In Progress',
-        'In Progress': 'Complete',
+        'In Progress': 'Completed',
         'Completed': 'Completed'
     };
 
-    function updateUI(newStatus) {
+    function updateUI(newStatus, triggerConfetti = false) {
         // Update the button text
         if (newStatus in statusMap) {
             if (newStatus === 'Completed') {
                 statusButton.remove(); // Remove the button from the DOM
+                if (triggerConfetti) launchConfetti(); // Only trigger confetti if this was a user action
             } else {
                 statusButton.textContent = statusMap[newStatus];
             }
@@ -486,9 +488,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Update the badge
         statusBadge.textContent = newStatus;
-
-        // Adjust badge color (Bootstrap classes)
-        // statusBadge.className = 'badge ' + getStatusBadgeClass(newStatus);
+        statusBadge.className = 'badge ' + getStatusBadgeClass(newStatus);
     }
 
     function getStatusBadgeClass(status) {
@@ -500,9 +500,19 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Set initial button text and badge color
+    function launchConfetti() {
+        confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 },
+        });
+    }
+
+    // Get initial status from data attribute
     let currentStatus = statusButton.getAttribute('data-status');
-    updateUI(currentStatus);
+
+    // Update UI **without triggering confetti on page load**
+    updateUI(currentStatus, false);
 
     statusButton.addEventListener('click', function() {
         const changeid = this.getAttribute('data-changeid');
@@ -521,9 +531,9 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-                // alert(data.message);
+                const wasCompleted = currentStatus === "Completed"; // Check if it was already completed
                 currentStatus = data.new_status;
-                updateUI(currentStatus);
+                updateUI(currentStatus, !wasCompleted); // Only trigger confetti if it wasn't already completed
             } else {
                 alert(`Error: ${data.message}`);
             }
