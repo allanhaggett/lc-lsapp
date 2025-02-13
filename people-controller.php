@@ -40,7 +40,7 @@ elseif($_POST['action'] == 'add'):
 					h($fromform['Super']),
 					h($fromform['Manager']),
 					h($fromform['Pronouns']),
-					'0,50,50,50,50',
+					'0|50|50|50|50',
 					0,
 					0
 		);
