@@ -30,6 +30,7 @@ elseif($_POST['action'] == 'add'):
 
 	//IDIR,Role,Name,Email,Status,Phone,Title,Super,Manager,Pronouns,Colors,iStore,kepler
 	$fromform = $_POST;
+	$pronouns = $fromform['Pronouns'] ? $fromform['Pronouns'] : 'Unspecified';
 	$newadmin = Array(strtolower(h($fromform['idir'])),
 					h($fromform['role']),
 					h($fromform['name']),
@@ -39,7 +40,7 @@ elseif($_POST['action'] == 'add'):
 					h($fromform['title']),
 					h($fromform['Super']),
 					h($fromform['Manager']),
-					h($fromform['Pronouns']),
+					$pronouns,
 					'0|50|50|50|50',
 					0,
 					0

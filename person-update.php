@@ -31,6 +31,8 @@ if($_POST):
 		$headers = fgetcsv($f);
 		fputcsv($temp_table,$headers);
 		
+		$pronouns = $fromform['Pronouns'] ? $fromform['Pronouns'] : 'Unspecified';
+		
 		// IDIR,Role,Name,Email,Status,Phone,Title,Super,Director,Pronouns,Colors,iStore,kepler
 		$person = Array($idir,
 					h($fromform['Role']),
@@ -41,7 +43,7 @@ if($_POST):
 					h($fromform['Title']),
 					h($fromform['Super']),
 					h($fromform['Manager']),
-					h($fromform['Pronouns']),
+					$pronouns,
 					h($fromform['Colors']),
 					h($fromform['iStore']),
 					h($fromform['Kepler'])
@@ -175,7 +177,7 @@ else: ?>
 	<label for="Kepler">Kepler Access: </label>
 	<input type="text" name="Kepler" id="Kepler" class="form-control" value="<?php if(isset($p[12])) echo $p[12] ?>">
 </div>
-<button class="btn btn-block btn-primary my-3">Save Person</button>
+<button type="submit" class="btn btn-block btn-primary my-3">Save Person</button>
 
 </form>
 	
