@@ -78,7 +78,7 @@
 		<form method="post"	class="newuser col" action="people-controller.php">
 
 			<input type="hidden" name="action" value="add">
-			<select name="role" id="role" class="form-control mb-2" required>
+			<select name="role" id="role" class="form-select mb-2" required>
 				<option value="Operations">Operations</option>
 				<option value="Delivery">Delivery</option>
 				<option value="Developer">Development</option>
@@ -97,7 +97,7 @@
 			<input type="hidden" name="Super" id="Super" class="form-control  mb-2" placeholder="Super user? 0 for no, 1 for yes" required>
 			<input type="hidden" name="Manager" id="Manager" class="form-control  mb-2" placeholder="Manager? 0 for no, 1 for yes" required>
 			<?php endif ?>
-			<input type="text" name="Pronouns" id="Pronouns" class="form-control  mb-2" placeholder="Personal pronouns e.g. She/Hers/They" required>
+			<input type="text" name="Pronouns" id="Pronouns" class="form-control  mb-2" placeholder="Personal pronouns e.g. She/Hers/They">
 			<input type="submit" class="btn btn-primary" value="Add Person">
 
 		</form>
