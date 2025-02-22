@@ -480,7 +480,10 @@ document.addEventListener('DOMContentLoaded', function() {
         if (newStatus in statusMap) {
             if (newStatus === 'Completed') {
                 statusButton.remove(); // Remove the button from the DOM
-                if (triggerConfetti) launchConfetti(); // Only trigger confetti if this was a user action
+                // Only trigger confetti if this was a user action and prefers-reduced-motion is not set
+                if (triggerConfetti && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                    launchConfetti();
+                }
             } else {
                 statusButton.textContent = statusMap[newStatus];
             }
