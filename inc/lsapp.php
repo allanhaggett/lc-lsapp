@@ -677,7 +677,32 @@ function getCourses() {
 
 
 
+//
+// Return only upcoming classes for a given courseID (today or later)
+//
+function getCoursesClassesUpcoming($courseid) {
+    $path = build_path(BASE_DIR, 'data', 'classes.csv');
+    $f = fopen($path, 'r');
+    $list = array();
+    $today = date('Y-m-d'); // Get today's date in YYYY-MM-DD format
 
+    while ($row = fgetcsv($f)) {
+        $startDate = $row[8]; // StartDate is in YYYY-MM-DD format
+
+        // Include only future classes (today or later)
+        if ($row[5] == $courseid && $startDate >= $today) {
+            $list[] = $row;
+        }
+    }
+    fclose($f);
+
+    // Sort classes by start date (earliest first)
+    usort($list, function($a, $b) {
+        return strcmp($a[8], $b[8]);
+    });
+
+    return $list;
+}
 
 
 

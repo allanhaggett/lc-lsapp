@@ -217,6 +217,13 @@ $stewsdevs = getCoursePeople($courseid);
 </div>
 <?php endif ?>
 
+<?php if(!empty($deets[3])): ?>
+<form class="my-3" action="course-openaccess-create.php" method="POST">
+    <input type="hidden" name="courseid" value="<?php echo htmlspecialchars($deets[0]); ?>">
+    <button type="submit" class="btn btn-primary">Generate Open Access Page</button>
+</form>
+<?php endif ?>
+
 	<details class="mb-3 p-2 border border-secondary-subtle rounded-3">
 		<summary>File Paths &amp; URLs</summary>
 		<div class="p-3 mb-3 bg-light-subtle">
