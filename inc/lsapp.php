@@ -2072,7 +2072,8 @@ function createSlug($string) {
 function getAuditTypes () {
 
 	return [
-		'Course',
+		'Corporate catalog course',
+		'Course outside corporate catalog',
 		'Learn @ Work Week',
 		'Webinar Recording',
 		'Video',
