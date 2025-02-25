@@ -462,7 +462,7 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
 		<ul class="list-group mb-4">
 			<?php foreach ($files as $file): 
 				$request = json_decode(file_get_contents($file), true);
-				if ($request['status'] != 'Completed'):
+				if ($request['progress'] != 'Closed'):
 					$filenameParts = explode('-change-', basename($file, '.json')); 
 					if (count($filenameParts) === 2):
 						$courseidParts = explode('course-', $filenameParts[0]);
@@ -478,7 +478,7 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
 							<strong>Urgent</strong>
 						</span>
 						<?php endif; ?>
-						<span class="badge bg-success"><?= htmlspecialchars($request['approval_status']) ?></span>
+						<span class="badge bg-success"><?= htmlspecialchars($request['approval_status'] ?? 'Unknown') ?></span>
 						</div>
 						<h4 class="my-1 fs-5">
 							<a href="course-change/view.php?courseid=<?= htmlspecialchars($courseidParts[1]) ?>&changeid=<?= htmlspecialchars($chid) ?>">
@@ -486,8 +486,8 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
 							</a>
 						</h4>
 						<div class="mb-1">
-							<strong>Status:</strong> <?= htmlspecialchars($request['status']) ?>
-							<strong>Assigned To:</strong> <?= htmlspecialchars($request['assign_to']) ?>
+							<strong>Progress:</strong> <?= htmlspecialchars($request['progress'] ?? '') ?>
+							<strong>Assigned To:</strong> <?= htmlspecialchars($request['assign_to'] ?? '') ?>
 						</div>
 						<div class="p-3 bg-light-subtle rounded-3">
 							<?= htmlspecialchars(truncateStringByWords($request['description'], 20)) ?>
@@ -527,7 +527,7 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
                 echo '<ul class="list-group mb-4">';
                 foreach ($files as $file) {
                     $request = json_decode(file_get_contents($file), true);
-                    if ($request['status'] == 'Completed') {
+                    if ($request['progress'] == 'Closed') {
                         $filenameParts = explode('-', basename($file, '.json')); // Parse file name
                         $chid = $filenameParts[3]; // Extract change ID (second part of the name)
                         ?>
@@ -546,7 +546,7 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
                                 </a>
                             </h4>
                             <div class="mb-1">
-                                <strong>Status:</strong> <?= htmlspecialchars($request['status']) ?>
+                                <strong>Progress:</strong> <?= htmlspecialchars($request['progress']) ?>
                                 <strong>Assigned To:</strong> <?= htmlspecialchars($request['assign_to']) ?>
                             </div>
                             <div class="p-3 bg-light-subtle rounded-3">

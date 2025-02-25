@@ -16,9 +16,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         'category' => urldecode($_POST['category']),
         'description' => $_POST['description'],
         'scope' => $_POST['scope'],
-        'approval_status' => $_POST['approval_status'],
+        'approval_status' => $_POST['approval_status'] ?? null,
         'urgent' => isset($_POST['urgent']) ? true : false,
-        'status' => $_POST['status'],
+        'progress' => $_POST['progress'] ?? null,
     ];
 
     $comment = $_POST['new_comment'] ?? null;
@@ -96,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
  * Log changes to fields and update the timeline.
  */
 function logFieldChanges($data, $existingData, &$timeline, $loggedInUser) {
-    $trackedFields = ['assign_to', 'crm_ticket_reference', 'category', 'description', 'scope', 'approval_status', 'status', 'urgent'];
+    $trackedFields = ['assign_to', 'crm_ticket_reference', 'category', 'description', 'scope', 'approval_status', 'progress', 'urgent'];
     foreach ($trackedFields as $field) {
         if (isset($existingData[$field]) && $existingData[$field] !== $data[$field]) {
             $timeline[] = [

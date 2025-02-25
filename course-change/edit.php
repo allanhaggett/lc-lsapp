@@ -167,6 +167,32 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
                 </div>
             </div>
 
+
+            <div class="row my-3">
+                <div class="col">
+                    <label for="approval_status" class="form-label">Approval Status</label>
+                    <select id="approval_status" name="approval_status" class="form-select" required>
+                        <option value="Approved" <?= $formData['approval_status'] === 'Approved' ? 'selected' : '' ?>>Approved</option>
+                        <option value="Pending" <?= $formData['approval_status'] === 'Pending' ? 'selected' : '' ?>>Pending Approval</option>
+                        <option value="Denied" <?= $formData['approval_status'] === 'Denied' ? 'selected' : '' ?>>Denied</option>
+                        <option value="On Hold" <?= $formData['approval_status'] === 'On Hold' ? 'selected' : '' ?>>On Hold</option>
+                    </select>
+                    <div class="invalid-feedback">Please select the approval status.</div>
+                </div>
+
+                <div class="col">
+                    <label for="progress" class="form-label">Progress</label>
+                    <select id="progress" name="progress" class="form-select" required>
+                        <option value="Not Started" <?= $formData['progress'] === 'Not Started' ? 'selected' : '' ?>>Not Started</option>
+                        <option value="In Progress" <?= $formData['progress'] === 'In Progress' ? 'selected' : '' ?>>In Progress</option>
+                        <option value="In Review" <?= $formData['progress'] === 'In Review' ? 'selected' : '' ?>>In Review</option>
+                        <option value="Ready to Publish" <?= $formData['progress'] === 'Ready to Publish' ? 'selected' : '' ?>>Ready to Publish</option>
+                        <option value="Closed" <?= $formData['progress'] === 'Closed' ? 'selected' : '' ?>>Closed</option>
+                    </select>
+                    <div class="invalid-feedback">Please select the status.</div>
+                </div>
+            </div>
+            
             <div class="row my-3">
                 <div class="col">
                     <label for="assign_to" class="form-label">Assigned To</label>
@@ -190,29 +216,6 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
                 <div class="col">
                     <label for="crm_ticket_reference" class="form-label">CRM Ticket #</label>
                     <input type="text" id="crm_ticket_reference" name="crm_ticket_reference" class="form-control" value="<?= htmlspecialchars($formData['crm_ticket_reference']) ?>">
-                </div>
-            </div>
-
-            <div class="row my-3">
-                <div class="col">
-                    <label for="approval_status" class="form-label">Approval Status</label>
-                    <select id="approval_status" name="approval_status" class="form-select" required>
-                        <option value="Approved" <?= $formData['approval_status'] === 'Approved' ? 'selected' : '' ?>>Approved</option>
-                        <option value="Pending" <?= $formData['approval_status'] === 'Pending' ? 'selected' : '' ?>>Pending Approval</option>
-                        <option value="Denied" <?= $formData['approval_status'] === 'Denied' ? 'selected' : '' ?>>Denied</option>
-                        <option value="On Hold" <?= $formData['approval_status'] === 'On Hold' ? 'selected' : '' ?>>On Hold</option>
-                    </select>
-                    <div class="invalid-feedback">Please select the approval status.</div>
-                </div>
-
-                <div class="col">
-                    <label for="status" class="form-label">Status</label>
-                    <select id="status" name="status" class="form-select" required>
-                        <option value="Not Started" <?= $formData['status'] === 'Not Started' ? 'selected' : '' ?>>Not Started</option>
-                        <option value="In Progress" <?= $formData['status'] === 'In Progress' ? 'selected' : '' ?>>In Progress</option>
-                        <option value="Completed" <?= $formData['status'] === 'Completed' ? 'selected' : '' ?>>Completed</option>
-                    </select>
-                    <div class="invalid-feedback">Please select the status.</div>
                 </div>
             </div>
 
@@ -349,44 +352,8 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
 
     </div>
     <div class="col-md-6">
-    <div><a href="#">Process documentation</a></div>
-    <details>
-        <summary><?= $cat ?> guidance</summary>
-        <?= $Parsedown->text($guidance) ?>
-    </details>
-    <details id="scopeguide">
-    <summary>Scope guidance</summary>
-        <div class="p-3">
-            <h3>Minor Change</h3>
-            <div><strong>1-2 hours </strong></div>
-            <p>Small revisions to existing content that don’t significantly change the 
-                meaning/consultation with the business owner is not required (e.g., typos, 
-                updating links to existing or new versions of small assets (e.g., images), 
-                minor big fixes that don’t significantly alter the user experience, changes 
-                that don’t require extensive testing, small adjustments to quiz questions 
-                in Moodle or HTML).</p>
-        </div>
-        <div class="p-3">
-            <h3>Moderate </h3>
-            <div><strong>2 hours – 24 hours </strong></div>
-            <p>Moderate changes to content (needing business owner approval), updating or 
-                reorganizing content in multiple lessons or modules, adding/updating evaluation 
-                surveys, adjustments to quizzes built in Storyline, updating videos/interactive 
-                activities, adding new activities/quizzes, multiple changes from an annual 
-                review, or changes that require more than one person (e.g., developer). </p>
-        </div>
-        <div class="p-3">
-            <h3>Major</h3>
-            <div><strong>> 24 hours </strong></div>
-            <p>Course overhauls or complete reorganization of existing content, revising learning 
-                objectives, creating videos, simulations, requires extensive consultation with 
-                business owners.</p>
-        </div>   
-    
-    </details>
-</div>
+        <?php require('../templates/guidance.php') ?>
     </div>
-</div>
 <?php endif ?>
 
 <?php require('../templates/javascript.php') ?>

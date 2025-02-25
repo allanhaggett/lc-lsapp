@@ -73,7 +73,19 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
 <title><?= $deets[2] ?> Change Request</title>
 
 <?php getScripts() ?>
-</body>
+<style>
+.scopeinfo {
+    all: unset; /* Removes default button styles */
+    cursor: pointer; /* Ensures it behaves like a link */
+    display: inline-flex; /* Keeps icon alignment */
+    align-items: center;
+}
+/* Preserve default focus outline */
+.scopeinfo:focus {
+    outline: revert;
+}
+</style>
+<body>
 <?php getNavigation() ?>
 
 <div class="container">
@@ -113,13 +125,7 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
                         <option value="Major">Major Change (&gt;24 hours)</option>
                         <option value="Unknown">Unknown (To be decided)</option>
                     </select>
-                    <a aria-label="More information about scope" class="scopeinfo" role="button" id="toggle-scopeguide">
-                        <span class="icon-svg baseline-svg">
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
-                                <path fill="#999" d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"></path>
-                            </svg>
-                        </span>
-                    </a>
+                    <button aria-label="More information about scope" class="scopeinfo" role="button" id="toggle-scopeguide"><span class="icon-svg baseline-svg"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="#999" d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"></path></svg></span></button>
                 </div>
                 <div class="invalid-feedback">Please select the scope of the request.</div>
                 <script>
@@ -218,23 +224,61 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
             <!-- Approval Status -->
             <div class="col-md-6">
                 <label for="approval_status" class="form-label">Approval Status</label>
-                <select id="approval_status" name="approval_status" class="form-select" required>
-                    <option value="Approved" <?php echo $formData['approval_status'] === 'Approved' ? 'selected' : ''; ?>>Approved</option>
-                    <option value="Pending" <?php echo $formData['approval_status'] === 'Pending' ? 'selected' : ''; ?>>Pending Approval</option>
-                    <option value="Denied" <?php echo $formData['approval_status'] === 'Denied' ? 'selected' : ''; ?>>Denied</option>
-                    <option value="On Hold" <?php echo $formData['approval_status'] === 'On Hold' ? 'selected' : ''; ?>>On Hold</option>
-                </select>
-                <div class="invalid-feedback">Please select the approval status.</div>
+                <div class="d-flex align-items-center gap-2">
+                    <select id="approval_status" name="approval_status" class="form-select" required>
+                        <option value="" selected disabled>Please select&hellip;</option>
+                        <option value="Pending">Pending Approval</option>
+                        <option value="Denied">Denied</option>
+                        <option value="On Hold">On Hold</option>
+                        <option value="Approved">Approved</option>
+                    </select>
+                    <a aria-label="More information about approval status" class="approvalinfo" role="button" id="toggle-approvalguide">
+                        <span class="icon-svg baseline-svg">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+                                <path fill="#999" d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"></path>
+                            </svg>
+                        </span>
+                    </a>
+                </div>
+                <script>
+                document.getElementById('toggle-approvalguide').addEventListener('click', function (event) {
+                    event.preventDefault(); // Prevent default behavior of the <a> tag
+                    const detailsElement = document.getElementById('approvalguide');
+                    if (detailsElement) {
+                        detailsElement.open = !detailsElement.open; // Toggle the `open` attribute
+                    }
+                });
+                </script>
             </div>
             <!-- Status -->
             <div class="col">
-                <label for="status" class="form-label">Status</label>
-                <select id="status" name="status" class="form-select" required>
-                    <option value="Not Started" <?php echo $formData['status'] === 'Not Started' ? 'selected' : ''; ?>>Not Started</option>
-                    <option value="In Progress" <?php echo $formData['status'] === 'In Progress' ? 'selected' : ''; ?>>In Progress</option>
-                    <option value="Completed" <?php echo $formData['status'] === 'Completed' ? 'selected' : ''; ?>>Completed</option>
-                </select>
-                <div class="invalid-feedback">Please select the status.</div>
+                <label for="progress" class="form-label">Progress</label>
+                <div class="d-flex align-items-center gap-2">
+                    <select id="progress" name="progress" class="form-select" required>
+                        <option value="" selected disabled>Please select&hellip;</option>
+                        <option value="Not Started">Not Started</option>
+                        <option value="In Progress">In Progress</option>
+                        <option value="In Review">In Review</option>
+                        <option value="Ready to Publish">Ready to Publish</option>
+                        <option value="Closed">Closed</option>
+                    </select>
+                    <a aria-label="More information about scope" class="progressinfo" role="button" id="toggle-progressguide">
+                        <span class="icon-svg baseline-svg">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
+                                <path fill="#999" d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM216 336h24V272H216c-13.3 0-24-10.7-24-24s10.7-24 24-24h48c13.3 0 24 10.7 24 24v88h8c13.3 0 24 10.7 24 24s-10.7 24-24 24H216c-13.3 0-24-10.7-24-24s10.7-24 24-24zm40-208a32 32 0 1 1 0 64 32 32 0 1 1 0-64z"></path>
+                            </svg>
+                        </span>
+                    </a>
+                </div>
+                <script>
+                document.getElementById('toggle-progressguide').addEventListener('click', function (event) {
+                    event.preventDefault(); // Prevent default behavior of the <a> tag
+                    const detailsElement = document.getElementById('progressguide');
+                    if (detailsElement) {
+                        detailsElement.open = !detailsElement.open; // Toggle the `open` attribute
+                    }
+                });
+                </script>
             </div>
 
             
@@ -351,45 +395,8 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
 
 </div>
 <div class="col-md-6">
-<div class="p-3 rounded-3 bg-dark-subtle">
-    <div class="mb-2"><a href="#" class="btn btn-secondary">Process documentation</a></div>
-    <details class="mb-2">
-        <summary class="mb-2"><?= $cat ?> guidance</summary>
-        <div class="p-2 rounded-3 bg-light-subtle">
-        <?= $Parsedown->text($guidance) ?>
-        </div>
-    </details>
-    <details id="scopeguide">
-    <summary class="mb-2">Scope guidance</summary>
-        <div class="mb-2 p-2 bg-light-subtle rounded-2">
-            <h3>Minor Change</h3>
-            <div><strong>1-2 hours </strong></div>
-            <p>Small revisions to existing content that don’t significantly change the 
-                meaning/consultation with the business owner is not required (e.g., typos, 
-                updating links to existing or new versions of small assets (e.g., images), 
-                minor big fixes that don’t significantly alter the user experience, changes 
-                that don’t require extensive testing, small adjustments to quiz questions 
-                in Moodle or HTML).</p>
-        </div>
-        <div class="mb-2 p-2 bg-light-subtle rounded-2">
-            <h3>Moderate </h3>
-            <div><strong>2 hours – 24 hours </strong></div>
-            <p>Moderate changes to content (needing business owner approval), updating or 
-                reorganizing content in multiple lessons or modules, adding/updating evaluation 
-                surveys, adjustments to quizzes built in Storyline, updating videos/interactive 
-                activities, adding new activities/quizzes, multiple changes from an annual 
-                review, or changes that require more than one person (e.g., developer). </p>
-        </div>
-        <div class="mb-2 p-2 bg-light-subtle rounded-2">
-            <h3>Major</h3>
-            <div><strong>> 24 hours </strong></div>
-            <p>Course overhauls or complete reorganization of existing content, revising learning 
-                objectives, creating videos, simulations, requires extensive consultation with 
-                business owners.</p>
-        </div>   
     
-    </details>
-</div>
+<?php require('../templates/guidance.php') ?>
 
 </div>
 </div>

@@ -26,7 +26,7 @@ $formData = [
     'approval_status' => '',
     'urgent' => false,
     'comments' => '',
-    'status' => ''
+    'progress' => ''
 ];
 
 if ($changeid) {
@@ -120,7 +120,7 @@ function generateMailtoLink($formData, $courseid, $changeid, $course_deets, $ema
     $body .= "Scope: " . htmlspecialchars($formData['scope'] ?? 'N/A') . "\n";
     $body .= "Assigned To: " . htmlspecialchars($formData['assign_to'] ?? 'N/A') . "\n";
     $body .= "Approval Status: " . htmlspecialchars($formData['approval_status'] ?? 'N/A') . "\n";
-    $body .= "Progress: " . htmlspecialchars($formData['status'] ?? 'N/A') . "\n";
+    $body .= "Progress: " . htmlspecialchars($formData['progress'] ?? 'N/A') . "\n";
     if (!empty($formData['crm_ticket_reference'])) {
         $body .= "CRM Ticket Reference: " . htmlspecialchars($formData['crm_ticket_reference']) . "\n";
     }
@@ -191,7 +191,7 @@ function generateMailtoLink($formData, $courseid, $changeid, $course_deets, $ema
                 <strong>Urgent</strong>
             </span>
             <?php endif; ?>
-            <span class="badge bg-primary"><?= htmlspecialchars($formData['approval_status']) ?></span>
+            <span class="badge bg-primary"><?= htmlspecialchars($formData['approval_status'] ?? 'Unknown') ?></span>
             </div>
             <h2 class="my-2"><?= htmlspecialchars($formData['category']) ?> Request <small class="text-muted"><?= $formData['changeid'] ?? '' ?></small></h2>
             
@@ -220,11 +220,11 @@ function generateMailtoLink($formData, $courseid, $changeid, $course_deets, $ema
             <?php endif ?>
         </div>
         <div class="col">
-            <strong>Status:</strong>
-            <span id="status-badge" class="badge bg-primary">
-                <?= htmlspecialchars($formData['status']) ?>
+            <strong>Progress:</strong>
+            <span id="progress-badge" class="badge bg-primary">
+                <?= htmlspecialchars($formData['progress'] ?? 'Draft') ?>
             </span>
-            <button class="btn btn-sm btn-success" id="status-button" data-changeid="<?= $changeid ?>" data-courseid="<?= $courseid ?>" data-status="<?= htmlspecialchars($formData['status']) ?>">
+            <button class="btn btn-sm btn-success" id="progress-button" data-changeid="<?= $changeid ?>" data-courseid="<?= $courseid ?>" data-progress="<?= htmlspecialchars($formData['progress'] ?? 'Draft') ?>">
                 Mark as In Progress
             </button>
         </div>
@@ -276,54 +276,8 @@ function generateMailtoLink($formData, $courseid, $changeid, $course_deets, $ema
     
         </div>
         <div class="col-md-6">
-
-            <h3>Guidance</h3>
-            <div class="p-3 rounded-3 bg-dark-subtle">
-
-            <div class="mb-2"><a href="#" class="btn btn-secondary">Process documentation</a></div>
-            <?php if($formData['assign_to'] === LOGGED_IN_IDIR): ?>
-            <details class="mb-2" open>
-            <?php else: ?>
-            <details class="mb-2">
-            <?php endif ?>
-                <summary class="mb-2"><?= $cat ?> guidance</summary>
-                <div class="p-2 rounded-3 bg-light-subtle">
-                <?= $Parsedown->text($guidance) ?>
-                </div>
-            </details>
-            <details id="scopeguide">
-                <summary class="mb-2">Scope guidance</summary>
-                    <div class="mb-2 p-2 bg-light-subtle rounded-2">
-                        <h3>Minor Change</h3>
-                        <div><strong>1-2 hours </strong></div>
-                        <p>Small revisions to existing content that don’t significantly change the 
-                            meaning/consultation with the business owner is not required (e.g., typos, 
-                            updating links to existing or new versions of small assets (e.g., images), 
-                            minor big fixes that don’t significantly alter the user experience, changes 
-                            that don’t require extensive testing, small adjustments to quiz questions 
-                            in Moodle or HTML).</p>
-                    </div>
-                    <div class="mb-2 p-2 bg-light-subtle rounded-2">
-                        <h3>Moderate </h3>
-                        <div><strong>2 hours – 24 hours </strong></div>
-                        <p>Moderate changes to content (needing business owner approval), updating or 
-                            reorganizing content in multiple lessons or modules, adding/updating evaluation 
-                            surveys, adjustments to quizzes built in Storyline, updating videos/interactive 
-                            activities, adding new activities/quizzes, multiple changes from an annual 
-                            review, or changes that require more than one person (e.g., developer). </p>
-                    </div>
-                    <div class="mb-2 p-2 bg-light-subtle rounded-2">
-                        <h3>Major</h3>
-                        <div><strong>> 24 hours </strong></div>
-                        <p>Course overhauls or complete reorganization of existing content, revising learning 
-                            objectives, creating videos, simulations, requires extensive consultation with 
-                            business owners.</p>
-                    </div>   
-                
-                </details>
-
-
-            </div>
+            <?php require('../templates/guidance.php') ?>
+        
 
 
             <h4 class="fs-5 mt-5">Comments</h4>
@@ -450,7 +404,7 @@ function generateMailtoLink($formData, $courseid, $changeid, $course_deets, $ema
 
     <?php endif; ?>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.js"></script>
+<script src="/lsapp/js/confetti.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
 
@@ -462,62 +416,91 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Status change stuff
-    const statusButton = document.getElementById('status-button');
-    const statusBadge = document.getElementById('status-badge');
+    // Progress change stuff
+    const progressButton = document.getElementById('progress-button');
+    const progressBadge = document.getElementById('progress-badge');
 
-    if (!statusButton || !statusBadge) return;
+    if (!progressButton || !progressBadge) return;
 
-    // Define the status progression
-    const statusMap = {
+    // Define the progress progression
+    const progressMap = {
         'Not Started': 'In Progress',
-        'In Progress': 'Completed',
-        'Completed': 'Completed'
+        'In Progress': 'In Review',
+        'In Review': 'Ready to Publish',
+        'Ready to Publish': 'Closed',
+        'Closed': 'Closed'
     };
 
-    function updateUI(newStatus, triggerConfetti = false) {
+    function updateUI(newProgress, triggerConfetti = false) {
         // Update the button text
-        if (newStatus in statusMap) {
-            if (newStatus === 'Completed') {
-                statusButton.remove(); // Remove the button from the DOM
+        if (newProgress in progressMap) {
+            if (newProgress === 'Closed') {
+                progressButton.remove(); // Remove the button from the DOM
                 // Only trigger confetti if this was a user action and prefers-reduced-motion is not set
                 if (triggerConfetti && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
                     launchConfetti();
                 }
             } else {
-                statusButton.textContent = statusMap[newStatus];
+                progressButton.textContent = progressMap[newProgress];
             }
         }
 
         // Update the badge
-        statusBadge.textContent = newStatus;
-        statusBadge.className = 'badge ' + getStatusBadgeClass(newStatus);
+        progressBadge.textContent = newProgress;
+        progressBadge.className = 'badge ' + getProgressBadgeClass(newProgress);
     }
 
-    function getStatusBadgeClass(status) {
-        switch (status) {
+    function getProgressBadgeClass(progress) {
+        switch (progress) {
             case 'Not Started': return 'bg-secondary';
             case 'In Progress': return 'bg-warning';
-            case 'Completed': return 'bg-success';
+            case 'In Review': return 'bg-warning';
+            case 'Ready to Publish': return 'bg-warning';
+            case 'Closed': return 'bg-success';
             default: return 'bg-primary';
         }
     }
 
     function launchConfetti() {
-        confetti({
-            particleCount: 100,
-            spread: 70,
-            origin: { y: 0.6 },
-        });
+        var defaults = {
+            spread: 360,
+            ticks: 50,
+            gravity: 0,
+            decay: 0.94,
+            startVelocity: 30,
+            colors: ['FFE400', 'FFBD00', 'E89400', 'FFCA6C', 'FDFFB8']
+        };
+
+        function shoot() {
+            confetti({
+                ...defaults,
+                particleCount: 40,
+                scalar: 1.2,
+                shapes: ['star']
+            });
+
+            confetti({
+                ...defaults,
+                particleCount: 10,
+                scalar: 0.75,
+                shapes: ['circle']
+            });
+        }
+
+        setTimeout(shoot, 0);
+        setTimeout(shoot, 100);
+        setTimeout(shoot, 200);
+        setTimeout(shoot, 500);
+        setTimeout(shoot, 1000);
     }
 
-    // Get initial status from data attribute
-    let currentStatus = statusButton.getAttribute('data-status');
+    // Get initial progress from data attribute
+    let currentProgress = progressButton.getAttribute('data-progress');
 
     // Update UI **without triggering confetti on page load**
-    updateUI(currentStatus, false);
+    updateUI(currentProgress, false);
 
-    statusButton.addEventListener('click', function() {
+    progressButton.addEventListener('click', function() {
         const changeid = this.getAttribute('data-changeid');
         const courseid = this.getAttribute('data-courseid');
 
@@ -526,22 +509,22 @@ document.addEventListener('DOMContentLoaded', function() {
             return;
         }
 
-        fetch('update-status.php', {
+        fetch('update-progress.php', {
             method: 'POST',
             headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
             body: `changeid=${changeid}&courseid=${courseid}`
         })
         .then(response => response.json())
         .then(data => {
-            if (data.status === 'success') {
-                const wasCompleted = currentStatus === "Completed"; // Check if it was already completed
-                currentStatus = data.new_status;
-                updateUI(currentStatus, !wasCompleted); // Only trigger confetti if it wasn't already completed
+            if (data.progress === 'success') {
+                const wasClosed = currentProgress === "Closed"; // Check if it was already Closed
+                currentProgress = data.new_progress;
+                updateUI(currentProgress, !wasClosed); // Only trigger confetti if it wasn't already Closed
             } else {
                 alert(`Error: ${data.message}`);
             }
         })
-        .catch(error => alert('Failed to update status. Please try again.'));
+        .catch(error => alert('Failed to update progress. Please try again.'));
     });
 
     const claimButton = document.getElementById('claim-button');
@@ -564,7 +547,10 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(response => response.json())
             .then(data => {
                 if (data.status === 'success') {
-                    alert('Request claimed successfully!');
+                    // alert('Request claimed successfully!');
+                    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                        launchConfetti();
+                    }
                     location.reload(); // Refresh page to reflect change
                 } else {
                     alert(`Error: ${data.message}`);

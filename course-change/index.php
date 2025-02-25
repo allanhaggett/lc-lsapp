@@ -20,7 +20,7 @@ foreach ($files as $file) {
             'changeid' => $changeData['changeid'],
             'courseid' => $changeData['courseid'],
             'assign_to' => $changeData['assign_to'],
-            'status' => $changeData['status'],
+            'progress' => $changeData['progress'],
             'urgent' => $changeData['urgent'] ? 'Yes' : 'No',
             'date_created' => date('Y-m-d H:i:s', $changeData['date_created']),
             'date_modified' => date('Y-m-d H:i:s', $changeData['date_modified']),
@@ -53,18 +53,18 @@ foreach ($files as $file) {
                 <table class="table table-striped table-hover">
                     <thead>
                         <tr>
-                            <th><button class="sort" data-sort="course">Course</button></th>
-                            <th><button class="sort" data-sort="urgent">Urgent</button></th>
-                            <th><button class="sort" data-sort="assigned">Assigned To</button></th>
-                            <th><button class="sort" data-sort="status">Status</button></th>
-                            <th><button class="sort" data-sort="date-created">Date Created</button></th>
-                            <th><button class="sort" data-sort="date-modified">Date Modified</button></th>
+                            <th><button class="btn btn-sm btn-secondary sort" data-sort="course">Course</button></th>
+                            <th><button class="btn btn-sm btn-secondary sort" data-sort="urgent">Urgent</button></th>
+                            <th><button class="btn btn-sm btn-secondary sort" data-sort="assigned">Assigned To</button></th>
+                            <th><button class="btn btn-sm btn-secondary sort" data-sort="progress">Progress</button></th>
+                            <th><button class="btn btn-sm btn-secondary sort" data-sort="date-created">Date Created</button></th>
+                            <th><button class="btn btn-sm btn-secondary sort" data-sort="date-modified">Date Modified</button></th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody class="list">
                         <?php foreach ($changeRequests as $request): ?>
-                            <?php if($request['status'] !== 'Completed'): ?>
+                            <?php if($request['progress'] !== 'Closed'): ?>
                             <tr>
                                 <td class="course">
                                     <?php $deets = getCourse($request['courseid']); ?>
@@ -74,7 +74,7 @@ foreach ($files as $file) {
                                 </td>
                                 <td class="urgent"><?php echo htmlspecialchars($request['urgent']); ?></td>
                                 <td class="assigned"><?php echo htmlspecialchars($request['assign_to']); ?></td>
-                                <td class="status"><?php echo htmlspecialchars($request['status']); ?></td>
+                                <td class="progressstat"><?php echo htmlspecialchars($request['progress'] ?? 'Draft'); ?></td>
                                 <td class="date-created"><?php echo htmlspecialchars($request['date_created']); ?></td>
                                 <td class="date-modified"><?php echo htmlspecialchars($request['date_modified']); ?></td>
                                 <td>
@@ -93,7 +93,7 @@ foreach ($files as $file) {
 
     <script>
     var options = {
-        valueNames: ['course', 'assigned', 'status', 'urgent', 'date-created', 'date-modified']
+        valueNames: ['course', 'assigned', 'progressstat', 'urgent', 'date-created', 'date-modified']
     };
 
     var changeRequestsList = new List('change-requests-list', options);
