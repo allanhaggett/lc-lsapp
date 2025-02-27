@@ -2,7 +2,7 @@
 require('inc/lsapp.php');
 
 // Get the full list of partners
-$partners = getPartners();
+$partners = getPartnersNew();
 
 ?>
 <?php getHeader() ?>

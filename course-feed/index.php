@@ -11,7 +11,7 @@ require($path);
 <title>PSALS Course Catalog Feed Generator</title>
 
 <?php getScripts() ?>
-</body>
+<body>
 <?php getNavigation() ?>
 
 <div class="container-fluid">
