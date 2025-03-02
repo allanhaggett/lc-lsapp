@@ -70,15 +70,20 @@ $pcourses = $partner ? getCoursesByPartnerName($partner["name"]) : [];
                 <h5>Courses Offered</h5>
             </div>
             <div class="card-body">
-                <ul class="list-group">
+                <table class="table table-striped">
                     <?php foreach ($pcourses as $course): ?>
-                        <li class="list-group-item">
+                    <tr>
+                        <td>
+                            <?php echo htmlspecialchars($course[1]); ?>
+                        </td>
+                        <td>
                             <a href="/lsapp/course.php?courseid=<?php echo htmlspecialchars($course[0]); ?>">
                                 <?php echo htmlspecialchars($course[2] ?? 'Untitled Course'); ?>
                             </a>
-                        </li>
+                        </td>
+                    </tr>
                     <?php endforeach; ?>
-                </ul>
+                </table>
             </div>
         </div>
     </div>
