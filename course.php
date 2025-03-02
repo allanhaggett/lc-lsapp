@@ -193,7 +193,7 @@ $stewsdevs = getCoursePeople($courseid);
 	<?php endif ?> 
 </div>
 <div class="col-md-4">
-<div class=""><strong>Corp. Partner:</strong><br> <a href="learning-hub-partner.php?partnerid=<?php echo urlencode($deets[36]) ?>"><?= $deets[36] ?></a></div>
+<div class=""><strong>Corp. Partner:</strong><br> <a href="/lsapp/partners/view.php?slug=<?php echo urlencode($deets[36]) ?>"><?= $deets[36] ?></a></div>
 </div>
 </div>
 

@@ -206,6 +206,9 @@ function getNavigation($context = NULL) {
 		<li class="nav-item">
 			<a class="nav-link" href="/lsapp/courses.php?sort=dateadded">Courses</a>
 		</li>
+		<li class="nav-item">
+			<a class="nav-link" href="/lsapp/partners/">Partners</a>
+		</li>
 
 
 		<li class="nav-item dropdown">
@@ -213,21 +216,21 @@ function getNavigation($context = NULL) {
 				More 
 			</a>
 			<div class="dropdown-menu" aria-labelledby="teamsdrop">
-				<a class="dropdown-item" href="https://bcgov.sharepoint.com/teams/00440" target="_blank" rel="noopener">Learning Centre SharePoint</a>
+				<a class="dropdown-item" href="/lsapp/people.php">People</a>
 				<a class="dropdown-item" href="/lsapp/course-changes.php">All Course Changes</a>
-				<a class="dropdown-item" href="/lsapp/venues.php">Venues</a>
-				<span class="dropdown-item-text fw-bold">Teams &amp; People</span>
+				<a class="dropdown-item" href="https://bcgov.sharepoint.com/teams/00440" target="_blank" rel="noopener">Learning Centre SharePoint</a>
+				<!-- <span class="dropdown-item-text fw-bold">Teams &amp; People</span>
 				<a class="dropdown-item" href="/lsapp/teams.php?teamname=Governance">Planning, Evaluation, &amp; Governance</a>
 				<a class="dropdown-item" href="/lsapp/teams.php?teamname=Employees">Corp. Learning - All Employees</a>
 				<a class="dropdown-item" href="/lsapp/teams.php?teamname=Leaders">Corp. Learning - People Leaders</a>
 				<a class="dropdown-item" href="/lsapp/teams.php?teamname=Operations">Operations &amp; Technology</a>
-				<a class="dropdown-item" href="/lsapp/people.php">All People</a>
-				<a class="dropdown-item" href="/lsapp/teams-all.php">All Teams</a>
-
-				<hr class="dropdown-divider">
-				<span class="dropdown-item-text fw-bold">Miscellaneous</span>
+				<a class="dropdown-item" href="/lsapp/teams-all.php">All Teams</a> -->
+        
+				<!-- <hr class="dropdown-divider"> -->
+				<!-- <span class="dropdown-item-text fw-bold">Miscellaneous</span> -->
 				<!-- <a class="dropdown-item" href="/lsapp/learning-hub-partners.php">Learning Hub Partners</a> -->
 				<a class="dropdown-item" href="/lsapp/audits.php">Resource Reviews</a>
+				<a class="dropdown-item" href="/lsapp/venues.php">Venues</a>
 				<a class="dropdown-item" href="/lsapp/function-map.php">Functions</a>
 				<a class="dropdown-item" href="/lsapp/kepler.php">Kepler Server Access</a>
 				<a class="dropdown-item" href="/lsapp/video-embedding-guide.php">Video Embedding Guide</a>

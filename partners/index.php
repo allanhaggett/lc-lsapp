@@ -9,115 +9,86 @@ $partners = file_exists($partnersFile) ? json_decode(file_get_contents($partners
 <?php if(canACcess()): ?>
 
 <?php getHeader() ?>
-
-<title>Manage Learning Partner</title>
+    <title>Learning Partners</title>
+    <script src="/lsapp/js/list.min.js"></script>
     <script>
         function editPartner(partner) {
             localStorage.setItem("editPartner", JSON.stringify(partner));
-            window.location.href = "index.php";
+            window.location.href = "form.php";
+        }
+        function deletePartner(id, name) {
+            if (confirm(`Are you sure you want to delete '${name}'? This cannot be undone.`)) {
+                fetch('process.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: `delete_id=${id}`
+                }).then(response => response.text()).then(data => {
+                    alert(data);
+                    window.location.reload();
+                }).catch(error => console.error('Error:', error));
+            }
         }
     </script>
-
 
 <?php getScripts() ?>
-<script>
-        function addContactField(contact = {}) {
-            let container = document.getElementById("contacts-container");
-            let index = document.querySelectorAll(".contact-group").length;
-
-            let contactHtml = `
-                <div class="contact-group border rounded p-3 mb-2">
-                    <div class="row g-2">
-                        <div class="col-md-6">
-                            <label class="form-label">Name</label>
-                            <input type="text" name="contacts[${index}][name]" class="form-control" value="${contact.name || ''}" required>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">Email</label>
-                            <input type="email" name="contacts[${index}][email]" class="form-control" value="${contact.email || ''}" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">IDIR</label>
-                            <input type="text" name="contacts[${index}][idir]" class="form-control" value="${contact.idir || ''}" required>
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Title</label>
-                            <input type="text" name="contacts[${index}][title]" class="form-control" value="${contact.title || ''}">
-                        </div>
-                        <div class="col-md-4">
-                            <label class="form-label">Role</label>
-                            <input type="text" name="contacts[${index}][role]" class="form-control" value="${contact.role || ''}">
-                        </div>
-                    </div>
-                    <button type="button" class="btn btn-danger btn-sm mt-2" onclick="removeContactField(this)">Remove Contact</button>
-                </div>`;
-            container.insertAdjacentHTML('beforeend', contactHtml);
-        }
-
-        function removeContactField(button) {
-            button.parentElement.remove();
-        }
-
-        function loadPartnerData(partner) {
-            document.querySelector('input[name="name"]').value = partner.name || '';
-            document.querySelector('input[name="slug"]').value = partner.slug || '';
-            document.querySelector('textarea[name="description"]').value = partner.description || '';
-            document.querySelector('input[name="link"]').value = partner.link || '';
-
-            partner.contacts.forEach(contact => addContactField(contact));
-        }
-
-        document.addEventListener("DOMContentLoaded", function () {
-            let partnerData = JSON.parse(localStorage.getItem("editPartner"));
-            if (partnerData) {
-                loadPartnerData(partnerData);
-                localStorage.removeItem("editPartner");
-            }
-        });
-    </script>
 <body>
 <?php getNavigation() ?>
 
 <div class="container-fluid">
 <div class="row justify-content-md-center">
-<div class="col-md-10 col-xl-8">
+<div class="col-md-6">
 
-    
-            <div class="card-body">
-                <form action="process.php" method="POST">
-                    <div class="mb-3">
-                        <label class="form-label">Partner Name</label>
-                        <input type="text" name="name" class="form-control" required>
-                    </div>
+        <h1>Corporate Learning Partners</h1>
 
-                    <div class="mb-3">
-                        <label class="form-label">Slug</label>
-                        <input type="text" name="slug" class="form-control" required>
-                    </div>
+        <a href="create.php" class="btn btn-primary mb-3">Add New Partner</a>
+        
+        
+        <div id="partner-list">
+            <input class="search form-control mb-3" placeholder="Search partners...">
+            <div class="list-group list">
+                <?php foreach ($partners as $partner): ?>
+                    <details class="list-group-item">
+                        <summary class="name">
+                            <?php echo htmlspecialchars($partner["name"]); ?>
+                        </summary>
+                        <p class="mt-2">
+                            <?php echo nl2br(htmlspecialchars($partner["description"])); ?>
+                        </p>
 
-                    <div class="mb-3">
-                        <label class="form-label">Description</label>
-                        <textarea name="description" class="form-control" rows="3" required></textarea>
-                    </div>
+                        <h6>Contacts:</h6>
+                        <ul class="list-unstyled">
+                            <?php foreach ($partner["contacts"] as $contact): ?>
+                                <li class="contact"><strong><?php echo htmlspecialchars($contact["name"]); ?></strong> 
+                                    (<?php echo htmlspecialchars($contact["email"]); ?>)</li>
+                            <?php endforeach; ?>
+                        </ul>
 
-                    <div class="mb-3">
-                        <label class="form-label">Link</label>
-                        <input type="url" name="link" class="form-control" required>
-                    </div>
-
-                    <h4>Contacts</h4>
-                    <div id="contacts-container"></div>
-                    <button type="button" class="btn btn-success btn-sm mb-3" onclick="addContactField()">Add Contact</button>
-
-                    <br>
-                    <button type="submit" class="btn btn-primary">Save Partner</button>
-                    <a href="list.php" class="btn btn-secondary">Cancel</a>
-                </form>
+                        <div class="d-flex gap-2 mt-2">
+                            <a href="<?php echo htmlspecialchars($partner["link"]); ?>" class="btn btn-success btn-sm" target="_blank">View Public Partner Page</a>
+                            <a href="/lsapp/partners/view.php?slug=<?php echo htmlspecialchars($partner["slug"]); ?>" class="btn btn-success btn-sm" target="_blank">View Private Partner Page</a>
+                            <a href="form.php?id=<?php echo $partner['id']; ?>" class="btn btn-warning btn-sm">Edit</a>
+                            <form action="process.php" method="POST" style="display:inline;">
+                                <input type="hidden" name="delete_id" value="<?php echo $partner['id']; ?>">
+                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this partner?')">Delete</button>
+                            </form>
+                        </div>
+                    </details>
+                <?php endforeach; ?>
             </div>
         </div>
     </div>
+</div>
+</div>
+</div>
 
-    <?php endif ?>
+<script>
+    var options = {
+        valueNames: ['name', 'contact']
+    };
+    var partnerList = new List('partner-list', options);
+</script>
+
+<?php endif ?>
 
 <?php require('../templates/javascript.php') ?>
 <?php require('../templates/footer.php') ?>

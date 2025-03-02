@@ -25,14 +25,14 @@
             {
                 "idir": "ahaggett",
                 "email": "allan.haggett@gov.bc.ca",
-                "name": "Allan Haggett",
+                "name": "Allan",
                 "title": "Stack",
                 "role": ""
             },
             {
                 "idir": "bnovak",
                 "email": "ben@gov.bc.ca",
-                "name": "Ben Novak",
+                "name": "Ben",
                 "title": "Dev",
                 "role": "Admin"
             }
@@ -115,6 +115,13 @@
                 "name": "Allan Haggett",
                 "title": "",
                 "role": ""
+            },
+            {
+                "idir": "dude",
+                "email": "dude@gov.bc.ca",
+                "name": "Dude",
+                "title": "Tech",
+                "role": "Admin"
             }
         ]
     },
