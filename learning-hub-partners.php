@@ -1,85 +1,72 @@
-<?php
-opcache_reset();
-$path = '../inc/lsapp.php';
-require($path);
-$partnersFile = "partners.json";
-$partners = file_exists($partnersFile) ? json_decode(file_get_contents($partnersFile), true) : [];
-$partnerId = $_GET['id'] ?? null;
-$partner = null;
+<?php 
+require('inc/lsapp.php');
 
-if ($partnerId) {
-    foreach ($partners as $p) {
-        if ($p['id'] == $partnerId) {
-            $partner = $p;
-            break;
-        }
-    }
-}
+// Get the full list of partners
+$partners = getPartners();
 
-$pcourses = $partner ? getCoursesByPartnerName($partner["name"]) : [];
 ?>
-
-<?php if(canACcess() && $partner): ?>
-
 <?php getHeader() ?>
-<title><?php echo htmlspecialchars($partner["name"]); ?> - Partner Details</title>
-
+<title>Learning Hub Partners</title>
 <?php getScripts() ?>
-<body>
 <?php getNavigation() ?>
+<?php if(canAccess()): ?>
+<div class="container">
+<div class="row justify-content-md-center mb-3">
 
-<div class="container mt-4">
-    <nav aria-label="breadcrumb">
-        <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="index.php">Partners</a></li>
-            <li class="breadcrumb-item active" aria-current="page"><?php echo htmlspecialchars($partner["name"]); ?></li>
-        </ol>
-    </nav>
+<div class="col-md-8">
+<h1>Learning Hub Partners <span class="badge bg-light-subtle"><?php echo count($partners) ?></span></h1>
 
-    <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h2 class="mb-0"> <?php echo htmlspecialchars($partner["name"]); ?> </h2>
-            <a href="form.php?id=<?php echo $partner['id']; ?>" class="btn btn-warning">Edit</a>
-        </div>
-        <div class="card-body">
-            <h5>Description:</h5>
-            <p><?php echo nl2br(htmlspecialchars($partner["description"])); ?></p>
+<div id="partnerlist">
+<input class="search form-control  mb-3" placeholder="search">
+<div class="list">
+<?php foreach($partners as $p): ?>
+	<details class="partner p-2 mb-1 bg-secondary-subtle rounded-3">
+		<summary class="fw-bold">
+			<div class="float-end"><a href="learning-hub-partner-manage.php?id=<?= $p->id ?>">Edit</a></div>
+			<?= $p->name ?>
+		</summary>
+		<div class="p-3 pt-0 mt-2">
+			<div><?= $p->description ?></div>
+			<div class="p-3 mt-3 bg-light-subtle rounded-3">Admin: <a href="mailto:<?= $p->admin_email ?>"><?= $p->admin_name ?></a></div>
+			<?php $pcourses = getCoursesByPartnerName($p->name) ?>
+			<details class="my-3">
+				<summary class="mb-3"><?= count($pcourses) ?> Courses</summary>
+				<?php foreach($pcourses as $c): ?>
+					<div class="mb-2 p-2 bg-light-subtle rounded-3">
+						<a href="/lsapp/course.php?courseid=<?= $c[0] ?>"><?= $c[2] ?></a>
+					</div>
+				<?php endforeach ?>
+			</details>
+		</div>
+	</details>
 
-            <h5>Contacts:</h5>
-            <ul class="list-group">
-                <?php foreach ($partner["contacts"] as $contact): ?>
-                    <li class="list-group-item">
-                        <strong><?php echo htmlspecialchars($contact["name"]); ?></strong>
-                        <br><a href="mailto:<?php echo htmlspecialchars($contact["email"]); ?>"><?php echo htmlspecialchars($contact["email"]); ?></a>
-                    </li>
-                <?php endforeach; ?>
-            </ul>
-
-            <h5 class="mt-4">External Link:</h5>
-            <a href="<?php echo htmlspecialchars($partner["link"]); ?>" class="btn btn-primary" target="_blank">Visit Partner Website</a>
-        </div>
-    </div>
-
-    <?php if (!empty($pcourses)): ?>
-        <div class="card mt-4">
-            <div class="card-header">
-                <h5>Courses Offered</h5>
-            </div>
-            <div class="card-body">
-                <ul class="list-group">
-                    <?php foreach ($pcourses as $course): ?>
-                        <li class="list-group-item">
-                            <strong><?php echo htmlspecialchars($course["title"] ?? 'Untitled Course'); ?></strong>
-                            <br><?php echo htmlspecialchars($course["description"] ?? 'No description available.'); ?>
-                        </li>
-                    <?php endforeach; ?>
-                </ul>
-            </div>
-        </div>
-    <?php endif; ?>
+<?php endforeach ?>
 </div>
+</div> <!-- /#partnerlist -->
+</div> <!-- /.col -->
+</div> <!-- /.row -->
+
+<?php else: ?>
+
+<?php require('templates/noaccess.php') ?>
 
 <?php endif ?>
 
-<?php require('../templates/javascript.php') ?>
-<?php require('../templates/footer.php') ?>
+<?php require('templates/javascript.php') ?>
+
+<script>
+
+document.querySelector('.search').addEventListener('input', function (e) {
+  const query = e.target.value.toLowerCase();
+  document.querySelectorAll('.partner').forEach(card => {
+    const text = card.innerText.toLowerCase();
+    if (text.includes(query)) {
+      card.style.display = 'block';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+});
+
+</script>
+<?php include('templates/footer.php') ?>

@@ -60,7 +60,7 @@
 </div>
 <?php 
 // Get the full list of partners
-$partners = getPartnersNew();
+$partners = getPartners();
 $platforms = getAllPlatforms();
 // Pop the headers off the top
 //array_shift($partners);

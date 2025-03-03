@@ -66,7 +66,7 @@ array_shift($partners);
 ?>
 <select name="LearningHubPartner" id="LearningHubPartner" class="form-control" required>
 	<?php foreach($partners as $p): ?>
-	<option><?= $p[1] ?></option>
+	<option><?= $p->name ?></option>
 	<?php endforeach ?>
 </select>
 </div>	

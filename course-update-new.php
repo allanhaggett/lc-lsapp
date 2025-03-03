@@ -166,7 +166,7 @@ $audits = getCourseAudits($courseid);
 </div>
 <div class="col-md-4">
 <div class=""><strong>Corp. Partner:</strong><br> 
-<?php $learnpartners = getPartnersNew(); ?>
+<?php $learnpartners = getPartners(); ?>
 <select name="LearningHubPartner" id="LearningHubPartner" class="form-control" required>
 <?php foreach($learnpartners as $part): ?>
 	<?php if($part->name == $course[36]): ?>

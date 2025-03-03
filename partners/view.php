@@ -41,7 +41,7 @@ $pcourses = $partner ? getCoursesByPartnerName($partner["name"]) : [];
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
             <h2 class="mb-0"> <?php echo htmlspecialchars($partner["name"]); ?> </h2>
-            <a href="form.php?slug=<?php echo $partner['slug']; ?>" class="btn btn-warning">Edit</a>
+            <a href="form.php?id=<?php echo $partner['id']; ?>" class="btn btn-warning">Edit</a>
         </div>
         <div class="card-body">
             <h5>Description:</h5>

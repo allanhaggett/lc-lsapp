@@ -209,6 +209,9 @@ function getNavigation($context = NULL) {
 		<li class="nav-item">
 			<a class="nav-link" href="/lsapp/partners/">Partners</a>
 		</li>
+		<li class="nav-item">
+			<a class="nav-link" href="/lsapp/people.php">People</a>
+		</li>
 
 
 		<li class="nav-item dropdown">
@@ -216,9 +219,9 @@ function getNavigation($context = NULL) {
 				More 
 			</a>
 			<div class="dropdown-menu" aria-labelledby="teamsdrop">
-				<a class="dropdown-item" href="/lsapp/people.php">People</a>
+				<!-- <a class="dropdown-item" href="/lsapp/people.php">People</a> -->
+				<a class="dropdown-item" href="/lsapp/teams.php">Teams</a>
 				<a class="dropdown-item" href="/lsapp/course-changes.php">All Course Changes</a>
-				<a class="dropdown-item" href="https://bcgov.sharepoint.com/teams/00440" target="_blank" rel="noopener">Learning Centre SharePoint</a>
 				<!-- <span class="dropdown-item-text fw-bold">Teams &amp; People</span>
 				<a class="dropdown-item" href="/lsapp/teams.php?teamname=Governance">Planning, Evaluation, &amp; Governance</a>
 				<a class="dropdown-item" href="/lsapp/teams.php?teamname=Employees">Corp. Learning - All Employees</a>
@@ -230,11 +233,12 @@ function getNavigation($context = NULL) {
 				<!-- <span class="dropdown-item-text fw-bold">Miscellaneous</span> -->
 				<!-- <a class="dropdown-item" href="/lsapp/learning-hub-partners.php">Learning Hub Partners</a> -->
 				<a class="dropdown-item" href="/lsapp/audits.php">Resource Reviews</a>
+				<a class="dropdown-item" href="https://bcgov.sharepoint.com/teams/00440" target="_blank" rel="noopener">Learning Centre SharePoint</a>
 				<a class="dropdown-item" href="/lsapp/venues.php">Venues</a>
 				<a class="dropdown-item" href="/lsapp/function-map.php">Functions</a>
 				<a class="dropdown-item" href="/lsapp/kepler.php">Kepler Server Access</a>
 				<a class="dropdown-item" href="/lsapp/video-embedding-guide.php">Video Embedding Guide</a>
-				<a class="dropdown-item" href="/lsapp/kiosk/">Kiosk</a>
+				<!-- <a class="dropdown-item" href="/lsapp/kiosk/">Kiosk</a> -->
 			</div>
 		</li>
 		
@@ -265,11 +269,11 @@ function getNavigation($context = NULL) {
 		</li>
 		<?php endif ?>		
 		<?php if($context != 'footer'): ?>
-		<li class="nav-item ml-2">
+		<!-- <li class="nav-item ml-2">
 			<label for="namesearch" class="d-none sr-only">Person Search</label>
         	<input type="text" name="namesearch" id="namesearch" class="form-control w-auto ml-2 d-block" placeholder="Person Search">
     		<div id="personresults" class="position-absolute"></div>
-		</li>
+		</li> -->
 		<li class="nav-item dropdown">
             <button class="btn btn-link nav-link ml-3 py-2 px-0 px-lg-2 dropdown-toggle d-flex align-items-center" id="bd-theme" type="button" aria-expanded="false" data-bs-toggle="dropdown" data-bs-display="static" aria-label="Toggle theme (dark)">
               <span class="theme-icon-active"><i class="me-2"></i></span>
