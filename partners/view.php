@@ -56,9 +56,10 @@ $pcourses = $partner ? getCoursesByPartnerName($partner["name"]) : [];
                     </li>
                 <?php endforeach; ?>
             </ul>
+            <div class="mt-3">
+                <a href="<?php echo htmlspecialchars($partner["link"]); ?>" class="btn btn-primary" target="_blank">LearningHUB</a>
+            </div>
 
-            <h5 class="mt-4">External Link:</h5>
-            <a href="<?php echo htmlspecialchars($partner["link"]); ?>" class="btn btn-primary" target="_blank">Visit Partner Website</a>
         </div>
     </div>
     </div>

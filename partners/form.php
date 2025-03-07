@@ -1,5 +1,6 @@
 <?php
 opcache_reset();
+date_default_timezone_set('America/Vancouver');
 $path = '../inc/lsapp.php';
 require($path); 
 $partnersFile = "../data/partners.json";
@@ -60,7 +61,10 @@ if (isset($_GET["id"])) {
         }
 
         function removeContactField(button) {
-            button.parentElement.remove();
+            let contactGroup = button.closest('.contact-group');
+            if (contactGroup) {
+                contactGroup.remove();
+            }
         }
     </script>
 </head>
@@ -100,34 +104,62 @@ if (isset($_GET["id"])) {
 
                     <h4>Contacts</h4>
                     <div id="contacts-container">
-                        <?php if (!empty($partner["contacts"])): ?>
-                            <?php foreach ($partner["contacts"] as $index => $contact): ?>
-                                <div class="contact-group border rounded p-3 mb-2">
-                                    <div class="row g-2">
-                                        <div class="col-md-6">
-                                            <label class="form-label">Name</label>
-                                            <input type="text" name="contacts[<?php echo $index; ?>][name]" class="form-control" required value="<?php echo htmlspecialchars($contact["name"]); ?>">
-                                        </div>
-                                        <div class="col-md-6">
-                                            <label class="form-label">Email</label>
-                                            <input type="email" name="contacts[<?php echo $index; ?>][email]" class="form-control" required value="<?php echo htmlspecialchars($contact["email"]); ?>">
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label">IDIR</label>
-                                            <input type="text" name="contacts[<?php echo $index; ?>][idir]" class="form-control" required value="<?php echo htmlspecialchars($contact["idir"]); ?>">
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label">Title</label>
-                                            <input type="text" name="contacts[<?php echo $index; ?>][title]" class="form-control" value="<?php echo htmlspecialchars($contact["title"]); ?>">
-                                        </div>
-                                        <div class="col-md-4">
-                                            <label class="form-label">Role</label>
-                                            <input type="text" name="contacts[<?php echo $index; ?>][role]" class="form-control" value="<?php echo htmlspecialchars($contact["role"]); ?>">
-                                        </div>
-                                    </div>
-                                    <button type="button" class="btn btn-danger btn-sm mt-2" onclick="removeContactField(this)">Remove</button>
+                    <?php if (!empty($partner["contacts"])): ?>
+                    <?php foreach ($partner["contacts"] as $index => $contact): ?>
+                        <div class="contact-group border rounded p-3 mb-2">
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <label class="form-label">Name</label>
+                                    <input type="text" name="contacts[<?php echo $index; ?>][name]" class="form-control" required value="<?php echo htmlspecialchars($contact["name"]); ?>">
                                 </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Email</label>
+                                    <input type="email" name="contacts[<?php echo $index; ?>][email]" class="form-control" required value="<?php echo htmlspecialchars($contact["email"]); ?>">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">IDIR</label>
+                                    <input type="text" name="contacts[<?php echo $index; ?>][idir]" class="form-control" required value="<?php echo htmlspecialchars($contact["idir"]); ?>">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Title</label>
+                                    <input type="text" name="contacts[<?php echo $index; ?>][title]" class="form-control" value="<?php echo htmlspecialchars($contact["title"]); ?>">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Role</label>
+                                    <input type="text" name="contacts[<?php echo $index; ?>][role]" class="form-control" value="<?php echo htmlspecialchars($contact["role"]); ?>">
+                                </div>
+                            </div>
+
+                            <!-- "Retire" Button inside <details> -->
+                            <details class="mt-2">
+                                <summary>Retire</summary>
+                                <p>If this person is no longer in this role, we need to "retire" them. Their information is still available as part of the record of this partnership.</p>
+                                <button type="button" class="btn btn-danger btn-sm mt-2" onclick="removeContactField(this)">Retire</button>
+                            </details>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <?php if (isset($_GET["id"])) : ?>
+                    <div class="alert alert-warning">
+                        There is no contact listed for this partner!
+                    </div>
+                    <?php endif; ?>
+                <?php endif; ?>
+                        <?php if (!empty($partner["contact_history"])): ?>
+                        <details>
+                            <summary>Contact History</summary>
+                            <?php foreach ($partner["contact_history"] as $index => $contact): ?>
+                            <div class="mb-2 p-3 bg-light-subtle rounded-3">
+                                <div><?php echo htmlspecialchars($contact["name"]); ?></div>
+                                <div><?php echo htmlspecialchars($contact["email"]); ?></div>
+                                <div><?php echo htmlspecialchars($contact["idir"]); ?></div>
+                                <div><?php echo htmlspecialchars($contact["title"]); ?></div>
+                                <div><?php echo htmlspecialchars($contact["role"]); ?></div>
+                                <div>Added: <?php echo htmlspecialchars($contact["added_at"]); ?></div>
+                                <div>Removed: <?php echo htmlspecialchars($contact["removed_at"]); ?></div>
+                            </div>
                             <?php endforeach; ?>
+                        </details>
                         <?php endif; ?>
                     </div>
 
