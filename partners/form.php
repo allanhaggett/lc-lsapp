@@ -2,7 +2,7 @@
 opcache_reset();
 $path = '../inc/lsapp.php';
 require($path); 
-$partnersFile = "partners.json";
+$partnersFile = "../data/partners.json";
 $partners = file_exists($partnersFile) ? json_decode(file_get_contents($partnersFile), true) : [];
 $partner = ["id" => "", "name" => "", "slug" => "", "description" => "", "link" => "", "contacts" => []];
 

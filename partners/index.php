@@ -2,7 +2,7 @@
 opcache_reset();
 $path = '../inc/lsapp.php';
 require($path); 
-$partnersFile = "partners.json";
+$partnersFile = "../data/partners.json";
 $partners = file_exists($partnersFile) ? json_decode(file_get_contents($partnersFile), true) : [];
 ?>
 
@@ -40,7 +40,7 @@ $partners = file_exists($partnersFile) ? json_decode(file_get_contents($partners
 
         <h1>Corporate Learning Partners</h1>
 
-        <a href="create.php" class="btn btn-primary mb-3">Add New Partner</a>
+        <a href="form.php" class="btn btn-primary mb-3">Add New Partner</a>
         
         
         <div id="partner-list">
@@ -64,8 +64,8 @@ $partners = file_exists($partnersFile) ? json_decode(file_get_contents($partners
                         </ul>
 
                         <div class="d-flex gap-2 mt-2">
-                            <a href="<?php echo htmlspecialchars($partner["link"]); ?>" class="btn btn-success btn-sm" target="_blank">View Public Partner Page</a>
-                            <a href="/lsapp/partners/view.php?slug=<?php echo htmlspecialchars($partner["slug"]); ?>" class="btn btn-success btn-sm" target="_blank">View Private Partner Page</a>
+                            <a href="<?php echo htmlspecialchars($partner["link"]); ?>" class="btn btn-success btn-sm" target="_blank">View on LearningHUB</a>
+                            <a href="/lsapp/partners/view.php?slug=<?php echo htmlspecialchars($partner["slug"]); ?>" class="btn btn-success btn-sm">View in LSApp</a>
                             <a href="form.php?id=<?php echo $partner['id']; ?>" class="btn btn-warning btn-sm">Edit</a>
                             <form action="process.php" method="POST" style="display:inline;">
                                 <input type="hidden" name="delete_id" value="<?php echo $partner['id']; ?>">

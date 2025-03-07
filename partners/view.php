@@ -2,7 +2,7 @@
 opcache_reset();
 $path = '../inc/lsapp.php';
 require($path);
-$partnersFile = "partners.json";
+$partnersFile = "../data/partners.json";
 $partners = file_exists($partnersFile) ? json_decode(file_get_contents($partnersFile), true) : [];
 $partnerSlug = $_GET['slug'] ?? null;
 $partner = null;
@@ -31,7 +31,7 @@ $pcourses = $partner ? getCoursesByPartnerName($partner["name"]) : [];
 <div class="container mt-4">
     <nav aria-label="breadcrumb">
         <ol class="breadcrumb">
-            <li class="breadcrumb-item"><a href="index.php">Partners</a></li>
+            <li class="breadcrumb-item"><a href="index.php">Corp. Learning Partners</a></li>
             <li class="breadcrumb-item active" aria-current="page"><?php echo htmlspecialchars($partner["name"]); ?></li>
         </ol>
     </nav>

@@ -1,5 +1,5 @@
 <?php
-$partnersFile = "partners.json";
+$partnersFile = "../data/partners.json";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Load existing data
@@ -56,5 +56,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     file_put_contents($partnersFile, json_encode(array_values($existingData), JSON_PRETTY_PRINT));
-    echo "Partner saved successfully!";
+    // echo "Partner saved successfully!";
+    header('Location: /lsapp/partners/view.php?slug=' . $_POST["slug"]);
 }

@@ -208,7 +208,7 @@ function getCourseClasses($courseid) {
 //
 function getCourseAudits($courseid) {
 
-	$path = build_path(BASE_DIR, 'data', 'backups', 'audits.csv');
+	$path = build_path(BASE_DIR, 'data', 'reviews', 'audits.csv');
 	$f = fopen($path, 'r');
 	$list = array();
 	while ($row = fgetcsv($f)) {
@@ -709,7 +709,7 @@ function getCoursesClassesUpcoming($courseid) {
 
 function getPartners() {
 
-	$path = build_path(BASE_DIR, 'partners', 'partners.json');
+	$path = build_path(BASE_DIR, 'data', 'partners.json');
 	$p = file_get_contents($path);
 	$list = json_decode($p);
 	return $list;
