@@ -51,8 +51,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 }
             }
 
-            // Assign timestamp if new
-            if ($isNewContact) {
+            // Ensure 'added_at' remains unchanged once set
+            if (!isset($contact["added_at"]) && $isNewContact) {
                 $contact["added_at"] = date("Y-m-d H:i:s");
             }
 
@@ -62,7 +62,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 "name" => $contact["name"],
                 "title" => $contact["title"],
                 "role" => $contact["role"],
-                "added_at" => $contact["added_at"] ?? null // Preserve added_at if already set
+                "added_at" => $contact["added_at"] // Preserve added_at if already set
             ];
         }
     }
@@ -85,6 +85,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     // Construct the updated partner data
+    $status = isset($_POST["status"]) ? "active" : "inactive"; // Set to 'active' if checked, otherwise 'inactive'
     $newPartner = [
         "id" => ($partnerIndex !== -1) ? $existingData[$partnerIndex]["id"] : (count($existingData) ? max(array_column($existingData, 'id')) + 1 : 1),
         "name" => $_POST["name"],
@@ -92,7 +93,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         "description" => $_POST["description"],
         "link" => $_POST["link"],
         "contacts" => $newContacts,
-        "contact_history" => $contactHistory // Preserve the history
+        "contact_history" => $contactHistory, // Preserve the history
+        "status" => $status
     ];
 
     if ($partnerIndex !== -1) {

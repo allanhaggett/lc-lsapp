@@ -5,7 +5,7 @@ $path = '../inc/lsapp.php';
 require($path); 
 $partnersFile = "../data/partners.json";
 $partners = file_exists($partnersFile) ? json_decode(file_get_contents($partnersFile), true) : [];
-$partner = ["id" => "", "name" => "", "slug" => "", "description" => "", "link" => "", "contacts" => []];
+$partner = ["id" => "", "name" => "", "slug" => "", "description" => "", "link" => "", "contacts" => [], "status" => "inactive"];
 
 // Load existing partner if editing
 if (isset($_GET["id"])) {
@@ -102,6 +102,11 @@ if (isset($_GET["id"])) {
                         <input type="url" name="link" class="form-control" required value="<?php echo htmlspecialchars($partner["link"]); ?>">
                     </div>
 
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" name="status" class="form-check-input" id="status" value="active" <?php echo $partner["status"] === "active" ? "checked" : ""; ?>>
+                        <label class="form-check-label" for="status">Active?</label>
+                    </div>
+
                     <h4>Contacts</h4>
                     <div id="contacts-container">
                     <?php if (!empty($partner["contacts"])): ?>
@@ -129,6 +134,7 @@ if (isset($_GET["id"])) {
                                     <input type="text" name="contacts[<?php echo $index; ?>][role]" class="form-control" value="<?php echo htmlspecialchars($contact["role"]); ?>">
                                 </div>
                             </div>
+                            <input type="hidden" name="contacts[<?php echo $index; ?>][added_at]" value="<?php echo htmlspecialchars($contact["added_at"] ?? ''); ?>">
 
                             <!-- "Retire" Button inside <details> -->
                             <details class="mt-2">
@@ -150,13 +156,19 @@ if (isset($_GET["id"])) {
                             <summary>Contact History</summary>
                             <?php foreach ($partner["contact_history"] as $index => $contact): ?>
                             <div class="mb-2 p-3 bg-light-subtle rounded-3">
-                                <div><?php echo htmlspecialchars($contact["name"]); ?></div>
-                                <div><?php echo htmlspecialchars($contact["email"]); ?></div>
-                                <div><?php echo htmlspecialchars($contact["idir"]); ?></div>
-                                <div><?php echo htmlspecialchars($contact["title"]); ?></div>
-                                <div><?php echo htmlspecialchars($contact["role"]); ?></div>
-                                <div>Added: <?php echo htmlspecialchars($contact["added_at"]); ?></div>
-                                <div>Removed: <?php echo htmlspecialchars($contact["removed_at"]); ?></div>
+                            <div>
+                                <?php echo htmlspecialchars($contact["name"]); ?> 
+                                &lt;<?php echo htmlspecialchars($contact["email"]); ?>&gt;
+                                (<?php echo htmlspecialchars($contact["idir"]); ?>)
+                            </div>
+                            <div>
+                                Title: <?php echo htmlspecialchars($contact["title"]); ?>
+                            </div>
+                            <div>
+                                Role: <?php echo htmlspecialchars($contact["role"]); ?>
+                            </div>
+                            <div>Added: <?php echo htmlspecialchars($contact["added_at"]); ?></div>
+                            <div>Retired: <?php echo htmlspecialchars($contact["removed_at"]); ?></div>
                             </div>
                             <?php endforeach; ?>
                         </details>
@@ -179,4 +191,3 @@ if (isset($_GET["id"])) {
 
 <?php require('../templates/javascript.php') ?>
 <?php require('../templates/footer.php') ?>
-

@@ -39,27 +39,79 @@ $pcourses = $partner ? getCoursesByPartnerName($partner["name"]) : [];
     <div class="row">
     <div class="col-md-6">
     <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
+        <div class="card-header">
+            <div class="mb-0">
+            <?php 
+            $statustype = 'primary';
+            if($partner["status"] != 'active') $statustype = 'warning'; 
+            ?>
+                <span class="badge bg-<?= $statustype ?>">
+                    <?php echo htmlspecialchars($partner["status"]); ?>
+                </span>
+            </div>
             <h2 class="mb-0"> <?php echo htmlspecialchars($partner["name"]); ?> </h2>
-            <a href="form.php?id=<?php echo $partner['id']; ?>" class="btn btn-warning">Edit</a>
         </div>
         <div class="card-body">
             <h5>Description:</h5>
             <p><?php echo nl2br(htmlspecialchars($partner["description"])); ?></p>
-
+            <div class="my-3">
+                <a href="<?php echo htmlspecialchars($partner["link"]); ?>" class="" target="_blank">LearningHUB</a>
+            </div>
             <h5>Contacts:</h5>
+            <?php if (!empty($partner["contacts"])): ?>
             <ul class="list-group">
                 <?php foreach ($partner["contacts"] as $contact): ?>
                     <li class="list-group-item">
-                        <strong><?php echo htmlspecialchars($contact["name"]); ?></strong>
-                        <br><a href="mailto:<?php echo htmlspecialchars($contact["email"]); ?>"><?php echo htmlspecialchars($contact["email"]); ?></a>
+
+                        <div>
+                            <?php echo htmlspecialchars($contact["name"]); ?> 
+                            &lt;<?php echo htmlspecialchars($contact["email"]); ?>&gt;
+                            (<?php echo htmlspecialchars($contact["idir"]); ?>)
+                        </div>
+                        <div>
+                            Title: <?php echo htmlspecialchars($contact["title"]); ?>
+                        </div>
+                        <div>
+                            Role: <?php echo htmlspecialchars($contact["role"]); ?>
+                        </div>
+                        <div>Added: <?php echo htmlspecialchars($contact["added_at"]); ?></div>
                     </li>
                 <?php endforeach; ?>
             </ul>
+            <?php else: ?>
+                <div class="alert alert-warning">
+                    There is no contact listed for this partner!
+                </div>
+            <?php endif ?>
+            
+            <?php if (!empty($partner["contact_history"])): ?>
+            <details class="mt-3">
+                <summary>Contact History</summary>
+                <?php foreach ($partner["contact_history"] as $index => $contact): ?>
+                <div class="mb-2 p-3 bg-light-subtle rounded-3">
+                    <div>
+                        <?php echo htmlspecialchars($contact["name"]); ?> 
+                        &lt;<?php echo htmlspecialchars($contact["email"]); ?>&gt;
+                        (<?php echo htmlspecialchars($contact["idir"]); ?>)
+                    </div>
+                    <div>
+                        Title: <?php echo htmlspecialchars($contact["title"]); ?>
+                    </div>
+                    <div>
+                        Role: <?php echo htmlspecialchars($contact["role"]); ?>
+                    </div>
+                    <div>Added: <?php echo htmlspecialchars($contact["added_at"]); ?></div>
+                    <div>Retired: <?php echo htmlspecialchars($contact["removed_at"]); ?></div>
+                </div>
+                <?php endforeach; ?>
+            </details>
+            <?php endif; ?>
+            
             <div class="mt-3">
-                <a href="<?php echo htmlspecialchars($partner["link"]); ?>" class="btn btn-primary" target="_blank">LearningHUB</a>
+                <a href="form.php?id=<?php echo $partner['id']; ?>" class="btn btn-dark">
+                    Edit partner info
+                </a>
             </div>
-
         </div>
     </div>
     </div>
