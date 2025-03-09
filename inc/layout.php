@@ -244,6 +244,7 @@ function getNavigation($context = NULL) {
 			<div class="dropdown-menu" aria-labelledby="admindrop">
 			
 				<a class="dropdown-item" href="/lsapp/admin.php" class="">Admin Dashboard</a>
+				<a class="dropdown-item" href="/lsapp/partners/course-dashboard.php" class="">Partner Course Dashboard</a>
 				<a class="dropdown-item" href="/lsapp/shipping-outgoing.php">Shipping Dashboard</a>
 				<a class="dropdown-item" href="/lsapp/venues-dashboard.php" class="">Venues Dashboard</a>
 				<a class="dropdown-item" href="/lsapp/materials.php" class="">Materials Dashboard</a>
