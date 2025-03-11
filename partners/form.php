@@ -43,8 +43,8 @@ if (isset($_GET["id"])) {
                             <input type="email" name="contacts[${index}][email]" class="form-control" required>
                         </div>
                         <div class="col-md-4">
-                            <label class="form-label">IDIR</label>
-                            <input type="text" name="contacts[${index}][idir]" class="form-control" required>
+                            <label class="form-label">IDIR <small>(not required, but highly recommended)</small></label>
+                            <input type="text" name="contacts[${index}][idir]" class="form-control">
                         </div>
                         <div class="col-md-4">
                             <label class="form-label">Title</label>
@@ -81,15 +81,20 @@ if (isset($_GET["id"])) {
             <div class="card-body">
                 <form action="process.php" method="POST">
                     <input type="hidden" name="id" value="<?php echo htmlspecialchars($partner["id"]); ?>">
+                    <input type="hidden" name="slug" value="<?php echo htmlspecialchars($partner["slug"]); ?>">
 
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <select name="status" class="form-select">
+                            <option value="requested" <?php echo $partner["status"] === "requested" ? "selected" : ""; ?>>Requested</option>
+                            <option value="active" <?php echo $partner["status"] === "active" ? "selected" : ""; ?>>Active</option>
+                            <option value="inactive" <?php echo $partner["status"] === "inactive" ? "selected" : ""; ?>>Inactive</option>
+                        </select>
+                    </div>
+                    
                     <div class="mb-3">
                         <label class="form-label">Partner Name</label>
                         <input type="text" name="name" class="form-control" required value="<?php echo htmlspecialchars($partner["name"]); ?>">
-                    </div>
-
-                    <div class="mb-3">
-                        <label class="form-label">Slug</label>
-                        <input type="text" name="slug" class="form-control" required value="<?php echo htmlspecialchars($partner["slug"]); ?>">
                     </div>
 
                     <div class="mb-3">
@@ -100,11 +105,6 @@ if (isset($_GET["id"])) {
                     <div class="mb-3">
                         <label class="form-label">Link</label>
                         <input type="url" name="link" class="form-control" required value="<?php echo htmlspecialchars($partner["link"]); ?>">
-                    </div>
-
-                    <div class="mb-3 form-check">
-                        <input type="checkbox" name="status" class="form-check-input" id="status" value="active" <?php echo $partner["status"] === "active" ? "checked" : ""; ?>>
-                        <label class="form-check-label" for="status">Active?</label>
                     </div>
 
                     <h4>Contacts</h4>
@@ -122,8 +122,8 @@ if (isset($_GET["id"])) {
                                     <input type="email" name="contacts[<?php echo $index; ?>][email]" class="form-control" required value="<?php echo htmlspecialchars($contact["email"]); ?>">
                                 </div>
                                 <div class="col-md-4">
-                                    <label class="form-label">IDIR</label>
-                                    <input type="text" name="contacts[<?php echo $index; ?>][idir]" class="form-control" required value="<?php echo htmlspecialchars($contact["idir"]); ?>">
+                                    <label class="form-label">IDIR <small>(not required, but highly recommended)</small></label>
+                                    <input type="text" name="contacts[<?php echo $index; ?>][idir]" class="form-control" value="<?php echo htmlspecialchars($contact["idir"]); ?>">
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Title</label>
@@ -147,9 +147,33 @@ if (isset($_GET["id"])) {
                 <?php else: ?>
                     <?php if (isset($_GET["id"])) : ?>
                     <div class="alert alert-warning">
-                        There is no contact listed for this partner!
+                        There is no contact listed for this partner! A blank contact field has been added.
                     </div>
                     <?php endif; ?>
+                    <div class="contact-group border rounded p-3 mb-2">
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <label class="form-label">Name</label>
+                                <input type="text" name="contacts[0][name]" class="form-control" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Email</label>
+                                <input type="email" name="contacts[0][email]" class="form-control" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">IDIR <small>(not required, but highly recommended)</small></label>
+                                <input type="text" name="contacts[0][idir]" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Title</label>
+                                <input type="text" name="contacts[0][title]" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Role</label>
+                                <input type="text" name="contacts[0][role]" class="form-control">
+                            </div>
+                        </div>
+                    </div>
                 <?php endif; ?>
                         <?php if (!empty($partner["contact_history"])): ?>
                         <details>

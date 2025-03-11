@@ -84,12 +84,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 
+    // Generate slug from name if not set
+    $slug = !empty($_POST["slug"]) ? $_POST["slug"] : strtolower(preg_replace('/[^a-z0-9\s-]/', '', str_replace(' ', '-', $_POST["name"])));
+
     // Construct the updated partner data
     $status = isset($_POST["status"]) ? "active" : "inactive"; // Set to 'active' if checked, otherwise 'inactive'
     $newPartner = [
         "id" => ($partnerIndex !== -1) ? $existingData[$partnerIndex]["id"] : (count($existingData) ? max(array_column($existingData, 'id')) + 1 : 1),
         "name" => $_POST["name"],
-        "slug" => $_POST["slug"],
+        "slug" => $slug,
         "description" => $_POST["description"],
         "link" => $_POST["link"],
         "contacts" => $newContacts,
@@ -104,5 +107,5 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     file_put_contents($partnersFile, json_encode(array_values($existingData), JSON_PRETTY_PRINT));
-    header('Location: /lsapp/partners/view.php?slug=' . $_POST["slug"]);
+    header('Location: /lsapp/partners/view.php?slug=' . $slug);
 }
