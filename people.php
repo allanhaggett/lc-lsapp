@@ -52,7 +52,7 @@
 		<span class="badge bg-light-subtle "><?= $peep[4] ?></span>
 		<?php endif ?>
 		</td>-->
-		<td class="idir"><span class="badge text-light-emphasis bg-light-subtle"><?= $peep[0] ?></span></td>
+		<td class="idir"><span class="badge text-light-emphasis bg-light-subtle" id="<?= $peep[0] ?>"><?= $peep[0] ?></span></td>
 		<?php if(array_key_exists($peep[1], $teams)): ?>
 			<td class="role"><?= $teams[$peep[1]]['name'] ?></td>
 		<?php endif; ?>
@@ -79,9 +79,8 @@
 
 	  
 		<form method="post"	class="newuser col" action="people-controller.php">
-
 			<input type="hidden" name="action" value="add">
-			<select name="role" id="role" class="form-select mb-2" required>
+			<select name="role" id="role" class="form-select mb-2" autocomplete="off" required>
 				<option selected value="" disabled>Choose a Team</option>
 				<?php foreach($teams as $teamId => $team): ?>
 					<option value=<?= $teamId ?>><?= $team["name"] ?></option>
@@ -133,6 +132,21 @@ $(document).ready(function(){
 	var peeps = new List('userlist', peopleoptions);
 
 });
+
+// IDIR validation
+function checkIdir(value) {
+	const userIdir = document.getElementById(value);
+	return userIdir;
+}
+const idirInput = document.getElementById('idir');
+idirInput.addEventListener('input', () => {
+	if (checkIdir(idirInput.value)) {
+		idirInput.setCustomValidity('IDIR already exists.');
+	} else {
+		idirInput.setCustomValidity('');
+	}
+})
+
 </script>
 
 <?php include('templates/footer.php') ?>
