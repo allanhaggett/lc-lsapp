@@ -3,6 +3,7 @@
 <title>People</title>
 <?php getScripts() ?>
 <?php getNavigation() ?>
+<?php $teams = getTeams(); ?>
 <?php if(canAccess()): ?>
 <div class="container">
 <div class="row justify-content-md-center mb-3">
@@ -16,7 +17,7 @@
 <?php endif ?>
 <h1>People</h1>
 <div id="userlist">
-<p>If they're not on this list, they can't access anything. <a href="teams.php">Team view</a>.</p>
+<p>If they're not on this list, they can't access anything. <a href="teams-all.php">Team view</a>.</p>
 <input class="search form-control  mb-3" placeholder="search">
 <div class="table-responsive">
 <table class="table table-sm table-striped table-hover">
@@ -29,7 +30,7 @@
 	<th>Phone</th>
 	<!-- <th>Status</th> -->
 	<th>IDIR</th>
-	<th>Role</th>
+	<th>Team</th>
 </tr>
 </thead>
 <tbody class="list">
@@ -79,14 +80,10 @@
 
 			<input type="hidden" name="action" value="add">
 			<select name="role" id="role" class="form-select mb-2" required>
-				<option value="Operations">Operations</option>
-				<option value="Delivery">Delivery</option>
-				<option value="Developer">Development</option>
-				<option value="Internal">Internal</option>
-				<option value="External">External</option>
-				<?php if(isSuper()): ?>
-				<option value="Super">Super</option>
-				<?php endif ?>
+				<option selected value="" disabled>Choose a Team</option>
+				<?php foreach($teams as $teamId => $team): ?>
+					<option value=<?= $teamId ?>><?= $team["name"] ?></option>
+				<?php endforeach ?>
 			</select>
 			<input type="text" name="idir" id="idir" class="form-control  mb-2" placeholder="IDIR" required>
 			<input type="text" name="name" id="name" class="form-control  mb-2" placeholder="Name" required>
