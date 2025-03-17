@@ -53,7 +53,9 @@
 		<?php endif ?>
 		</td>-->
 		<td class="idir"><span class="badge text-light-emphasis bg-light-subtle"><?= $peep[0] ?></span></td>
-		<td class="role"><?= $peep[1] ?></td>
+		<?php if(array_key_exists($peep[1], $teams)): ?>
+			<td class="role"><?= $teams[$peep[1]]['name'] ?></td>
+		<?php endif; ?>
 	</tr>
 <?php endif ?>
 <?php endforeach ?>
