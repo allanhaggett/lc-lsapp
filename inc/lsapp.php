@@ -31,7 +31,6 @@ function stripIDIR($idir) {
 	
 }
 define('LOGGED_IN_IDIR', stripIDIR($_SERVER["REMOTE_USER"]));
-// define('LOGGED_IN_IDIR', 'ahaggett');
 
 // Last synchronization message for everywhere
 $today = date('Y-m-d');
@@ -1236,6 +1235,34 @@ function getPeople($idir = null) {
 	}
 	print $options;
 }
+
+// 
+// return an array of key values pairs, with the values as arrays of team details
+//
+function getTeams() {
+	
+	return [
+		'ExecutiveDirector' => ['name' => 'Executive Director', 'isBranch' => 1],
+		'Operations' => ['name' => 'Operations &amp; Technology', 'isBranch' => 1],
+		'Employees' => ['name' => 'Corp Learning All Employees', 'isBranch' => 1],
+		'Leaders' => ['name' => 'Corp Learning People Leaders', 'isBranch' => 1],
+		'Governance' => ['name' => 'Planning, Evaluation &amp; Governance', 'isBranch' => 1],
+		'Coaching' => ['name' => 'Coaching Services', 'isBranch' => 1],
+		'LeadershipDev' => ['name' => 'Leadership Development', 'isBranch' => 1],
+		'Internal' => ['name' => 'Internal', 'isBranch' => 0],
+		'External' => ['name' => 'External', 'isBranch' => 0]
+	];
+}
+
+
+
+
+
+
+
+
+
+
 
 
 
