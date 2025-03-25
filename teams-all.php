@@ -94,7 +94,7 @@ h1, h2 {
 		if($colors[0] > 0):
 		?>
 		<div class="mb-0 bg-light-subtle shadow-sm" style="border-radius: 10px; border: 1px solid #F1F1F1; margin: 0; padding: 0; position: relative; width: 100%;">
-			<div style="border-right: 2px solid black; height: 100%; position:absolute; width: 50%  "></div>
+			<div style="border-right: solid rgb(256, 256, 256, 100%); height: 100%; position:absolute; width: 50%  "></div>
 			<div id="bluebar" class="bar" style="border-top-left-radius: 10px; background-color: DodgerBlue; width: <?= $colors[1] ?>%"></div>
 			<div id="greenbar" class="bar" style="background-color: MediumSeaGreen; width: <?= $colors[2] ?>%"></div>
 			<div id="yellowbar" class="bar" style="background-color: gold; width: <?= $colors[3] ?>%"></div>
@@ -195,7 +195,7 @@ h1, h2 {
 			if($colors[0] > 0):
 			?>
 				<div class="mb-0 bg-light-subtle shadow-sm" style="border-radius: 10px; border: 1px solid #F1F1F1; margin: 0; padding: 0; position: relative; width: 100%;">
-					<div style="border-right: 2px solid black; height: 100%; position:absolute; width: 50%  "></div>
+					<div style="border-right: solid rgb(256, 256, 256, 100%); height: 100%; position:absolute; width: 50%  "></div>
 					<div id="bluebar" class="bar" style="border-top-left-radius: 10px; background-color: DodgerBlue; width: <?= $colors[1] ?>%"></div>
 					<div id="greenbar" class="bar" style="background-color: MediumSeaGreen; width: <?= $colors[2] ?>%"></div>
 					<div id="yellowbar" class="bar" style="background-color: gold; width: <?= $colors[3] ?>%"></div>

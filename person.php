@@ -12,6 +12,7 @@
 <?php $cclaimed = getCoursesClaimed($idir) ?>
 <?php $tips = getTips() ?>
 <?php 
+$teams = getTeams();
 $functions = getUserFunctions($idir); 
 $categories = [];
 foreach($functions as $fun) {
@@ -73,17 +74,30 @@ h1, h2 {
 <?php if(isset($person[6])): ?>
 <h2 class=""><?= $person[6] ?>
 <?php endif ?>
+
 <?php if(isset($person[1])): ?>
 <?php 
-$team = '';
-if($person[1] == 'Governance') $team = 'Governance, Planning, &amp; Evaluation';
-if($person[1] == 'Employees') $team = 'Corp. Learning - All Employees';
-if($person[1] == 'Leaders') $team = 'Corp. Learning - People Leaders';
-if($person[1] == 'Operations') $team = 'Operations &amp; Technology';
+	if (array_key_exists($person[1], $teams) && $teams[$person[1]]['isBranch'] == 1) {
+		if ($teams[$person[1]]['name'] == 'Executive Director') {
+			$team = '';
+		} else {
+			$team = $teams[$person[1]]['name'];
+		}
+	} else {
+		$team = '';
+	}
+
+// if($person[1] == 'Governance') $team = 'Governance, Planning, &amp; Evaluation';
+// if($person[1] == 'Employees') $team = 'Corp. Learning - All Employees';
+// if($person[1] == 'Leaders') $team = 'Corp. Learning - People Leaders';
+// if($person[1] == 'Operations') $team = 'Operations &amp; Technology';
+
 ?>
+
 <?php if($team): ?>
 <div>
-	<a class="" href="/lsapp/teams.php?teamname=<?= $person[1] ?>"><?= $team ?> Team</a>
+	<a class="" href="/lsapp/teams-all.php?team=<?= $person[1] ?>"><?= $team ?> Team</a>
+	<!-- <?= $team ?> Team -->
 </div>
 <?php endif ?>
 <?php endif ?>
@@ -128,8 +142,8 @@ if($colors[0] > 0):
 ?>
 
 <a class="" href="#" data-toggle="modal" data-target="#tips">
-<div class="mb-0 bg-light-subtle rounded-2" style="margin: 0; padding: 0; position: relative; width: 100%;">
-	<div style="border-right: 2px solid black; height: 100%; position:absolute; width: 50%  "></div>
+<div class="mb-0 bg-light-subtle rounded-2 shadow-sm" style="margin: 0; padding: 0; position: relative; width: 100%;">
+	<div style="border-right: solid rgb(256, 256, 256, 100%); height: 100%; position:absolute; width: 50%  "></div>
 	<div id="bluebar" class="bar" style="border-top-left-radius: 10px; background-color: DodgerBlue; width: <?= $colors[1] ?>%"></div>
 	<div id="greenbar" class="bar" style="background-color: MediumSeaGreen; width: <?= $colors[2] ?>%"></div>
 	<div id="yellowbar" class="bar" style="background-color: gold; width: <?= $colors[3] ?>%"></div>
