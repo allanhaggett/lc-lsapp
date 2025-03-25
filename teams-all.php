@@ -5,6 +5,7 @@ require('inc/lsapp.php');
 // IDIR,Role,Name,Email,Status,Phone,Title
 $peeps = getPeopleAll();
 $teams = getTeams();
+$queryString = $_GET['team'];
 
 // populate our people array with our pre-defined teams as arrays
 $allFolks = array();
@@ -146,7 +147,7 @@ h1, h2 {
 	}
 	?>
 
-	<details class="m-3 p-2 bg-secondary-subtle rounded" id="<?= $teamName ?>-details">
+	<details class="m-3 p-2 bg-secondary-subtle rounded" id="<?= $teamName ?>-details" <?= $teamName === $queryString ? 'open=""' : '' ?>>
 
 	<summary>
 		<h2 class="text-primary-emphasis" style="display: inline;">
