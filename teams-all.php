@@ -5,7 +5,12 @@ require('inc/lsapp.php');
 // IDIR,Role,Name,Email,Status,Phone,Title
 $peeps = getPeopleAll();
 $teams = getTeams();
-$queryString = $_GET['team'];
+
+if (isset($_GET['team'])) {
+	$queryString = $_GET['team'];
+} else {
+	$queryString = '';
+}
 
 // populate our people array with our pre-defined teams as arrays
 $allFolks = array();
@@ -167,7 +172,7 @@ h1, h2 {
 			<div class="name"><strong><a href="/lsapp/person.php?idir=<?= $person[0] ?>"><?= $person[2] ?></a></strong>
 			
 			<?php if($person[9] != 'Unspecified'): ?>
-				(<span class="pronouns"><?= $person[9] ?></span>)
+				(<span class="pronouns text-lowercase"><?= $person[9] ?></span>)
 			<?php endif ?>
 			<div class="title"><?php if(isset($person[6])) echo $person[6] ?></div>
 			</div>
