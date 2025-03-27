@@ -1150,7 +1150,7 @@ function getDirectors() {
 	fgetcsv($f); // Pop off the header
 	$list = array();
 	while ($row = fgetcsv($f)) {
-		if($row[8] == 1) {
+		if($row[4] === 'Active' && $row[8]) {
 			array_push($list,$row);
 		}
 	}
