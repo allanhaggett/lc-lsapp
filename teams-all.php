@@ -126,7 +126,7 @@ h1, h2 {
 			?>
 			<li class="list-group-item">
 			<div class="form-check">
-				<input class="form-check-input" type=checkbox value="" id="<?= $teamId ?>-checkbox" autocomplete="off">
+				<input class="form-check-input" type=checkbox value="" id="<?= $teamId ?>-checkbox" autocomplete="off" <?= $teamId === $queryString ? 'checked=""' : '' ?>>
 				<label class="form-check-label" for="<?= $teamId ?>-checkbox"><?= $teamDeets['name'] ?></label>
 			</div>
 			</li>
