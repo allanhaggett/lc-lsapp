@@ -16,11 +16,15 @@ if($_POST):
 	// Start making a value that we're going to update the person
 	// with regardless that uses the old/existing IDIR.
 	$idir = $oldidir;
-	$newidir = $fromform['NewIDIR'];
-	// if the existing IDIR doesn't match the new IDIR update 
-	// value that gets populated into the person being written 
-	if ($idir !== $newidir) {
-		$idir = $newidir;
+
+	if (isset($fromform['NewIDIR'])) {
+		$newidir = $fromform['NewIDIR'];
+
+		// if the existing IDIR doesn't match the new IDIR update 
+		// value that gets populated into the person being written 
+		if ($idir !== $newidir) {
+			$idir = $newidir;
+		}
 	}
 	
 	if(isAdmin() || $currentuser == $idir) { // note that this means that people can't update their own IDIRs
