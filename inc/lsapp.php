@@ -207,7 +207,7 @@ function getCourseClasses($courseid) {
 //
 function getCourseAudits($courseid) {
 
-	$path = build_path(BASE_DIR, 'data', 'backups', 'audits.csv');
+	$path = build_path(BASE_DIR, 'data', 'reviews', 'audits.csv');
 	$f = fopen($path, 'r');
 	$list = array();
 	while ($row = fgetcsv($f)) {
@@ -330,7 +330,7 @@ function getVenueRooms($venueid) {
 function getUserReviews($idir) {
 	
 	
-	$path = build_path(BASE_DIR, 'data', 'backups', 'audits.csv');
+	$path = build_path(BASE_DIR, 'data', 'reviews', 'audits.csv');
 	$f = fopen($path, 'r');
 	$list = array();
 	while ($row = fgetcsv($f)) {
@@ -2001,7 +2001,7 @@ function getProposals() {
 // Return all evaluations
 //
 function getAudits() {
-	$f = fopen('data/backups/audits.csv', 'r');
+	$f = fopen('data/reviews/audits.csv', 'r');
 	$list = array();
 	while ($row = fgetcsv($f)) {
 		array_push($list,$row);
