@@ -57,7 +57,7 @@ h1, h2 {
 		<a href="person-update.php?idir=<?= $person[0] ?>" class="btn btn-link float-right">Edit</a>
 	<?php endif ?>
 </div>
-<!--IDIR,Role,Name,Email,Status,Phone,Title-->
+<!--IDIR,Team,Name,Email,Status,Phone,Title-->
 <!--
 <?php if($person[4] == 'Active'): ?>
 <span class="badge badge-success"><?= $person[4] ?></span>
@@ -86,18 +86,11 @@ h1, h2 {
 	} else {
 		$team = '';
 	}
-
-// if($person[1] == 'Governance') $team = 'Governance, Planning, &amp; Evaluation';
-// if($person[1] == 'Employees') $team = 'Corp. Learning - All Employees';
-// if($person[1] == 'Leaders') $team = 'Corp. Learning - People Leaders';
-// if($person[1] == 'Operations') $team = 'Operations &amp; Technology';
-
 ?>
 
 <?php if($team): ?>
 <div>
 	<a class="" href="/lsapp/teams-all.php?team=<?= $person[1] ?>"><?= $team ?> Team</a>
-	<!-- <?= $team ?> Team -->
 </div>
 <?php endif ?>
 <?php endif ?>
@@ -197,13 +190,13 @@ if($colors[0] > 0):
 				</span>
 			</div>
 			<div class="p-3 bg-light-subtle rounded-3 my-2">
-				<?php if($colors[0] > 0) $checked = 'checked' ?? '' ?>
+				<?php $checked = $colors[0] > 0 ? 'checked' : '' ?>
 				<input type="checkbox" id="optinout" name="optinout" <?= $checked ?> value="<?= $colors[0] ?>">
 				<label for="optinout" style="margin:0">Share your graph?</label>
 			</div>
-			<!-- IDIR,Role,Name,Email,Status,Phone,Title,Super,Manager,Pronouns,Colors -->
-			<input type="hidden" name="IDIR" id="IDIR" value="<?= $person[0] ?>">
-			<input type="hidden" name="Role" id="role" value="<?= $person[1] ?>">
+			<!-- IDIR,Team,Name,Email,Status,Phone,Title,Super,Manager,Pronouns,Colors -->
+			<input type="hidden" name="OldIDIR" id="IDIR" value="<?= $person[0] ?>">
+			<input type="hidden" name="Team" id="team" value="<?= $person[1] ?>">
 			<input type="hidden" name="Name" id="Name" value="<?= $person[2] ?>">
 			<input type="hidden" name="Email" id="Email" value="<?= $person[3] ?>">
 			<input type="hidden" name="Status" id="Status" value="<?= $person[4] ?>">
@@ -213,6 +206,8 @@ if($colors[0] > 0):
 			<input type="hidden" name="Manager" id="Manager" value="<?= $person[8] ?>">
 			<input type="hidden" name="Pronouns" id="Pronouns" value="<?= $person[9] ?>">
 			<input type="hidden" name="Colors" id="Colors" value="<?= $person[10] ?>">
+			<input type="hidden" name="iStore" id="iStore" value="<?= $person[11] ?>">
+			<input type="hidden" name="Kepler" id="Kepler" value="<?= $person[12] ?>">
 			<button class="btn btn-primary">Save Graph</button>
 			</form>
 		</details>
@@ -303,9 +298,9 @@ if($colors[0] > 0):
 	<?php else: ?>
 		<?php if($idir == $currentuser): ?>
 			<form id="optin" class="" method="post" action="person-update.php">
-			<!-- IDIR,Role,Name,Email,Status,Phone,Title,Super,Manager,Pronouns,Colors -->
-			<input type="hidden" name="IDIR" id="IDIR" value="<?= $person[0] ?>">
-			<input type="hidden" name="Role" id="role" value="<?= $person[1] ?>">
+			<!-- IDIR,Team,Name,Email,Status,Phone,Title,Super,Manager,Pronouns,Colors -->
+			<input type="hidden" name="OldIDIR" id="IDIR" value="<?= $person[0] ?>">
+			<input type="hidden" name="Team" id="team" value="<?= $person[1] ?>">
 			<input type="hidden" name="Name" id="Name" value="<?= $person[2] ?>">
 			<input type="hidden" name="Email" id="Email" value="<?= $person[3] ?>">
 			<input type="hidden" name="Status" id="Status" value="<?= $person[4] ?>">
@@ -315,8 +310,10 @@ if($colors[0] > 0):
 			<input type="hidden" name="Manager" id="Manager" value="<?= $person[8] ?>">
 			<input type="hidden" name="Pronouns" id="Pronouns" value="<?= $person[9] ?>">
 			<input type="hidden" name="Colors" id="Colors" value="<?= $person[10] ?>">
+			<input type="hidden" name="iStore" id="iStore" value="<?= $person[11] ?>">
+			<input type="hidden" name="Kepler" id="Kepler" value="<?= $person[12] ?>">
 			<div>
-				<?php if($colors[0] > 0) $checked = 'checked' ?? '' ?>
+				<?php $checked = $colors[0] > 0 ? 'checked' : '' ?>
 				<input type="checkbox" id="optinout" name="optinout" <?= $checked ?> value="<?= $colors[0] ?>">
 				<label for="optinout">Share your graph?</label>
 			</div>
