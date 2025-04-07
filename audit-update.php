@@ -6,150 +6,131 @@ $modified = date('Y-m-d:His');
 $norm = explode('\\', $_SERVER["REMOTE_USER"]); 
 $modifiedBy = strtolower($norm[1]); // ahaggett
 
+// Sanitize input function
+function sanitize_input($input) {
+    return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
+}
 
-// Rename the existing copy with a modified timestamp on the end 
-// of the filename 
+// Function to sanitize array inputs
+function sanitize_array($array) {
+    if (is_array($array)) {
+        return array_map('sanitize_input', $array);
+    }
+    return [];
+}
 
-// audit-shamitch-20230720-161848
-$existingname = $_POST['AuditID'];
+// Sanitize all incoming POST data
+$sanitized_post = filter_input_array(INPUT_POST, FILTER_SANITIZE_SPECIAL_CHARS);
+if (!$sanitized_post) {
+    die("Invalid input data.");
+}
+
+// Rename the existing copy with a modified timestamp on the end of the filename 
+$existingname = sanitize_input($sanitized_post['AuditID']);
 $backupname = $existingname . '-modified-' . date('YmdHis');
 $backuppath = 'data/backups/' . $backupname . '.json';
 $existingpath = 'data/backups/' . $existingname . '.json';
-rename($existingpath,$backuppath);
 
+// Create a backup before overwriting
+rename($existingpath, $backuppath);
 
+// Build sanitized audit data
+$newaudit = [
+    'AuditID' => $existingname,
+    'Status' => sanitize_input($sanitized_post['Status']),
+    'created' => sanitize_input($sanitized_post['created']),
+    'createdby' => sanitize_input($sanitized_post['createdby']),
+    'edited' => $modified,
+    'editedby' => $modifiedBy,
+    'resourceType' => sanitize_input($sanitized_post['resourceType']),
+    'LSAppCourseid' => sanitize_input($sanitized_post['LSAppCourseid']),
+    'ResourceName' => sanitize_input($sanitized_post['ResourceName']),
+    'ResourceOwner' => sanitize_input($sanitized_post['ResourceOwner']),
+    'DeliveryMethod' => sanitize_input($sanitized_post['DeliveryMethod']),
+    'Duration' => sanitize_input($sanitized_post['Duration']),
+    'Level' => sanitize_input($sanitized_post['Level']),
+    'Audience' => sanitize_input($sanitized_post['Audience']),
+    'Topic' => sanitize_input($sanitized_post['Topic']),
+    'OverallCourseOutcomes' => sanitize_input($sanitized_post['OverallCourseOutcomes']),
+    'Notes' => sanitize_input($sanitized_post['Notes']),
+    'MeasurableOutcomesForOrganization' => sanitize_input($sanitized_post['MeasurableOutcomesForOrganization']),
+    'CurrentOrganizationalMeasureBaseline' => sanitize_input($sanitized_post['CurrentOrganizationalMeasureBaseline']),
+    'LearningMetric' => sanitize_input($sanitized_post['LearningMetric']),
+    'SupportChangingSkills' => sanitize_input($sanitized_post['SupportChangingSkills']),
 
-// $auditindex = [
-// 	'Evaluationid' => $auditID,
-// 	'Created' => date('Y-m-d H:i:s'),
-// 	'CreatedBy' => $createdBy,
-// 	'LSAppcourseID' => $_POST['lsappcourseid'], 
-// 	'ResourceName' => $_POST['ResourceName'],
-// 	'resourceType' => $_POST['resourceType'],
-// 	'ResourceOwner' => $_POST['ResourceOwner'],
-// 	'Status' => 'Submitted'
-// ];
-// $fp = fopen('data/backups/audits.csv', 'a+');
-// fputcsv($fp, $auditindex);
-// fclose($fp);
+    'BCPSPrincipleLearnerCentre' => sanitize_array($sanitized_post['BCPSPrincipleLearnerCentre'] ?? []),
+    'BCPSPrincipleLearnerCentreSupportYes' => sanitize_input($sanitized_post['BCPSPrincipleLearnerCentreSupportYes']),
+    'BCPSPrincipleLearnerCentreSupportNo' => sanitize_input($sanitized_post['BCPSPrincipleLearnerCentreSupportNo']),
 
+    'BCPSPrincipleAlignedBusinessPriority' => sanitize_array($sanitized_post['BCPSPrincipleAlignedBusinessPriority'] ?? []),
+    'BCPSPrincipleAlignedBusinessPrioritySupportYes' => sanitize_input($sanitized_post['BCPSPrincipleAlignedBusinessPrioritySupportYes']),
+    'BCPSPrincipleAlignedBusinessPrioritySupportNo' => sanitize_input($sanitized_post['BCPSPrincipleAlignedBusinessPrioritySupportNo']),
+    
+    'BCPSPrincipleAvailableJIT' => sanitize_array($sanitized_post['BCPSPrincipleAvailableJIT'] ?? []),
+    'BCPSPrincipleAvailableJITSupportYes' => sanitize_input($sanitized_post['BCPSPrincipleAvailableJITSupportYes']),
+    'BCPSPrincipleAvailableJITSupportNo' => sanitize_input($sanitized_post['BCPSPrincipleAvailableJITSupportNo']),
+    
+    'BCPSPrincipleEmpowerGrowth' => sanitize_array($sanitized_post['BCPSPrincipleEmpowerGrowth'] ?? []),
+    'BCPSPrincipleEmpowerGrowthSupportYes' => sanitize_input($sanitized_post['BCPSPrincipleEmpowerGrowthSupportYes']),
+    'BCPSPrincipleEmpowerGrowthSupportNo' => sanitize_input($sanitized_post['BCPSPrincipleEmpowerGrowthSupportNo']),
 
-
-
-$newaudit = Array(
-            'AuditID' => $existingname,
-            'Status' => $_POST['Status'],
-            'created' => $_POST['created'],
-            'createdby' => $_POST['createdby'],
-            'edited' => $modified,
-            'editedby' => $modifiedBy,
-            'resourceType' => $_POST['resourceType'],
-            'LSAppCourseid' => $_POST['LSAppCourseid'],
-            'ResourceName' => $_POST['ResourceName'],
-            'ResourceOwner' => $_POST['ResourceOwner'],
-            'DeliveryMethod' => $_POST['DeliveryMethod'],
-            'Duration' => $_POST['Duration'],
-            'Level' => $_POST['Level'],
-            'Audience' => $_POST['Audience'],
-            'Topic' => $_POST['Topic'],
-            'OverallCourseOutcomes' => $_POST['OverallCourseOutcomes'],
-            'Notes' => $_POST['Notes'],
-            'MeasurableOutcomesForOrganization' => $_POST['MeasurableOutcomesForOrganization'],
-            'CurrentOrganizationalMeasureBaseline' => $_POST['CurrentOrganizationalMeasureBaseline'],
-            'LearningMetric' => $_POST['LearningMetric'],
-            'SupportChangingSkills' => $_POST['SupportChangingSkills'],
-
-            'BCPSPrincipleLearnerCentre' => $_POST['BCPSPrincipleLearnerCentre'],
-            'BCPSPrincipleLearnerCentreSupportYes' => $_POST['BCPSPrincipleLearnerCentreSupportYes'],
-            'BCPSPrincipleLearnerCentreSupportNo' => $_POST['BCPSPrincipleLearnerCentreSupportNo'],
-
-            'BCPSPrincipleAlignedBusinessPriority' => $_POST['BCPSPrincipleAlignedBusinessPriority'],
-            'BCPSPrincipleAlignedBusinessPrioritySupportYes' => $_POST['BCPSPrincipleAlignedBusinessPrioritySupportYes'],
-            'BCPSPrincipleAlignedBusinessPrioritySupportNo' => $_POST['BCPSPrincipleAlignedBusinessPrioritySupportNo'],
-            
-            'BCPSPrincipleAvailableJIT' => $_POST['BCPSPrincipleAvailableJIT'],
-            'BCPSPrincipleAvailableJITSupportYes' => $_POST['BCPSPrincipleAvailableJITSupportYes'],
-            'BCPSPrincipleAvailableJITSupportNo' => $_POST['BCPSPrincipleAvailableJITSupportNo'],
-            
-            'BCPSPrincipleEmpowerGrowth' => $_POST['BCPSPrincipleEmpowerGrowth'],
-            'BCPSPrincipleEmpowerGrowthSupportYes' => $_POST['BCPSPrincipleEmpowerGrowthSupportYes'],
-            'BCPSPrincipleEmpowerGrowthSupportNo' => $_POST['BCPSPrincipleEmpowerGrowthSupportNo'],
-
-            'BCPSPrinciplePromoteConnectness' => $_POST['BCPSPrinciplePromoteConnectness'],
-            'BCPSPrinciplePromoteConnectnessSupportYes' => $_POST['BCPSPrinciplePromoteConnectnessSupportYes'],
-            'BCPSPrinciplePromoteConnectnessSupportNo' => $_POST['BCPSPrinciplePromoteConnectnessSupportNo'],
-            
-            'BCPSPrincipleAnchorEstablishedContent' => $_POST['BCPSPrincipleAnchorEstablishedContent'],
-            'BCPSPrincipleAnchorEstablishedContentSupportYes' => $_POST['BCPSPrincipleAnchorEstablishedContentSupportYes'],
-            'BCPSPrincipleAnchorEstablishedContentSupportNo' => $_POST['BCPSPrincipleAnchorEstablishedContentSupportNo'],
-            
-            'BCPSPrincipleEncourageReflection' => $_POST['BCPSPrincipleEncourageReflection'],
-            'BCPSPrincipleEncourageReflectionSupportYes' => $_POST['BCPSPrincipleEncourageReflectionSupportYes'],
-            'BCPSPrincipleEncourageReflectionSupportNo' => $_POST['BCPSPrincipleEncourageReflectionSupportNo'],
-            
-            'BCPSPrincipleOverallPercent' => $_POST['BCPSPrincipleOverallPercent'],
-
-
-            'MeetAccessibilityStandards' => $_POST['MeetAccessibilityStandards'],
-            'MeetAccessibilityStandardsElaborate' => $_POST['MeetAccessibilityStandardsElaborate'],
-            'MissingKeyContent' => $_POST['MissingKeyContent'],
-            'MissingKeyContentElaborate' => $_POST['MissingKeyContentElaborate'],
-            'ReduceRisk' => $_POST['ReduceRisk'],
-            'ReduceRiskElaborate' => $_POST['ReduceRiskElaborate'],
-            'SignificantReach' => $_POST['SignificantReach'],
-            'SignificantReachElaborate' => $_POST['SignificantReachElaborate'],
-            'WhatUpdates' => $_POST['WhatUpdates'],
-            'WhatUpdatesElaborate' => $_POST['WhatUpdatesElaborate'],
-            'UncompletedUpdateRisk' => $_POST['UncompletedUpdateRisk'],
-            'ResourceRedirect' => $_POST['ResourceRedirect'],
-            'ResourceRedirectElaborate' => $_POST['ResourceRedirectElaborate']
-);
-$audit = json_encode($newaudit);
-
-$result = file_put_contents($existingpath, $audit);
-if ($result !== false) {
-	//echo "Data written to file successfully!";
-} else {
-	echo "Error writing to file!";
-	exit;
-}
-
-
-$fromform = $_POST;
-
-$f = fopen('data/backups/audits.csv','r');
-$temp_table = fopen('data/backups/audits-temp.csv','w');
-// pop the headers off the source file and start the new file with those headers
-$headers = fgetcsv($f);
-fputcsv($temp_table,$headers);
-// AuditID,Created,CreatedBy,LSAppcourseID,ResourceName,resourceType,Status
-$auditupdate = [
-	'Auditid' => $existingname,
-	'created' => $_POST['created'],
-	'createdby' => $_POST['createdby'],
-	'LSAppcourseID' => $_POST['LSAppCourseid'], 
-	'ResourceName' => $_POST['ResourceName'],
-	'resourceType' => $_POST['resourceType'],
-	'Status' => $_POST['Status'],
-    'PrinciplesPercent' => $_POST['BCPSPrincipleOverallPercent']
+    'BCPSPrinciplePromoteConnectness' => sanitize_array($sanitized_post['BCPSPrinciplePromoteConnectness'] ?? []),
+    'BCPSPrinciplePromoteConnectnessSupportYes' => sanitize_input($sanitized_post['BCPSPrinciplePromoteConnectnessSupportYes']),
+    'BCPSPrinciplePromoteConnectnessSupportNo' => sanitize_input($sanitized_post['BCPSPrinciplePromoteConnectnessSupportNo']),
+    
+    'BCPSPrincipleAnchorEstablishedContent' => sanitize_array($sanitized_post['BCPSPrincipleAnchorEstablishedContent'] ?? []),
+    'BCPSPrincipleAnchorEstablishedContentSupportYes' => sanitize_input($sanitized_post['BCPSPrincipleAnchorEstablishedContentSupportYes']),
+    'BCPSPrincipleAnchorEstablishedContentSupportNo' => sanitize_input($sanitized_post['BCPSPrincipleAnchorEstablishedContentSupportNo']),
+    
+    'BCPSPrincipleEncourageReflection' => sanitize_array($sanitized_post['BCPSPrincipleEncourageReflection'] ?? []),
+    'BCPSPrincipleEncourageReflectionSupportYes' => sanitize_input($sanitized_post['BCPSPrincipleEncourageReflectionSupportYes']),
+    'BCPSPrincipleEncourageReflectionSupportNo' => sanitize_input($sanitized_post['BCPSPrincipleEncourageReflectionSupportNo']),
+    'BCPSPrincipleOverallPercent' => sanitize_input($sanitized_post['BCPSPrincipleOverallPercent']),
+    'MeetAccessibilityStandards' => sanitize_input($sanitized_post['MeetAccessibilityStandards']),
+    'MeetAccessibilityStandardsElaborate' => sanitize_input($sanitized_post['MeetAccessibilityStandardsElaborate']),
+    'MissingKeyContent' => sanitize_input($sanitized_post['MissingKeyContent']),
+    'MissingKeyContentElaborate' => sanitize_input($sanitized_post['MissingKeyContentElaborate']),
+    'ReduceRisk' => sanitize_input($sanitized_post['ReduceRisk']),
+    'ReduceRiskElaborate' => sanitize_input($sanitized_post['ReduceRiskElaborate']),
+    'SignificantReach' => sanitize_input($sanitized_post['SignificantReach']),
+    'SignificantReachElaborate' => sanitize_input($sanitized_post['SignificantReachElaborate']),
+    'WhatUpdates' => sanitize_input($sanitized_post['WhatUpdates']),
+    'WhatUpdatesElaborate' => sanitize_input($sanitized_post['WhatUpdatesElaborate']),
+    'UncompletedUpdateRisk' => sanitize_input($sanitized_post['UncompletedUpdateRisk']),
+    'ResourceRedirect' => sanitize_input($sanitized_post['ResourceRedirect']),
+    'ResourceRedirectElaborate' => sanitize_input($sanitized_post['ResourceRedirectElaborate'])
 ];
 
-while (($data = fgetcsv($f)) !== FALSE){
-    if($data[0] == $existingname) {
-        fputcsv($temp_table,$auditupdate);
-    } else {
-        fputcsv($temp_table,$data);
-    }
+$audit = json_encode($newaudit);
+$result = file_put_contents($existingpath, $audit);
+
+if ($result === false) {
+    die("Error writing to file!");
+}
+
+// Update CSV
+$f = fopen('data/backups/audits.csv', 'r');
+$temp_table = fopen('data/backups/audits-temp.csv', 'w');
+$headers = fgetcsv($f);
+fputcsv($temp_table, $headers);
+
+$auditupdate = [
+    'Auditid' => $existingname,
+    'created' => sanitize_input($sanitized_post['created']),
+    'createdby' => sanitize_input($sanitized_post['createdby']),
+    'LSAppcourseID' => sanitize_input($sanitized_post['LSAppCourseid']), 
+    'ResourceName' => sanitize_input($sanitized_post['ResourceName']),
+    'resourceType' => sanitize_input($sanitized_post['resourceType']),
+    'Status' => sanitize_input($sanitized_post['Status']),
+    'PrinciplesPercent' => sanitize_input($sanitized_post['BCPSPrincipleOverallPercent'])
+];
+
+while (($data = fgetcsv($f)) !== FALSE) {
+    fputcsv($temp_table, ($data[0] == $existingname) ? $auditupdate : $data);
 }
 
 fclose($f);
 fclose($temp_table);
+rename('data/backups/audits-temp.csv', 'data/backups/audits.csv');
 
-rename('data/backups/audits-temp.csv','data/backups/audits.csv');
-
-
-
-$go = 'Location: /learning/resource-review/review.php?auditid=' . $existingname;
-header($go);
-
-
+header('Location: /learning/resource-review/review.php?auditid=' . $existingname);

@@ -91,6 +91,7 @@ $totalcourses = count($activecourses);
 // For the tips modal
 $tips = getTips();
 
+$teams = getTeams();
 $directors = getDirectors();
 
 $coursechanges = getPendingCourseChanges();
@@ -312,7 +313,14 @@ array_multisort($tmp, $sortdir, $classchanges);
 <?php endforeach ?>
 </details>
 
+<?php 
 
+function isBranch($value) {
+    return $value['isBranch'] == 1 && $value['name'] != 'Executive Director';
+}
+$branchTeams = array_filter($teams, 'isBranch');
+
+?>
 
 
 
@@ -324,24 +332,17 @@ array_multisort($tmp, $sortdir, $classchanges);
 
 
 <details class="my-2 p-2 rounded-3">
-    <summary><strong>4</strong> Teams</summary>
+    <summary><strong><?= count($branchTeams) ?></strong> Teams</summary>
 
-<div class="p-2 mb-1 bg-light-subtle rounded-3">
-    <a href="teams.php?teamname=Governance">Planning,  Evaluation, &amp; Governance</a>
-</div>
-<div class="p-2 mb-1 bg-light-subtle rounded-3">
-    <a href="teams.php?teamname=Employees">Corp. Learning - All Employees</a>
-</div>
-<div class="p-2 mb-1 bg-light-subtle rounded-3">
-    <a href="teams.php?teamname=Leaders">Corp. Learning - People Leaders</a>
-</div>
-<div class="p-2 mb-1 bg-light-subtle rounded-3">
-    <a href="teams.php?teamname=Operations">Operations and Technology</a>
-</div>
+    <?php foreach($branchTeams as $teamId => $teamDetails): ?>
+    <div class="p-2 mb-1 bg-light-subtle rounded-3">
+        <a href="teams-all.php?team=<?= $teamId ?>"><?= $teamDetails['name'] ?></a>
+    </div>
+    <?php endforeach ?>
 </details>
 
 <details class="my-2 p-2 rounded-3">
-    <summary><strong><?= count($directors) ?></strong> Directors</summary>
+    <summary><strong><?= count($directors) ?></strong> Leadership Roles</summary>
     <?php foreach($directors as $d): ?>
     <div class="p-2 mb-1 bg-light-subtle rounded-3">
     <?= $d[2] ?> <?= $d[6] ?><br>
@@ -349,12 +350,11 @@ array_multisort($tmp, $sortdir, $classchanges);
     <?php endforeach ?>
 </details>
 
+<div class="my-2 p-2 rounded-3">
+    <a href="people.php"><strong><?= $lsapppeople ?></strong> People</a>
+</div>
 
-<details class="my-2 p-2 rounded-3">
-    <summary><strong><?= $lsapppeople ?></strong> People</summary>
-
-</details>
-
+<!--
 <details class="my-2 p-2 rounded-3">
     <summary><strong><?= count($functionlist) ?></strong> Functions</summary>
 
@@ -369,7 +369,7 @@ array_multisort($tmp, $sortdir, $classchanges);
     <?php endforeach ?>
 
 </details>
-
+-->
 
 </div>
 
@@ -399,7 +399,7 @@ array_multisort($tmp, $sortdir, $classchanges);
     <div class="p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
     <div class="font-weight-bold">
         
-        <a href="https://gww.bcpublicservice.gov.bc.ca/lsapp/class.php?classid=<?= $row[0]  ?>">
+        <a href="class.php?classid=<?= $row[0]  ?>">
         <?= $row[6]  ?>
         <?php if(!empty($row[25])): ?>
             - <?= $row[25]  ?>
@@ -434,7 +434,7 @@ array_multisort($tmp, $sortdir, $classchanges);
 <?php $yesnext = 1 ?>
 <div class="p-2 mb-1 bg-light-subtle border border-secondary-subtle rounded-3">
     <div class="font-weight-bold">
-        <a href="https://gww.bcpublicservice.gov.bc.ca/lsapp/class.php?classid=<?= $trow[0]  ?>">
+        <a href="class.php?classid=<?= $trow[0]  ?>">
         <?= $trow[6]  ?> 
         <?php if(!empty($trow[25])): ?>
             - <?= $trow[25]  ?>
@@ -464,7 +464,7 @@ array_multisort($tmp, $sortdir, $classchanges);
 
 
 <div class="mt-3">
-    <a href="https://gww.bcpublicservice.gov.bc.ca/lsapp/" class="btn bg-light-subtle">All upcoming classes</a>
+    <a href="./" class="btn bg-light-subtle">All upcoming classes</a>
 
 
 

@@ -30,8 +30,7 @@ function stripIDIR($idir) {
 	return strtolower($justuser[1]);
 	
 }
-// define('LOGGED_IN_IDIR', stripIDIR($_SERVER["REMOTE_USER"]));
-define('LOGGED_IN_IDIR', 'ahaggett');
+define('LOGGED_IN_IDIR', stripIDIR($_SERVER["REMOTE_USER"]));
 
 // Last synchronization message for everywhere
 $today = date('Y-m-d');
@@ -208,7 +207,7 @@ function getCourseClasses($courseid) {
 //
 function getCourseAudits($courseid) {
 
-	$path = build_path(BASE_DIR, 'data', 'backups', 'audits.csv');
+	$path = build_path(BASE_DIR, 'data', 'reviews', 'audits.csv');
 	$f = fopen($path, 'r');
 	$list = array();
 	while ($row = fgetcsv($f)) {
@@ -331,7 +330,7 @@ function getVenueRooms($venueid) {
 function getUserReviews($idir) {
 	
 	
-	$path = build_path(BASE_DIR, 'data', 'backups', 'audits.csv');
+	$path = build_path(BASE_DIR, 'data', 'reviews', 'audits.csv');
 	$f = fopen($path, 'r');
 	$list = array();
 	while ($row = fgetcsv($f)) {
@@ -677,7 +676,32 @@ function getCourses() {
 
 
 
+//
+// Return only upcoming classes for a given courseID (today or later)
+//
+function getCoursesClassesUpcoming($courseid) {
+    $path = build_path(BASE_DIR, 'data', 'classes.csv');
+    $f = fopen($path, 'r');
+    $list = array();
+    $today = date('Y-m-d'); // Get today's date in YYYY-MM-DD format
 
+    while ($row = fgetcsv($f)) {
+        $startDate = $row[8]; // StartDate is in YYYY-MM-DD format
+
+        // Include only future classes (today or later)
+        if ($row[5] == $courseid && $startDate >= $today) {
+            $list[] = $row;
+        }
+    }
+    fclose($f);
+
+    // Sort classes by start date (earliest first)
+    usort($list, function($a, $b) {
+        return strcmp($a[8], $b[8]);
+    });
+
+    return $list;
+}
 
 
 
@@ -1128,7 +1152,7 @@ function getDirectors() {
 	fgetcsv($f); // Pop off the header
 	$list = array();
 	while ($row = fgetcsv($f)) {
-		if($row[8] == 1) {
+		if($row[4] === 'Active' && $row[8]) {
 			array_push($list,$row);
 		}
 	}
@@ -1238,6 +1262,34 @@ function getPeople($idir = null) {
 	}
 	print $options;
 }
+
+// 
+// return an array of key values pairs, with the values as arrays of team details
+//
+function getTeams() {
+	
+	return [
+		'ExecutiveDirector' => ['name' => 'Executive Director', 'isBranch' => 1],
+		'Operations' => ['name' => 'Operations &amp; Technology', 'isBranch' => 1],
+		'Employees' => ['name' => 'Corp Learning All Employees', 'isBranch' => 1],
+		'Leaders' => ['name' => 'Corp Learning People Leaders', 'isBranch' => 1],
+		'Governance' => ['name' => 'Planning, Evaluation &amp; Governance', 'isBranch' => 1],
+		'Coaching' => ['name' => 'Coaching Services', 'isBranch' => 1],
+		'LeadershipDev' => ['name' => 'Leadership Development', 'isBranch' => 1],
+		'Internal' => ['name' => 'Internal', 'isBranch' => 0],
+		'External' => ['name' => 'External', 'isBranch' => 0]
+	];
+}
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1951,7 +2003,7 @@ function getProposals() {
 // Return all evaluations
 //
 function getAudits() {
-	$f = fopen('data/backups/audits.csv', 'r');
+	$f = fopen('data/reviews/audits.csv', 'r');
 	$list = array();
 	while ($row = fgetcsv($f)) {
 		array_push($list,$row);
@@ -2074,7 +2126,8 @@ function createSlug($string) {
 function getAuditTypes () {
 
 	return [
-		'Course',
+		'Corporate catalog course',
+		'Course outside corporate catalog',
 		'Learn @ Work Week',
 		'Webinar Recording',
 		'Video',

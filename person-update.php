@@ -31,9 +31,11 @@ if($_POST):
 		$headers = fgetcsv($f);
 		fputcsv($temp_table,$headers);
 		
-		// IDIR,Role,Name,Email,Status,Phone,Title,Super,Director,Pronouns,Colors,iStore,kepler
+		$pronouns = $fromform['Pronouns'] ? $fromform['Pronouns'] : 'Unspecified';
+		
+		// IDIR,Team,Name,Email,Status,Phone,Title,Super,Director,Pronouns,Colors,iStore,kepler
 		$person = Array($idir,
-					h($fromform['Role']),
+					h($fromform['Team']),
 					h($fromform['Name']),
 					h($fromform['Email']),
 					h($fromform['Status']),
@@ -41,7 +43,7 @@ if($_POST):
 					h($fromform['Title']),
 					h($fromform['Super']),
 					h($fromform['Manager']),
-					h($fromform['Pronouns']),
+					$pronouns,
 					h($fromform['Colors']),
 					h($fromform['iStore']),
 					h($fromform['Kepler'])
@@ -81,6 +83,8 @@ else: ?>
 <?php getScripts() ?>
 <?php getNavigation() ?>
 
+<?php $teams = getTeams(); ?>
+
 <div class="container mb-3">
 <div class="row justify-content-md-center mb-3">
 <div class="col-md-6 mb-3">
@@ -97,24 +101,22 @@ else: ?>
 
 <form method="post" action="person-update.php" class="mb-3 pb-3" id="PersonUpdate">
 
-<!-- IDIR,Role,Name,Email,Status,Phone,Title -->
+<!-- IDIR,Team,Name,Email,Status,Phone,Title -->
 <div class="form-group">
 	<label for="IDIR">IDIR: </label>
 	<input type="text" name="NewIDIR" id="NewIDIR" class="form-control" value="<?= $p[0] ?>">
 	<input type="hidden" name="OldIDIR" id="OldIDIR" value="<?= $p[0] ?>">
 </div>
 <div class="form-group">
-	<label for="Role">Role: </label>
-	<?php $roles = array('Operations','Employees','Leaders','Governance','Executive Director','PSA','External') ?>
-	<select name="Role" id="Role" class="form-select">
-	<?php foreach($roles as $role): ?>
-	<?php if(!isSuper() && $role == 'Super') continue;  ?>
-	<?php if($role == $p[1]): ?>
-	<option selected><?= $role ?></option>
-	<?php else: ?>
-	<option><?= $role ?></option>
-	<?php endif ?>
-	<?php endforeach ?>
+	<label for="Team">Team: </label>
+	<select name="Team" id="Team" class="form-select">
+		<?php foreach($teams as $teamId => $team): ?>
+			<?php if($teamId == $p[1]): ?>
+				<option selected value=<?= $teamId ?>><?= $team["name"] ?></option>
+			<?php else: ?>
+				<option value=<?= $teamId ?>><?= $team["name"] ?></option>
+			<?php endif ?>
+		<?php endforeach ?>
 	</select>
 	
 </div>
@@ -154,8 +156,8 @@ else: ?>
 	<input type="text" name="Super" id="Super" class="form-control" value="<?php if(isset($p[7])) echo $p[7] ?>">
 </div>
 <div class="form-group">
-	<label for="Manager">Manager: </label>
-	<input type="text" name="Manager" id="Manager" class="form-control" value="<?php if(isset($p[8])) echo $p[8] ?>">
+	<label for="Manager">Leadership Role:</label><span class="text-body-secondary"> (leave blank if not applicable)</span>
+	<input type="text" name="Manager" id="Manager" class="form-control" value="<?php if(isset($p[8])) echo $p[8] ?>" placeholder="Eg. Director, Manager">
 </div>
 <?php endif ?>
 
@@ -175,7 +177,7 @@ else: ?>
 	<label for="Kepler">Kepler Access: </label>
 	<input type="text" name="Kepler" id="Kepler" class="form-control" value="<?php if(isset($p[12])) echo $p[12] ?>">
 </div>
-<button class="btn btn-block btn-primary my-3">Save Person</button>
+<button type="submit" class="btn btn-block btn-primary my-3">Save Person</button>
 
 </form>
 	

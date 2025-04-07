@@ -3,6 +3,7 @@
 <title>People</title>
 <?php getScripts() ?>
 <?php getNavigation() ?>
+<?php $teams = getTeams(); ?>
 <?php if(canAccess()): ?>
 <div class="container">
 <div class="row justify-content-md-center mb-3">
@@ -16,7 +17,7 @@
 <?php endif ?>
 <h1>People</h1>
 <div id="userlist">
-<p>If they're not on this list, they can't access anything. <a href="teams.php">Team view</a>.</p>
+<p>If they're not on this list, they can't access anything. <a href="teams-all.php">Team view</a>.</p>
 <input class="search form-control  mb-3" placeholder="search">
 <div class="table-responsive">
 <table class="table table-sm table-striped table-hover">
@@ -29,7 +30,7 @@
 	<th>Phone</th>
 	<!-- <th>Status</th> -->
 	<th>IDIR</th>
-	<th>Role</th>
+	<th>Team</th>
 </tr>
 </thead>
 <tbody class="list">
@@ -51,8 +52,10 @@
 		<span class="badge bg-light-subtle "><?= $peep[4] ?></span>
 		<?php endif ?>
 		</td>-->
-		<td class="idir"><span class="badge text-light-emphasis bg-light-subtle"><?= $peep[0] ?></span></td>
-		<td class="role"><?= $peep[1] ?></td>
+		<td class="idir"><span class="badge text-light-emphasis bg-light-subtle" id="<?= $peep[0] ?>"><?= $peep[0] ?></span></td>
+		<?php if(array_key_exists($peep[1], $teams)): ?>
+			<td class="role"><?= $teams[$peep[1]]['name'] ?></td>
+		<?php endif; ?>
 	</tr>
 <?php endif ?>
 <?php endforeach ?>
@@ -76,17 +79,12 @@
 
 	  
 		<form method="post"	class="newuser col" action="people-controller.php">
-
 			<input type="hidden" name="action" value="add">
-			<select name="role" id="role" class="form-control mb-2" required>
-				<option value="Operations">Operations</option>
-				<option value="Delivery">Delivery</option>
-				<option value="Developer">Development</option>
-				<option value="Internal">Internal</option>
-				<option value="External">External</option>
-				<?php if(isSuper()): ?>
-				<option value="Super">Super</option>
-				<?php endif ?>
+			<select name="role" id="role" class="form-select mb-2" autocomplete="off" required>
+				<option selected value="" disabled>Choose a Team</option>
+				<?php foreach($teams as $teamId => $team): ?>
+					<option value=<?= $teamId ?>><?= $team["name"] ?></option>
+				<?php endforeach ?>
 			</select>
 			<input type="text" name="idir" id="idir" class="form-control  mb-2" placeholder="IDIR" required>
 			<input type="text" name="name" id="name" class="form-control  mb-2" placeholder="Name" required>
@@ -97,7 +95,7 @@
 			<input type="hidden" name="Super" id="Super" class="form-control  mb-2" placeholder="Super user? 0 for no, 1 for yes" required>
 			<input type="hidden" name="Manager" id="Manager" class="form-control  mb-2" placeholder="Manager? 0 for no, 1 for yes" required>
 			<?php endif ?>
-			<input type="text" name="Pronouns" id="Pronouns" class="form-control  mb-2" placeholder="Personal pronouns e.g. She/Hers/They" required>
+			<input type="text" name="Pronouns" id="Pronouns" class="form-control  mb-2" placeholder="Personal pronouns e.g. She/Hers/They">
 			<input type="submit" class="btn btn-primary" value="Add Person">
 
 		</form>
@@ -134,6 +132,21 @@ $(document).ready(function(){
 	var peeps = new List('userlist', peopleoptions);
 
 });
+
+// IDIR validation
+function checkIdir(value) {
+	const userIdir = document.getElementById(value);
+	return userIdir;
+}
+const idirInput = document.getElementById('idir');
+idirInput.addEventListener('input', () => {
+	if (checkIdir(idirInput.value)) {
+		idirInput.setCustomValidity('IDIR already exists.');
+	} else {
+		idirInput.setCustomValidity('');
+	}
+})
+
 </script>
 
 <?php include('templates/footer.php') ?>

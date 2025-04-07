@@ -206,7 +206,7 @@ iframe {
 
 function getNavigation($context = NULL) {
 
-
+$teams = getTeams();
 
 
 	
@@ -250,16 +250,16 @@ function getNavigation($context = NULL) {
 				More 
 			</a>
 			<div class="dropdown-menu" aria-labelledby="teamsdrop">
-				<a class="dropdown-item" href="https://bcgov.sharepoint.com/teams/00440" target="_blank" rel="noopener">Learning Centre SharePoint</a>
+				<a class="dropdown-item" href="https://bcgov.sharepoint.com/teams/00440" target="_blank" rel="noopener">Corporate Learning SharePoint</a>
+				<a class="dropdown-item" href="/lsapp/course-changes.php">All Course Changes</a>
 				<a class="dropdown-item" href="/lsapp/venues.php">Venues</a>
 				<span class="dropdown-item-text fw-bold">Teams &amp; People</span>
-				<a class="dropdown-item" href="/lsapp/teams.php?teamname=Governance">Planning, Evaluation, &amp; Governance</a>
-				<a class="dropdown-item" href="/lsapp/teams.php?teamname=Employees">Corp. Learning - All Employees</a>
-				<a class="dropdown-item" href="/lsapp/teams.php?teamname=Leaders">Corp. Learning - People Leaders</a>
-				<a class="dropdown-item" href="/lsapp/teams.php?teamname=Operations">Operations &amp; Technology</a>
 				<a class="dropdown-item" href="/lsapp/people.php">All People</a>
 				<a class="dropdown-item" href="/lsapp/teams-all.php">All Teams</a>
-
+        <?php foreach($teams as $teamId => $teamDeets): ?>
+          <?php if($teamDeets['isBranch'] == 0 || $teamDeets['name'] == 'Executive Director') continue; ?>
+          <a class="dropdown-item" href="/lsapp/teams-all.php?team=<?= $teamId ?>"><?= $teamDeets['name'] ?></a>
+        <?php endforeach; ?>
 				<hr class="dropdown-divider">
 				<span class="dropdown-item-text fw-bold">Miscellaneous</span>
 				<!-- <a class="dropdown-item" href="/lsapp/learning-hub-partners.php">Learning Hub Partners</a> -->
