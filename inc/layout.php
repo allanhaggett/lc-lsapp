@@ -75,7 +75,40 @@ img {
 .fc-time{
    display : none;
 }
+/* Images and icons */
+img,
+iframe {
+    height: auto;
+    max-width: 100%;
+}
 
+.icon {
+    width: 2rem;
+    height: 100%;
+    margin: 0;
+}
+
+.icon-square {
+    width: 2.75rem;
+    height: 3rem;
+}
+
+.icon-svg {
+    display: inline-flex;
+    align-self: center;
+}
+
+.icon-svg.baseline-svg svg {
+    top: .125em;
+    position: relative;
+    overflow: visible;
+}
+
+.icon-svg svg {
+    height: 1em;
+    width: 1em;
+    margin-right: 0.5rem;
+}
 
 #footer .navbar-brand { display: none; }
 
@@ -200,13 +233,17 @@ $teams = getTeams();
 		<li class="nav-item">
 			<a class="nav-link" href="/lsapp/classes-past.php">Past</a>
 		</li>
-		<!-- <li class="nav-item">
-			<a class="nav-link" href="/lsapp/classes-calendar.php">Calendar</a>
-		</li>		 -->
-		<li class="nav-item">
-			<a class="nav-link" href="/lsapp/courses.php?sort=dateadded">Courses</a>
-		</li>
 
+    <li class="nav-item dropdown">
+			<a class="nav-link dropdown-toggle" href="#" id="teamsdrop" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+				Courses 
+			</a>
+			<div class="dropdown-menu" aria-labelledby="teamsdrop">
+				<a class="dropdown-item" href="/lsapp/courses.php?sort=dateadded">Course Catalog</a>
+				<a class="dropdown-item" href="/lsapp/course-change/index.php">Course Changes</a>
+				<a class="dropdown-item" href="/lsapp/course-change/guidance-manage.php">Course Change Guidance</a>
+      </div>
+    </li>
 
 		<li class="nav-item dropdown">
 			<a class="nav-link dropdown-toggle" href="#" id="teamsdrop" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

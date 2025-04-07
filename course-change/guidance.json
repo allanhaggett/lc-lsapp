@@ -1,0 +1,22 @@
+[
+    {
+        "category": "Open Course",
+        "guidance": "Here are all the things you need to do to open a course: \r\n\r\n1. Edit the course in ELM and make the course \"Active.\"\r\n2. Ensure that the class offering is also \"Active.\"\r\n3. Another thing that we need.\r\n4. Mark this issue completed."
+    },
+    {
+        "category": "Content Update",
+        "guidance": "Here are all the things you need to do to do a general update of course.\r\n\r\n- Step 1\r\n- Step 2"
+    },
+    {
+        "category": "Name Change",
+        "guidance": "- Edit the course name in ELM and only there. \r\n- The course name will update in LSApp upon next sync process.\r\n- More guidance"
+    },
+    {
+        "category": "New Moodle Cohort",
+        "guidance": "- Copy the most recent cohort into a new course with no participants.\r\n- Update the program site.\r\n- The next thing.\r\n"
+    },
+    {
+        "category": "Close Course",
+        "guidance": "Jumps off balcony gives owner dead mouse at present then poops in litter box snatches yarn and fights with dog cat chases laser then plays in grass finds tiny spot in cupboard and sleeps all day jumps in bathtub and meows when owner fills food dish the cat knocks over the food dish cat slides down the water slide and into pool and swims even though it does not like water push your water glass on the floor."
+    }
+]

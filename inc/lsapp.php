@@ -1088,7 +1088,9 @@ function getMaterial($matid) {
 // Get the details of a single person based on their IDIR 
 //
 function getPerson($idir) {
-	$f = fopen('data/people.csv', 'r');
+	$path = build_path(BASE_DIR, 'data', 'people.csv');
+	$f = fopen($path, 'r');
+	// $f = fopen('data/people.csv', 'r');
 	$user = '';
 	while ($row = fgetcsv($f)) {
 		if($row[0] == $idir) {
@@ -2239,3 +2241,11 @@ function removeOutlookSafeLinks($link) {
     return $url;
 };
 
+function truncateStringByWords($string, $wordLimit, $ellipsis = true) {
+    $words = explode(' ', $string);
+    if (count($words) > $wordLimit) {
+        $truncated = implode(' ', array_slice($words, 0, $wordLimit));
+        return $truncated . ($ellipsis ? '...' : '');
+    }
+    return $string;
+}

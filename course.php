@@ -25,6 +25,34 @@ $stewsdevs = getCoursePeople($courseid);
 // 10-CourseOwner,11-MinMax,12-CourseNotes,
 // 13-Requested, 14-RequestedBy,15-EffectiveDate,16-CourseDescription,17-CourseAbstract,18-Prerequisites,19-Keywords,
 // 20-Category,21-Method,22-elearning
+// Load categories from the JSON file
+$categoriesFile = 'course-change/guidance.json';
+$categories = [];
+
+if (file_exists($categoriesFile)) {
+    $categories = json_decode(file_get_contents($categoriesFile), true);
+    if (json_last_error() !== JSON_ERROR_NONE) {
+        die("Error reading categories.json: " . json_last_error_msg());
+    }
+
+    foreach ($categories as $key => $cat) {
+        if ($deets[1] === 'Active') {
+            // If the course is active and the guidance is "Open Course", remove it from the list
+            if ($cat['category'] === 'Open Course') {
+                unset($categories[$key]);
+            }
+        } else {
+            // If the course is not active and the guidance is "Close Course", remove it from the list
+            if ($cat['category'] === 'Close Course') {
+                unset($categories[$key]);
+            }
+        }
+    }
+
+    // Reindex the array after unsetting
+    $categories = array_values($categories);
+}
+
 ?>
 <?php getHeader() ?>
 
@@ -57,8 +85,26 @@ $stewsdevs = getCoursePeople($courseid);
 	<div class="col-6 col-md-3"><strong>Delivery method:</strong><br> <?= $deets[21] ?></div>
 </div>
 <?php if(isAdmin()): ?>
-	<div class="float-right">
-		<a href="course-update.php?courseid=<?= $courseid ?>" class="btn btn-light float-end">Edit course</a>
+	<div class="btn-group float-end">
+		<a href="course-update.php?courseid=<?= $courseid ?>" class="btn btn-light float-end">Edit details</a>
+		<div class="btn-group">
+			<button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+				Requests
+			</button>
+			<ul class="dropdown-menu">
+				<?php foreach ($categories as $cat): ?>
+				<li class="dropdown-item">
+					<a href="course-change/create.php?cat=<?php echo htmlspecialchars(urlencode($cat['category'])); ?>&courseid=<?= $deets[0] ?>">
+						<?php echo htmlspecialchars($cat['category']); ?>
+					</a>
+				</li>
+                <?php endforeach; ?>
+				<li class="dropdown-item">
+					<a href="/lsapp/class-bulk-insert.php?courseid=<?= $deets[0] ?>">New Class Date</a>
+				</li>
+			</ul>
+		</div>
+
 	</div>
 	<?php endif ?>
 <h1><?= $deets[2] ?></h1>
@@ -310,6 +356,14 @@ $stewsdevs = getCoursePeople($courseid);
 		</div>
 </details>
 
+<<<<<<< HEAD
+
+	
+	<?php if($deets[35]): ?>
+	<div class=mb-3">Evaluations link: <?= $deets[35] ?></div>
+	<?php endif ?>
+=======
+>>>>>>> 5b82ac84cef407453dfc41bdd031d16edf212a5b
 	
 	
 	<div>
@@ -334,8 +388,7 @@ $stewsdevs = getCoursePeople($courseid);
 </div>
 
 <div class="col-md-6">
-	<div><a href="/lsapp/class-bulk-insert.php?courseid=<?= $deets[0] ?>" class="btn btn-primary btn-block">New Date Requests</a></div>
-	<hr>
+
 <?php 
 $inactive = 0;
 $closed = 0;
@@ -354,21 +407,10 @@ $finalcount = $upcount - $inactive - $closed;
 
 <?php if($finalcount > 0): ?>
 <div class="mb-3" id="upcoming-classes">
-	<div class="mb-3 p-3 bg-light-subtle sticky-top shadow-sm">
+	<div class="mb-3 shadow-sm">
 		<h3><span class="classcount"><?= $finalcount ?></span>  Current Offering<?php if($finalcount > 1) echo 's' ?></h3>
 	</div>
-	
-<!-- <div class="btn-group">
-<a href="course-classes-export.php?courseid=<?= $deets[0] ?>" class="btn btn-primary">Export to Excel</a>
-<button class="btn btn-primary copy" 
-	href="https://gww.bcpublicservice.gov.bc.ca/lsapp/ical-course.php?courseid=<?= $deets[0] ?>"
-	data-clipboard-text="https://gww.bcpublicservice.gov.bc.ca/lsapp/ical-course.php?courseid=<?= $deets[0] ?>"
-	title="All scheduled classes for this course">
-	Calendar Subscribe
-</button>
-</div> -->
-<!-- <input class="search form-control my-2" placeholder="search"> -->
-<table class="table table-sm">
+<table class="table table-sm mb-5">
 <tbody class="list">
 <?php foreach($classes as $class): ?>
 <?php
@@ -410,205 +452,137 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
 </table>
 </div>
 <?php endif; //finalcount ?>
+
 <div class="">
 
-	<h3 class="mb-1">
-		Change Requests
-		<a class="badge text-light-emphasis bg-light-subtle" href="/lsapp/course-changes.php">All Requests</a>
+	<h3 class="mb-1 clearfix">
+		Open Change Requests
 	</h3>
-	
-<details class="mb-2 p-1">
-	<summary>Add new change request</summary>
-	<div class="p-3 my-3 bg-light-subtle rounded-3">
-	<p>Request a change to the information <em>at the course level</em>. 
-	To request a change to a class, please navigate to that class page 
-	and submit your request there.</p>
-		<form action="course-change-create.php" method="post">
-		<input type="hidden" name="CourseName" id="CourseName" value="<?= h($deets[2]) ?>">
-		<input type="hidden" name="CourseID" id="CourseID" value="<?= h($deets[0]) ?>">
-		<label>Assign to: 
-			<select class="form-select Assigned" name="AssignedTo" id="AssignedTo">
-				<option>Unassigned</option>
-				<?php getPeople($deets[44]) ?>
-			</select>
-		</label>
-		<label>Request Type: 
-			<select class="form-select RequestType" name="RequestType">
-				<option disabled selected>Select &hellip;</option>
-				<option value="Close">Close Course</option> 
-				<option value="Update">Simple Content Update</option>
-				<option value="Overhaul">Complete Content Overhaul</option>
-				<option value="Moodle">Moodle</option>
-				<option value="Other">Other</option>
-			</select>
-		</label>
-		<label>Priority: 
-			<select class="form-select Priority" name="Priority" id="Priority">
-				<option value="Backlog">Backlog</option>
-				<option value="NotUrgent" selected>Not urgent</option>
-				<option value="ASAP">As Soon As Possible</option>
-				<option value="HighPriority">High Priority</option>
-			</select>
-		</label>
-		<div class="mt-3 guidance closecoursehelp alert alert-warning">
-			<h5>Closing this course?</h5>
-			<p>Don't forget to communicate with enrolled learners about the 
-				closure.</p>
-			<p>Example for comms around course closure could be things like 
-				"Hey learner, last chance to complete this course before we 
-				close it for good!"</p>
-		</div>
-		<div class="mt-3 guidance moodlehelp alert alert-warning">
-			<h5>Moodle?</h5>
-			<p>Instruction for Moodle workflows will go here.</p>
-		</div>
-		<textarea name="ChangeRequest" id="ChangeRequest" class="form-control" rows="8" required></textarea>
-		<input type="submit" class="btn btn-sm btn-primary btn-block" value="Add Change Request">
-		</form>
-		</div>
-</details>
-
-
-
-
-
-
-<?php 
-$chgs = getCourseChanges($courseid);
-$completedchanges = []; 
-?>
-<?php if(isset($chgs)): ?>
-	<!-- <h4>Pending Change Requests</h4> -->
-<?php foreach($chgs as $ch): ?>
-<?php if($ch[5] == 'Pending'): ?>
-<div class="p-3 my-3 bg-light-subtle rounded-3">
-<?php //0-creqID,1-CourseID,3-CourseName,4-DateRequested,5-RequestedBy,6-Status,7-CompletedBy,8-CompletedDate,9-Request ?>
-	<?php if(isSuper()): ?>
-	<form method="post" action="course-change-delete.php" class="float-end">
-	<input type="hidden" name="CourseID" value="<?= $deets[0] ?>">
-	<input type="hidden" name="reqID" value="<?= $ch[0] ?>">
-	<input type="submit" value="Delete" class="btn btn-sm btn-dark del">
-	</form>
-	<?php endif ?>
-	<div>
-		<strong>Requested <?= h($ch[3]) ?> by <?= h($ch[4]) ?></strong> 
-	</div>
-	<div class="">
-		<span>Priority 
-		<?php 
-		if($ch[11] == 'NotUrgent'):
-			$urgencybadge = 'primary';
-		elseif($ch[11] == 'Backlog'):
-			$urgencybadge = 'dark';
-		elseif($ch[11] == 'ASAP'):
-			$urgencybadge = 'warning';
-		elseif($ch[11] == 'HighPriority'):
-			$urgencybadge = 'danger';
-		endif; 
-		?>
-		<span class="badge text-bg-<?= $urgencybadge ?>"><?= h($ch[11]) ?></span>
-		<!-- <span>Status <span class="badge badge-secondary"><?= h($ch[5]) ?> </span></span> -->
-		<span>Change type <span class="badge text-bg-secondary"><?= h($ch[9]) ?></span></span>
-		Assigned to <span class="badge text-bg-secondary"><?= h($ch[10]) ?></span>
-		<a href="/lsapp/course-change-claim.php?changeid=<?= h($ch[0]) ?>&courseid=<?= h($deets[0]) ?>" class="btn btn-sm btn-light">Claim</a>
-	</div>
-	<?php if($ch[5] != 'Pending'): ?>
-		<?= h($ch[5]) ?> by <?= h($ch[6]) ?> on <?= h($ch[7]) ?>
-	<?php endif ?>
-	
-	<div class="p-3 bg-light-subtle rounded-3">
 		
-		<?= $Parsedown->text($ch[8])  ?>
-		<?php if($ch[5] == 'Pending'): ?>
-		<!-- <span>Status <span class="badge text-bg-dark"><?= h($ch[5]) ?></span></span> -->
-		<a href="/lsapp/course-change-process.php?changeid=<?= h($ch[0]) ?>&courseid=<?= h($deets[0]) ?>" class="btn btn-sm btn-success">Mark Complete</a>
-		<a href="/lsapp/course-change-view.php?changeid=<?= h($ch[0]) ?>" class="btn btn-sm btn-secondary">Comments</a>
-		<?php endif ?>
-	</div>
-	<?php if($ch[9] == 'Close'): ?>
-	<div class="mt-3">
-		<h4>How to close a course</h4>
-		<ol>
-			<li>Check that course steward has communicated with enrolled learners.
-			<li>Make sure all classes are processed and closed (under all delivery methods).
-			<li>Edit the course to set to "Closed".
-			<li>Decommission/archive Alchemer surveys.
-			<li>Update LSApp course list to "Closed".
-			<li>Sign off on course change request.
-		</ol>
-	</div>
-	<?php endif ?>
-	<?php if($ch[9] == 'Moodle'): ?>
-	<div class="mt-3">
-		<h4>Moodle Change</h4>
-		<ol>
-			<li>We'll have instructions specific to this case ASAP.
-		</ol>
-	</div>
-	<?php endif ?>
-</div>
-<?php else: ?>
-<?php array_push($completedchanges, $ch) ?>
-<?php endif ?>
-<?php endforeach ?>
-<?php endif ?>
+	<div id="uncompleted-changes" class="">
+	<?php
+	$comped = 0;
+	// Fetch all matching request files for the course ID
+	$files = glob("course-change/requests/course-{$courseid}-change-*.json");
+	if (empty($files)): ?>
+		<p>No requests found for this course.</p>
+	<?php else: ?>
+		<ul class="list-group mb-4">
+			<?php foreach ($files as $file): 
+				$request = json_decode(file_get_contents($file), true);
+				if ($request['progress'] != 'Closed'):
+					$filenameParts = explode('-change-', basename($file, '.json')); 
+					if (count($filenameParts) === 2):
+						$courseidParts = explode('course-', $filenameParts[0]);
+						$chid = $filenameParts[1];
+					else:
+						die("Error: Invalid file name format.");
+					endif; ?>
+
+					<li class="list-group-item">
+					<div class="">
+						<?php if ($request['urgent']): ?>
+						<span class="badge bg-danger">
+							<strong>Urgent</strong>
+						</span>
+						<?php endif; ?>
+						<span class="badge bg-success"><?= htmlspecialchars($request['approval_status'] ?? 'Unknown') ?></span>
+						</div>
+						<h4 class="my-1 fs-5">
+							<a href="course-change/view.php?courseid=<?= htmlspecialchars($courseidParts[1]) ?>&changeid=<?= htmlspecialchars($chid) ?>">
+								<?= htmlspecialchars($request['category']) ?> Request <small><?= $request['changeid'] ?? '' ?></small>
+							</a>
+						</h4>
+						<div class="mb-1">
+							<strong>Progress:</strong> <?= htmlspecialchars($request['progress'] ?? '') ?>
+							<strong>Assigned To:</strong> <?= htmlspecialchars($request['assign_to'] ?? '') ?>
+						</div>
+						<div class="p-3 bg-light-subtle rounded-3">
+							<?= htmlspecialchars(truncateStringByWords($request['description'], 20)) ?>
+						</div>
+						<div class="mt-1">
+							<strong>Files:</strong> <?= isset($request['files']) ? count($request['files']) : 0 ?> 
+							<strong>Hyperlinks:</strong> <?= isset($request['links']) ? count($request['links']) : 0 ?> 
+							<strong>Comments:</strong> <?= isset($request['timeline']) ? count(array_filter($request['timeline'], fn($entry) => $entry['field'] === 'comment')) : 0 ?><br>
+						</div>
+							
+						<!-- <div class="mt-1">
+							<strong>Created:</strong> <?= date('Y-m-d H:i:s', $request['date_created']) ?> 
+							by <?= htmlspecialchars($request['created_by'] ?? '') ?>
+						</div> -->
+						<div class="mb-1">
+							<strong>Modified:</strong> <?= date('Y-m-d H:i:s', $request['date_modified']) ?> 
+							by <?= htmlspecialchars($request['created_by'] ?? '') ?>
+						</div>
+					</li>
+				<?php else: 
+					$comped = 1;
+				endif;
+			endforeach; ?>
+		</ul>
+	<?php endif; ?>
 
 
-
-<?php if(!empty($completedchanges)): ?>
-	<details class="p-1">
-		<summary>Completed Changes</summary>
-<?php foreach($completedchanges as $ch): ?>
-<div class="p-3 my-3 bg-light-subtle rounded-3">
-<?php //creqID,CourseID,CourseName,DateRequested,RequestedBy,Status,CompletedBy,CompletedDate,Request,RequestType,AssignedTo,Urgency ?>
-	<?php if(isSuper()): ?>
-	<form method="post" action="course-change-delete.php" class="float-right">
-	<input type="hidden" name="CourseID" value="<?= $deets[0] ?>">
-	<input type="hidden" name="reqID" value="<?= $ch[0] ?>">
-	<input type="submit" value="Delete" class="btn btn-sm btn-dark del">
-	</form>
-	<?php endif ?>
-	<div><strong>Requested <?= h($ch[3]) ?> by <?= h($ch[4]) ?></strong></div>
-	<div class="">
-		<span>Priority 
-		<?php 
-		if($ch[11] == 'NotUrgent'):
-			$urgencybadge = 'primary';
-		elseif($ch[11] == 'ASAP'):
-			$urgencybadge = 'warning';
-		elseif($ch[11] == 'HighPriority'):
-			$urgencybadge = 'danger';
-		endif; 
-		?>
-		<span class="badge text-bg-<?= $urgencybadge ?>"><?= h($ch[11]) ?></span>
-		<!-- <span>Status <span class="badge badge-secondary"><?= h($ch[5]) ?> </span></span> -->
-		<span>Change type <span class="badge text-bg-secondary"><?= h($ch[9]) ?></span></span>
-		Assigned to <span class="badge text-bg-secondary"><?= h($ch[10]) ?></span>
-		
-	</div>
-	<?php if($ch[5] != 'Pending'): ?>
-		<div><?= h($ch[5]) ?> by <?= h($ch[6]) ?> on <?= h($ch[7]) ?></div>
-	<?php endif ?>
-	
-	<div class="p-3 bg-light-subtle rounded-3">
-		
-		<?= h($ch[8]) ?>
-		<?php if($ch[5] == 'Pending'): ?>
-		<span>Status <span class="badge text-bg-dark"><?= h($ch[5]) ?></span></span>
-		<?php endif ?>
-		<div>
-			<a href="/lsapp/course-change-view.php?changeid=<?= h($ch[0]) ?>" 
-				class="btn btn-sm btn-secondary">
-					Comments
-			</a>
-		</div>
-	</div>
-</div>
-
-<?php endforeach ?>
-</details>
-<?php endif ?>
-
+        </div>
+		<?php if($comped): ?>
+    <details>
+        <summary>Completed Changes</summary>
+        <div id="completed-changes" class="">
+            <?php
+            if (empty($files)) {
+                echo '<p>No requests found for this course.</p>';
+            } else {
+                echo '<ul class="list-group mb-4">';
+                foreach ($files as $file) {
+                    $request = json_decode(file_get_contents($file), true);
+                    if ($request['progress'] == 'Closed') {
+                        $filenameParts = explode('-', basename($file, '.json')); // Parse file name
+                        $chid = $filenameParts[3]; // Extract change ID (second part of the name)
+                        ?>
+                        <li class="list-group-item">
+                            <div class="mb-2">
+                                <?php if ($request['urgent']): ?>
+                                    <span class="badge bg-danger">
+                                        <strong>Urgent</strong>
+                                    </span>
+                                <?php endif; ?>
+                                <span class="badge bg-success">Approval: <?= htmlspecialchars($request['approval_status']) ?></span>
+                            </div>
+                            <h4 class="my-1 fs-5">
+                                <a href="course-change/view.php?courseid=<?= htmlspecialchars($courseid) ?>&changeid=<?= htmlspecialchars($chid) ?>">
+                                    <?= htmlspecialchars($request['category']) ?> Request <small><?= $request['changeid'] ?? '' ?></small>
+                                </a>
+                            </h4>
+                            <div class="mb-1">
+                                <strong>Progress:</strong> <?= htmlspecialchars($request['progress']) ?>
+                                <strong>Assigned To:</strong> <?= htmlspecialchars($request['assign_to']) ?>
+                            </div>
+                            <div class="p-3 bg-light-subtle rounded-3">
+                                <?= htmlspecialchars(truncateStringByWords($request['description'], 20)) ?>
+                            </div>
+                            <div class="mt-1">
+                                <strong>Files:</strong> <?= isset($request['files']) ? count($request['files']) : 0 ?> 
+                                <strong>Hyperlinks:</strong> <?= isset($request['links']) ? count($request['links']) : 0 ?> 
+                                <strong>Comments:</strong> <?= isset($request['timeline']) ? count(array_filter($request['timeline'], fn($entry) => $entry['field'] === 'comment')) : 0 ?>
+                            </div>
+                            <!-- <div class="mt-1">
+                                <strong>Created:</strong> <?= date('Y-m-d H:i:s', $request['date_created']) ?> 
+                                by <?= htmlspecialchars($request['created_by'] ?? '') ?>
+                            </div> -->
+                            <div class="mb-1">
+                                <strong>Modified:</strong> <?= date('Y-m-d H:i:s', $request['date_modified']) ?> 
+                                by <?= htmlspecialchars($request['created_by'] ?? '') ?>
+                            </div>
+                        </li>
+                        <?php
+                    }
+                }
+                echo '</ul>';
+            }
+            ?>
+        </div>
+    </details>
+<?php endif; ?>
 
 </div>
 
@@ -623,22 +597,6 @@ $completedchanges = [];
 </div>
 </div>
 
-<?php if(isSuper()): ?>
-<!-- <div>
-<div class="col-md-6">
-<div class="alert alert-warning">
-A WORK IN PROGRESS. Please don't mess with it :)
-<form method="post" action="communication-template-create.php">
-<input type="hidden" name="CourseID" id="CourseID" value="<?= h($deets[0]) ?>">
-Template Name: <input type="text" id="TemplateName" name="TemplateName" class="form-control"><br>
-Template:<br>
-<textarea class="form-control summernote" name="Template" id="Template"></textarea>
-<input type="submit" class="btn btn-block btn-success" value="Add Template">
-</form>
-</div>
-</div>
-</div> -->
-<?php endif ?>
 
 
 </div>
