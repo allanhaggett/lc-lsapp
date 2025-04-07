@@ -356,14 +356,11 @@ if (file_exists($categoriesFile)) {
 		</div>
 </details>
 
-<<<<<<< HEAD
 
 	
 	<?php if($deets[35]): ?>
 	<div class=mb-3">Evaluations link: <?= $deets[35] ?></div>
 	<?php endif ?>
-=======
->>>>>>> 5b82ac84cef407453dfc41bdd031d16edf212a5b
 	
 	
 	<div>
