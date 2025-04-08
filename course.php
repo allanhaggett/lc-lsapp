@@ -58,6 +58,7 @@ if (file_exists($categoriesFile)) {
 <div class="row">
 <div class="col-md-12 col-lg-8">
 <!--<div class="text-uppercase">LC Ship? <?= $deets[23] ?></div>-->
+
 <div class="row mb-3 py-2 bg-light-subtle border border-secondary-subtle rounded-3">
 	<div class="col-6 col-md-3"><strong>Status:</strong><br><?= $deets[1] ?></div>
 	<div class="col-6 col-md-3"><strong>Short name:</strong><br> <?= $deets[3] ?></div>
@@ -96,7 +97,7 @@ if (file_exists($categoriesFile)) {
 	
 <h1><?= $deets[2] ?></h1>
 <div class="col-12">DESCRIPTION</div>
-<div class=""><?= $deets[16] ?></div>
+<div class=""><?= $Parsedown->text($deets[16]) ?></div>
 <details class="p-2">
 	<summary>Full Abstract</summary>
 	<div class="p-3 bg-light-subtle rounded-3">

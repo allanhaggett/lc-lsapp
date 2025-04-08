@@ -356,7 +356,9 @@ if (!empty($_GET['openaccess'])) {
 	<a class="badge bg-body text-primary-emphasis" href="courses.php?audience=<?= urlencode($course[39]) ?>"><?= $course[39] ?></a>
 	<a class="badge bg-body text-primary-emphasis" href="courses.php?level=<?= urlencode($course[40]) ?>"><?= $course[40] ?></a>
 	<a class="badge bg-body text-primary-emphasis" href="courses.php?topic=<?= urlencode($course[38]) ?>"><?= $course[38] ?></a>
-	
+	<?php if($course[53] == 'Yes' || $course[53] == 1): ?>
+	<span class="badge bg-body">Learning<strong>HUB</strong></span>
+	<?php endif ?>
 
 
 
@@ -378,6 +380,7 @@ if (!empty($_GET['openaccess'])) {
 </div>
 <div class="row bg-light-subtle">
 	<div class="col-md-6">
+	<div class="p-2">Platform: <a href="#<?php echo urlencode($course[0]) ?>"><?= $course[52] ?></a></div>
 <?php $stewsdevs = getCoursePeople($course[0]) ?>
 <?php if(!empty($stewsdevs['stewards'][0][2])): ?>
 	<div class="p-2">Steward: <a href="/lsapp/person.php?idir=<?= $stewsdevs['stewards'][0][2] ?>"><?= $stewsdevs['stewards'][0][2] ?></a></div>
@@ -390,87 +393,7 @@ if (!empty($_GET['openaccess'])) {
 <div class="p-2">Corp. Partner: <a href="learning-hub-partner.php?partnerid=<?php echo urlencode($course[36]) ?>"><?= $course[36] ?></a></div>
 </div>
 </div>
-<!--
-<details class="bg-light-subtle p-2">
-		<summary>Taxonomy quick update</summary>
 
-			<form method="post" action="/lsapp/course-update-newfast.php" class="mb-3 pb-3 taxup">
-			<input type="hidden" name="CourseID" value="<?= h($course[0]) ?>">
-
-			<div class="form-group">
-			<label for="Delivery<?= $course[0] ?>">Delivery Method</label><br>
-			<select name="Delivery" id="Delivery<?= $course[0] ?>" class="form-select">
-			<?php foreach($deliverymethods as $dm): ?>
-			<?php if($course[21] == $dm): ?>
-			<option selected><?= $dm ?></option>
-			<?php else: ?>
-			<option><?= $dm ?></option>
-			<?php endif ?>
-			<?php endforeach ?>
-			</select>
-			</div>
-			<div class="form-group">
-			<label for="Levels<?= $course[0] ?>">Groups</label><br>
-			<select name="Levels" id="Levels<?= $course[0] ?>" class="form-select">
-			<?php foreach($levels as $l): ?>
-			<?php if($course[40] == $l): ?>
-			<option selected><?= $l ?></option>
-			<?php else: ?>
-			<option><?= $l ?></option>
-			<?php endif ?>
-			<?php endforeach ?>
-			</select>
-			</div>
-			<div class="form-group">
-			<label for="Topics<?= $course[0] ?>">Topics</label><br>
-			
-			<select name="Topics" id="Topics<?= $course[0] ?>" class="form-select">
-			<?php foreach($topics as $t): ?>
-			<?php if($course[38] == $t): ?>
-			<option selected><?= $t ?></option>
-			<?php else: ?>
-			<option><?= $t ?></option>
-			<?php endif ?>
-			<?php endforeach ?>
-			</select>
-
-			</div>
-			<div class="form-group">
-
-			<label for="Audience<?= $course[0] ?>">Audience</label><br>
-			<select name="Audience" id="Audience<?= $course[0] ?>" class="form-select">
-			<?php foreach($audiences as $a): ?>
-			<?php if($course[39] == $a): ?>
-			<option selected><?= $a ?></option>
-			<?php else: ?>
-			<option><?= $a ?></option>
-			<?php endif ?>
-			<?php endforeach ?>
-			</select>
-			</div>
-
-
-			
-
-			<div class="form-group">
-			<label for="Reporting<?= $course[0] ?>">Reporting</label><br>
-			<select name="Reporting" id="Reporting<?= $course[0] ?>" class="form-select">
-			<?php foreach($reportinglist as $r): ?>
-			<?php if($course[41] == $r): ?>
-			<option selected><?= $r ?></option>
-			<?php else: ?>
-			<option><?= $r ?></option>
-			<?php endif ?>
-			<?php endforeach ?>
-			</select>
-
-			</div>
-
-			<button class="btn btn-primary my-3">Save Course Info</button>
-			</form>
-			<div class="savemessage"></div>
-</details>
-			-->
 </div>
 <?php endforeach ?>
 
