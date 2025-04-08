@@ -152,7 +152,7 @@ h1, h2 {
 	}
 	?>
 
-	<details class="m-3 p-2 bg-secondary-subtle rounded" id="<?= $teamName ?>-details" <?= $teamName === $queryString ? 'open=""' : '' ?>>
+	<details class="m-3 mt-0 p-2 bg-secondary-subtle rounded" id="<?= $teamName ?>-details" <?= $teamName === $queryString ? 'open=""' : '' ?>>
 
 	<summary>
 		<h2 class="text-primary-emphasis" style="display: inline;">
