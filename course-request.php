@@ -28,7 +28,7 @@
 
 <input class="Requested" type="hidden" name="Requested" id="Requested" value="<?php echo date('Y-m-d') ?>">
 <input class="RequestedBy" type="hidden" name="RequestedBy" id="RequestedBy" value="<?= $user ?>">
-
+<input type="hidden" name="HUBInclude" id="HUBInclude" value="No">
 <div class="form-group">
 
 <label for="LearningHubPartner">Learning Hub Partner</label>
@@ -107,14 +107,6 @@ document.addEventListener("DOMContentLoaded", function () {
     });
 });
 </script>
-
-
-<div class="form-group">
-<input type="checkbox" name="HUBInclude" id="HUBInclude">
-<label for="HUBInclude">Include in LearningHUB?</label>
-</div>
-
-
 
 <div class="form-group">	
 <label for="CourseName">Course Name (Long)</label><br>
