@@ -135,6 +135,9 @@ foreach ($courses_sorted as $c) {
 			continue;
 		}
 	}
+	if (!empty($_GET['hubonly']) && strtolower($_GET['hubonly']) === 'true' && strtolower($c[53]) !== 'yes') {
+		continue;
+	}
 	if ($c[1] == 'Active') {
 		$coursesfilteredactive++;
 	}
@@ -169,7 +172,7 @@ if (!empty($_GET['topic'])) {
 } 
 if (!empty($_GET['delivery'])) {
 	$deliveryget .= '&delivery=' . urlencode($_GET['delivery']);
-	$dmethod == $_GET['delivery'];
+	$dmethod = $_GET['delivery'];
 } 
 if (!empty($_GET['processed'])) {
 	$processedget .= '&processed=' . urlencode($_GET['processed']);
@@ -177,6 +180,11 @@ if (!empty($_GET['processed'])) {
 $openaccessget = '';
 if (!empty($_GET['openaccess'])) {
     $openaccessget .= '&openaccess=' . urlencode($_GET['openaccess']);
+}
+} 
+$hubonlyget = '';
+if (!empty($_GET['hubonly'])) {
+    $hubonlyget .= '&hubonly=' . urlencode($_GET['hubonly']);
 }
 
 
@@ -217,7 +225,8 @@ if (!empty($_GET['openaccess'])) {
 <div class="col-md-4 col-xl-3">
 
 <input class="search form-control mb-2" placeholder="search">
-<div class="mb-3">
+
+<div class="mb-2">
 	<a class="badge bg-light-subtle text-primary-emphasis" href="./courses.php">All Alphabetically</a>  <!-- text-light-emphasis bg-light-subtle -->
 	<a class="badge bg-light-subtle text-primary-emphasis" href="./courses.php?sort=dateadded">All Recent</a>
 	<a class="badge bg-light-subtle text-primary-emphasis" href="./courses.php?status=active">All Active</a>
@@ -241,7 +250,24 @@ if (!empty($_GET['openaccess'])) {
 <div class="mb-2">
 	
 
-
+<div class="my-2">
+	<?php
+$hubget = '';
+if (!empty($_GET['hubonly']) && strtolower($_GET['hubonly']) === 'true') {
+	// Show a "remove" button if active
+    $hubquery = $_GET;
+    unset($hubquery['hubonly']);
+    $querystring = http_build_query($hubquery);
+    echo '<a class="badge bg-dark-subtle text-primary-emphasis" href="./courses.php?' . $querystring . '">&times; LearningHUB</a>';
+} else {
+	// Add HUB filter to current query
+    $hubquery = $_GET;
+    $hubquery['hubonly'] = 'true';
+    $querystring = http_build_query($hubquery);
+    echo '<a class="badge bg-light-subtle text-primary-emphasis" href="./courses.php?' . $querystring . '">LearningHUB</a>';
+}
+?>
+</div>
 
 
 	<!-- Delivery Methods update --> 
@@ -251,10 +277,10 @@ if (!empty($_GET['openaccess'])) {
 	    <?php $active = 'light-subtle text-primary-emphasis'; ?>
 		<?php if($dm == $dmethod):
 			$active = 'dark-subtle text-primary-emphasis'; ?>
-			<a href="courses.php?<?php echo $processedget . $audienceget . $topicget . $levelget ?>" 
+			<a href="courses.php?<?php echo $processedget . $audienceget . $topicget . $levelget . $hubonlyget ?>" 
 			class="badge bg-<?= $active ?>"><?= '&times; ' . $dm ?></a>
 		<?php else: ?>
-			<a href="courses.php?delivery=<?php echo urlencode($dm) . $processedget . $audienceget . $topicget . $levelget ?>" 
+			<a href="courses.php?delivery=<?php echo urlencode($dm) . $processedget . $audienceget . $topicget . $levelget . $hubonlyget ?>" 
 			class="badge bg-<?= $active ?>"><?= $dm ?></a>
 		<?php endif; ?>	
 	<?php endforeach; ?>
@@ -264,29 +290,14 @@ if (!empty($_GET['openaccess'])) {
 	<?php foreach($audiences as $a): ?>
 	<?php if($a == $audience): ?>
 		<?php $active = 'dark-subtle text-primary-emphasis'; ?>
-		<a href="courses.php?<?php echo $processedget . $topicget . $levelget ?>" 
+		<a href="courses.php?<?php echo $processedget . $topicget . $levelget . $hubonlyget ?>" 
 			class="badge bg-<?= $active ?>"><?= '&times; ' . $a ?></a>
 	<?php else: ?>
 		<?php $active = 'light-subtle text-primary-emphasis'; ?>
-		<a href="courses.php?audience=<?php echo urlencode($a) . $processedget . $topicget . $levelget ?>" 
+		<a href="courses.php?audience=<?php echo urlencode($a) . $processedget . $topicget . $levelget . $hubonlyget ?>" 
 			class="badge bg-<?= $active ?>"><?= $a ?></a>
 	<?php endif; ?>	
 	<?php endforeach ?>
-	</div>
-	<!-- Levels update --> 
-	<div class="mb-3">
-	<div>Groups</div>
-	<?php foreach($levels as $l): ?>
-	    <?php $active = 'light-subtle text-primary-emphasis'; ?>
-		<?php if($l == $level):
-			$active = 'dark-subtle text-primary-emphasis'; ?>
-			<a href="courses.php?<?php echo $processedget . $audienceget . $topicget . $deliveryget ?>" 
-			class="badge bg-<?= $active ?>"><?= '&times; ' . $l ?></a>
-		<?php else: ?>
-			<a href="courses.php?level=<?php echo urlencode($l) . $processedget . $audienceget . $topicget . $deliveryget ?>" 
-			class="badge bg-<?= $active ?>"><?= $l ?></a>
-		<?php endif; ?>	
-	<?php endforeach; ?>
 	</div>
 
 
@@ -297,28 +308,15 @@ if (!empty($_GET['openaccess'])) {
 		<?php $active = 'light-subtle text-primary-emphasis'; ?>
 		<?php if($t == $topic): 
 			$active = 'dark-subtle text-primary-emphasis'; ?>
-			<a href="courses.php?<?php echo $processedget . $audienceget . $levelget . $deliveryget ?>" 
+			<a href="courses.php?<?php echo $processedget . $audienceget . $levelget . $deliveryget . $hubonlyget ?>" 
 			class="badge bg-<?= $active ?>"><?= '&times; ' . $t ?></a>
 		<?php else: ?>
-			<a href="courses.php?topic=<?php echo urlencode($t) . $processedget . $levelget . $audienceget . $deliveryget ?>" 
+			<a href="courses.php?topic=<?php echo urlencode($t) . $processedget . $levelget . $audienceget . $deliveryget . $hubonlyget ?>" 
 			class="badge bg-<?= $active ?>"><?= $t ?></a> 
 		<?php endif; ?>
 	<?php endforeach; ?>
 	</div>
-	
 
-	
-
-	
-	<details class="my-5">
-		<summary>Old Categories</summary>
-	<?php foreach($categories as $category): ?>
-	<a href="courses.php?category=<?php echo urlencode($category[1]) ?>" 
-		class="badge bg-light-subtle text-primary-emphasis">
-		<?= $category[1] ?>
-	</a> 
-	<?php endforeach ?>
-	</details>
 
 
 </div>
@@ -338,23 +336,11 @@ if (!empty($_GET['openaccess'])) {
 		<?php $statusbg = ($course[1] == 'Inactive') ? 'secondary' : 'primary'; ?>
 		<span class="badge text-light-subtle bg-<?php echo $statusbg; ?>"><?php echo $course[1]; ?></span> 
 	</div>
-	<!--
-	<?php if(empty($course[48])): ?>
-	<div class="float-end pl-3 pb-3">
-		<form method="get" action="course-tax-claim.php" class="d-inline claimform">
-			<input type="hidden" name="cid" id="cid" value="<?= $course[0] ?>">
-			<input type="submit" class="btn btn-sm bg-light-subtle ml-3" value="Claim">
-		</form>
 
-		<a href="/lsapp/person.php?idir=<?= $course[49] ?>"><?= $course[49] ?></a>
-	</div>
-	<?php endif ?>
-	-->
 	<a class="badge bg-body text-primary-emphasis" href="courses.php?delivery=<?= $course[21] ?>">
 			<?= $course[21] ?>
 	</a>
 	<a class="badge bg-body text-primary-emphasis" href="courses.php?audience=<?= urlencode($course[39]) ?>"><?= $course[39] ?></a>
-	<a class="badge bg-body text-primary-emphasis" href="courses.php?level=<?= urlencode($course[40]) ?>"><?= $course[40] ?></a>
 	<a class="badge bg-body text-primary-emphasis" href="courses.php?topic=<?= urlencode($course[38]) ?>"><?= $course[38] ?></a>
 	<?php if($course[53] == 'Yes' || $course[53] == 1): ?>
 	<span class="badge bg-body">Learning<strong>HUB</strong></span>
@@ -383,9 +369,9 @@ if (!empty($_GET['openaccess'])) {
 	<div class="p-2">Platform: <a href="#<?php echo urlencode($course[0]) ?>"><?= $course[52] ?></a></div>
 <?php $stewsdevs = getCoursePeople($course[0]) ?>
 <?php if(!empty($stewsdevs['stewards'][0][2])): ?>
-	<div class="p-2">Steward: <a href="/lsapp/person.php?idir=<?= $stewsdevs['stewards'][0][2] ?>"><?= $stewsdevs['stewards'][0][2] ?></a></div>
+	<!-- <div class="p-2">Steward: <a href="/lsapp/person.php?idir=<?= $stewsdevs['stewards'][0][2] ?>"><?= $stewsdevs['stewards'][0][2] ?></a></div> -->
 <?php else: ?>
-	<div class="p-2">No steward set!</div>
+	<!-- <div class="p-2">No steward set!</div> -->
 <?php endif ?>
 </div>
 
