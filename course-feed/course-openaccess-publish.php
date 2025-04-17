@@ -1,8 +1,8 @@
 <?php
 opcache_reset();
 // Include required files that contain getCourse and getCoursesClassesUpcoming
-require_once 'inc/lsapp.php'; // Ensure this contains getCoursesClassesUpcoming()
-$csvFile = fopen('data/courses.csv', 'r');
+require_once '../inc/lsapp.php'; // Ensure this contains getCoursesClassesUpcoming()
+$csvFile = fopen('../data/courses.csv', 'r');
 if (!$csvFile) {
     die("Failed to open courses CSV.");
 }
@@ -44,40 +44,42 @@ while (($course = fgetcsv($csvFile)) !== false) {
             $today = date('Y-m-d'); // Get today's date
         
             foreach ($upcomingClasses as $class) {
-                $startDate = $class[8]; // StartDate
-                $startTime = $class[54]; // StartTime
-                $endTime = $class[55]; // EndTime
-                $webinarLink = $class[15]; // Webinar link
-                $currentEnrolment = $class[18]; // current enrolment number
-                $maxEnrolment = $class[12]; // maximum enrolment number
-        
-                // Format the date
-                $dateObj = new DateTime($startDate);
-                $formattedDate = $dateObj->format('l, M j Y');
-        
-                // Only show webinar link if the event is happening today
-                $webinarCell = "";
-                if ($startDate === $today) {
-                    // Determine the help link for the webinar
-                    $help = "";
-                    if (strpos($webinarLink, 'teams.microsoft.com') !== false) {
-                        $help = '<a href="https://aka.ms/JoinTeamsMeeting?omkt=en-US" target="_blank" rel="noopener">Need help?</a>';
-                    } elseif (strpos($webinarLink, 'zoom.us') !== false) {
-                        $help = ''; // Zoom help TBD
+                if($class[1] == 'Active') {
+                    $startDate = $class[8]; // StartDate
+                    $startTime = $class[54]; // StartTime
+                    $endTime = $class[55]; // EndTime
+                    $webinarLink = $class[15]; // Webinar link
+                    $currentEnrolment = $class[18]; // current enrolment number
+                    $maxEnrolment = $class[12]; // maximum enrolment number
+            
+                    // Format the date
+                    $dateObj = new DateTime($startDate);
+                    $formattedDate = $dateObj->format('l, M j Y');
+            
+                    // Only show webinar link if the event is happening today
+                    $webinarCell = "";
+                    if ($startDate === $today) {
+                        // Determine the help link for the webinar
+                        $help = "";
+                        if (strpos($webinarLink, 'teams.microsoft.com') !== false) {
+                            $help = '<a href="https://aka.ms/JoinTeamsMeeting?omkt=en-US" target="_blank" rel="noopener">Need help?</a>';
+                        } elseif (strpos($webinarLink, 'zoom.us') !== false) {
+                            $help = ''; // Zoom help TBD
+                        }
+            
+                        $webinarCell = "<a class='btn btn-primary' href='{$webinarLink}' target='_blank' rel='noopener'>Join</a> $help";
+                    } else {
+                        $webinarCell = "<span class='text-muted'>Available on the day</span>";
                     }
-        
-                    $webinarCell = "<a class='btn btn-primary' href='{$webinarLink}' target='_blank' rel='noopener'>Join</a> $help";
-                } else {
-                    $webinarCell = "<span class='text-muted'>Available on the day</span>";
+            
+                    // Add class row
+                    $nextOffering .= "<tr>
+                                        <td>{$formattedDate}</td>
+                                        <td>{$startTime} - {$endTime}</td>
+                                        <td>{$currentEnrolment}/{$maxEnrolment}</td>
+                                        <td>{$webinarCell}</td>
+                                    </tr>";
                 }
-        
-                // Add class row
-                $nextOffering .= "<tr>
-                                    <td>{$formattedDate}</td>
-                                    <td>{$startTime} - {$endTime}</td>
-                                    <td>{$currentEnrolment}/{$maxEnrolment}</td>
-                                    <td>{$webinarCell}</td>
-                                </tr>";
             }
         
             $nextOffering .= "</tbody></table>";
@@ -134,4 +136,5 @@ while (($course = fgetcsv($csvFile)) !== false) {
 }
 
 fclose($csvFile);
-exit;
+// exit;
+header('Location: index.php?message=Success');
