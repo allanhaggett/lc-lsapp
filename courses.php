@@ -130,6 +130,11 @@ foreach ($courses_sorted as $c) {
 			continue;	
 		}
 	}
+	if (!empty($_GET['openaccess'])) {
+		if (!($c[57] === 'true' || $c[57] === 'on')) {
+			continue;
+		}
+	}
 	if ($c[1] == 'Active') {
 		$coursesfilteredactive++;
 	}
@@ -169,6 +174,10 @@ if (!empty($_GET['delivery'])) {
 if (!empty($_GET['processed'])) {
 	$processedget .= '&processed=' . urlencode($_GET['processed']);
 } 
+$openaccessget = '';
+if (!empty($_GET['openaccess'])) {
+    $openaccessget .= '&openaccess=' . urlencode($_GET['openaccess']);
+}
 
 
 
@@ -219,6 +228,15 @@ if (!empty($_GET['processed'])) {
 	<!-- <a class="badge bg-dark-subtle text-primary-emphasis" href="./courses.php?processed=1">Hide Processed</a> -->
 	<?php //endif ?>
 	<!-- <a class="badge bg-dark-subtle text-primary-emphasis" href="./courses-wtaxup.php">Taxonomy Updater</a> -->
+</div>
+<div class="mb-3">
+<?php if (!empty($_GET['openaccess'])): ?>
+    <a href="courses.php?<?php echo $processedget . $audienceget . $topicget . $levelget . $deliveryget ?>" 
+       class="badge bg-dark-subtle text-primary-emphasis">&times; Open Access</a>
+<?php else: ?>
+    <a href="courses.php?openaccess=true<?php echo $processedget . $audienceget . $topicget . $levelget . $deliveryget ?>" 
+       class="badge bg-light-subtle text-primary-emphasis">Open Access</a>
+<?php endif; ?>
 </div>
 <div class="mb-2">
 	
