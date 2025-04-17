@@ -278,7 +278,7 @@ if (file_exists($categoriesFile)) {
 	<div class="alert alert-primary">This course is NOT published on the Open Access server.</div>
 <?php endif ?>
 <?php else: ?>
-	<div class="alert alert-primary">Cannot be published on Open Access server until it has a short name.</div>
+	<div class="alert alert-primary">Cannot be published on Open Access server until a short name is set.</div>
 <?php endif ?>
 </div>
 

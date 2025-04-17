@@ -274,14 +274,19 @@ document.addEventListener("DOMContentLoaded", function () {
 	<label for="HUBInclude">Include in LearningHUB?</label>
 <?php endif ?>
 </div>
-
 <div class="form-group">
-<?php if($course[57] == 'on' || $course[57] == 'Yes'): ?>
+<?php if(!empty($deets[3])): ?>
+	<?php if($course[57] == 'on' || $course[57] == 'Yes'): ?>
 	<input type="checkbox" name="OpenAccessOptin" id="OpenAccessOptin" checked>
 	<label for="OpenAccessOptin">OpenAccess Publish?</label>
-<?php else: ?>
+	<?php else: ?>
 	<input type="checkbox" name="OpenAccessOptin" id="OpenAccessOptin">
 	<label for="OpenAccessOptin">OpenAccess Publish?</label>
+	<?php endif ?>
+<?php else: ?>
+	<input type="checkbox" name="OpenAccessOptin" id="OpenAccessOptin" disabled>
+	<label for="OpenAccessOptin">OpenAccess Publish?</label>
+	<div class="alert alert-primary my-1">Cannot be published on Open Access server until a short name is set.</div>
 <?php endif ?>
 </div>
 
