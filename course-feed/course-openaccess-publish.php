@@ -10,7 +10,7 @@ if (!$csvFile) {
 $header = fgetcsv($csvFile); // Skip header row
 
 while (($course = fgetcsv($csvFile)) !== false) {
-    if (isset($course[57]) && strtolower(trim($course[57])) === 'true') {
+    if (isset($course[57]) && strtolower(trim($course[57])) === 'true' || strtolower(trim($course[57])) === 'on') {
         $courseid = $course[0]; // Assuming course ID is in index 0
 
         // Fetch course details
@@ -44,7 +44,7 @@ while (($course = fgetcsv($csvFile)) !== false) {
             $today = date('Y-m-d'); // Get today's date
         
             foreach ($upcomingClasses as $class) {
-                if($class[1] == 'Active') {
+                if($class[1] === 'Active') {
                     $startDate = $class[8]; // StartDate
                     $startTime = $class[54]; // StartTime
                     $endTime = $class[55]; // EndTime
@@ -94,8 +94,8 @@ while (($course = fgetcsv($csvFile)) !== false) {
         }
 
         // Define file paths
-        $headerFile = 'templates/openaccess-header.php';
-        $footerFile = 'templates/openaccess-footer.php';
+        $headerFile = '../templates/openaccess-header.php';
+        $footerFile = '../templates/openaccess-footer.php';
         $indexFile = $directory . '/' . $courseShort . '.php';
 
         // Read header and footer
