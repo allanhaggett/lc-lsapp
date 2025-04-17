@@ -268,7 +268,7 @@ if (file_exists($categoriesFile)) {
 <?php if($deets[57] == 'on' || $deets[57] == 'Yes'): ?>
 	<div class="alert alert-success">
 		This course
-		<a href="https://learn.bcpublicservice.gov.bc.ca/openaccess/<?= str_replace(' ', '-', strtolower($course[3])) ?>.php?accesscode=mciencui33" 
+		<a href="https://learn.bcpublicservice.gov.bc.ca/openaccess/<?= str_replace(' ', '-', strtolower($deets[3])) ?>.php?accesscode=mciencui33" 
 			target="_blank">
 				is published
 		</a>
