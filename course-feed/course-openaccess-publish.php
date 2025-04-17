@@ -8,8 +8,10 @@ if (!$csvFile) {
 }
 
 $header = fgetcsv($csvFile); // Skip header row
+$allCourseIds = []; // Track all course IDs for later cleanup
 
 while (($course = fgetcsv($csvFile)) !== false) {
+    $allCourseIds[] = $course[0]; // Track all course IDs for later cleanup
     if (isset($course[57]) && strtolower(trim($course[57])) === 'true' || strtolower(trim($course[57])) === 'on') {
         $courseid = $course[0]; // Assuming course ID is in index 0
 
@@ -132,6 +134,28 @@ while (($course = fgetcsv($csvFile)) !== false) {
 
         // Write the index.php file
         file_put_contents($indexFile, $pageContent);
+    }
+}
+
+// Cleanup unpublished courses
+$existingFiles = glob($directory . '/*.php');
+foreach ($existingFiles as $file) {
+    $filename = basename($file, '.php');
+    $match = false;
+    foreach ($allCourseIds as $id) {
+        $courseData = getCourse($id);
+        if ($courseData && isset($courseData[3])) {
+            $short = str_replace(' ', '-', strtolower($courseData[3]));
+            if ($short === $filename) {
+                if (isset($courseData[57]) && (strtolower(trim($courseData[57])) === 'true' || strtolower(trim($courseData[57])) === 'on')) {
+                    $match = true;
+                    break;
+                }
+            }
+        }
+    }
+    if (!$match) {
+        unlink($file);
     }
 }
 
