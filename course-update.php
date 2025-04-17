@@ -275,7 +275,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <?php endif ?>
 </div>
 <div class="form-group">
-<?php if(!empty($deets[3])): ?>
+<?php if(!empty($course[3])): ?>
 	<?php if($course[57] == 'on' || $course[57] == 'Yes'): ?>
 	<input type="checkbox" name="OpenAccessOptin" id="OpenAccessOptin" checked>
 	<label for="OpenAccessOptin">OpenAccess Publish?</label>
