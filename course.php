@@ -263,12 +263,24 @@ if (file_exists($categoriesFile)) {
 </div>
 <?php endif ?>
 
+<div class="form-group mb-3">
 <?php if(!empty($deets[3])): ?>
-<form class="my-3" action="course-openaccess-create.php" method="POST">
-    <input type="hidden" name="courseid" value="<?php echo htmlspecialchars($deets[0]); ?>">
-    <button type="submit" class="btn btn-primary">Generate Open Access Page</button>
-</form>
+<?php if($deets[57] == 'on' || $deets[57] == 'Yes'): ?>
+	<div class="alert alert-success">
+		This course 
+		<a href="https://learn.bcpublicservice.gov.bc.ca/openaccess/<?= strtolower($deets[3]) ?>.php?accesscode=mciencui33" 
+			target="_blank">
+				is published
+		</a>
+		on the Open Access server.
+	</div>
+<?php else: ?>
+	<div class="alert alert-primary">This course is NOT published on the Open Access server.</div>
 <?php endif ?>
+<?php else: ?>
+	<div class="alert alert-primary">Cannot be published on Open Access server until it has a short name.</div>
+<?php endif ?>
+</div>
 
 	<details class="mb-3 p-2 border border-secondary-subtle rounded-3">
 		<summary>File Paths &amp; URLs</summary>
