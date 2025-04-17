@@ -275,7 +275,7 @@ document.addEventListener("DOMContentLoaded", function () {
 <?php endif ?>
 </div>
 <div class="form-group">
-<?php if(!empty($course[3])): ?>
+<?php if(!empty($deets[3])): ?>
 	<?php if($course[57] == 'on' || $course[57] == 'Yes'): ?>
 	<input type="checkbox" name="OpenAccessOptin" id="OpenAccessOptin" checked>
 	<label for="OpenAccessOptin">OpenAccess Publish?</label>
@@ -287,16 +287,6 @@ document.addEventListener("DOMContentLoaded", function () {
 	<input type="checkbox" name="OpenAccessOptin" id="OpenAccessOptin" disabled>
 	<label for="OpenAccessOptin">OpenAccess Publish?</label>
 	<div class="alert alert-primary my-1">Cannot be published on Open Access server until a short name is set.</div>
-<?php endif ?>
-</div>
-
-<div class="form-group">
-<?php if($course[57] == 'on' || $course[57] == 'Yes'): ?>
-	<input type="checkbox" name="OpenAccessOptin" id="OpenAccessOptin" checked>
-	<label for="OpenAccessOptin">OpenAccess Publish?</label>
-<?php else: ?>
-	<input type="checkbox" name="OpenAccessOptin" id="OpenAccessOptin">
-	<label for="OpenAccessOptin">OpenAccess Publish?</label>
 <?php endif ?>
 </div>
 
