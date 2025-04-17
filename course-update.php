@@ -1,3 +1,4 @@
+<?php ob_start(); ?>
 <?php require('inc/lsapp.php') ?>
 <?php opcache_reset(); ?>
 <?php if(isAdmin()): ?>
@@ -79,7 +80,7 @@ $course = Array($_POST['CourseID'],
 				h($_POST['ELM']),
 				$securepre,
 				$securepost,
-				h($_POST['CourseOwner']),
+				h($_POST['CourseOwner'] ?? ''),
 				'', // used to be minmax
 				h($_POST['CourseNotes']),
 				h($_POST['Requested']),
@@ -108,7 +109,7 @@ $course = Array($_POST['CourseID'],
 				h($_POST['LearningHubPartner']),
 				h($alchemer),
 				h($_POST['Topics']),
-				h($_POST['Audience']),
+				h($_POST['Audience'] ?? ''),
 				$levels,
 				$reporting,
 				$lanpathvalid,
@@ -125,7 +126,8 @@ $course = Array($_POST['CourseID'],
 				$hubInclude,
 				h($_POST['RegistrationLink']),
 				$slug,
-				h($_POST['HubExpirationDate'])
+				h($_POST['HubExpirationDate']),
+				h($_POST['OpenAccessOptin'])
 
 			);
 
@@ -147,8 +149,8 @@ rename('data/courses-temp.csv','data/courses.csv');
 
 // CourseID,Role,IDIR,Date
 $peoplefp = fopen('data/course-people.csv', 'a+');
-if($_POST['CourseOwner'] != $coursesteward) {
-	$stew = [$courseid,'steward',$_POST['CourseOwner'], $now];
+if(($_POST['CourseOwner'] ?? '') != $coursesteward) {
+	$stew = [$courseid,'steward',$_POST['CourseOwner'] ?? '', $now];
 	fputcsv($peoplefp, $stew);
 }
 if(isset($_POST['Developer']) && $_POST['Developer'] != $coursedeveloper) {
@@ -264,12 +266,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
 <div class="form-group">
-<?php if($course[53] == 'on' || $course[53] == 'Yes'): ?>
+<?php if($course[55] == 'on' || $course[55] == 'Yes'): ?>
 	<input type="checkbox" name="HUBInclude" id="HUBInclude" checked>
 	<label for="HUBInclude">Include in LearningHUB?</label>
 <?php else: ?>
 	<input type="checkbox" name="HUBInclude" id="HUBInclude">
 	<label for="HUBInclude">Include in LearningHUB?</label>
+<?php endif ?>
+</div>
+
+<div class="form-group">
+<?php if($course[57] == 'on' || $course[57] == 'Yes'): ?>
+	<input type="checkbox" name="OpenAccessOptin" id="OpenAccessOptin" checked>
+	<label for="OpenAccessOptin">OpenAccess Publish?</label>
+<?php else: ?>
+	<input type="checkbox" name="OpenAccessOptin" id="OpenAccessOptin">
+	<label for="OpenAccessOptin">OpenAccess Publish?</label>
 <?php endif ?>
 </div>
 
