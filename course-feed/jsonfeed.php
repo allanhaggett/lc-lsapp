@@ -86,5 +86,5 @@ if (!copy($jsoname, $newfile)) {
 }
 
 // header('Location: lhub-course-sync.php');
-header('course-openaccess-publish.php');
+header('Location: course-openaccess-publish.php');
 // header('Location: index.php?message=Success');
