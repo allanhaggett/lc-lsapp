@@ -261,7 +261,7 @@ $openAccessCode = $accessCodeData[0]['code'] ?? '';
 ?>
 	<div class="alert alert-success">
 		This course
-		<a href="https://learn.bcpublicservice.gov.bc.ca/openaccess/<?= str_replace(' ', '-', strtolower($deets[3])) ?>.php?accesscode=<?= h($openAccessCode) ?>" 
+		<a href="https://learn.bcpublicservice.gov.bc.ca/openaccess/<?= str_replace(' ', '-', strtolower($course[3])) ?>.php?accesscode=mciencui33" 
 			target="_blank">
 				is published
 		</a>
