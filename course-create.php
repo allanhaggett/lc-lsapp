@@ -85,7 +85,8 @@ if(canAccess()):
 					h($_POST['HUBInclude']),
 					h($_POST['RegistrationLink']),
 					$slug,
-					h($_POST['HubExpirationDate'])
+					h($_POST['HubExpirationDate']),
+					0
 		);
 		
 	$course = array($newcourse);
