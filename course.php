@@ -271,9 +271,14 @@ if (file_exists($categoriesFile)) {
 <div class="form-group mb-3">
 <?php if(!empty($deets[3])): ?>
 <?php if($deets[57] == 'on' || $deets[57] == 'Yes'): ?>
+<?php
+$accessCodeJson = __DIR__ . '/data/open-access-code.json';
+$accessCodeData = file_exists($accessCodeJson) ? json_decode(file_get_contents($accessCodeJson), true) : [];
+$openAccessCode = $accessCodeData[0]['code'] ?? '';
+?>
 	<div class="alert alert-success">
 		This course
-		<a href="https://learn.bcpublicservice.gov.bc.ca/openaccess/<?= str_replace(' ', '-', strtolower($deets[3])) ?>.php?accesscode=mciencui33" 
+		<a href="https://learn.bcpublicservice.gov.bc.ca/openaccess/<?= str_replace(' ', '-', strtolower($deets[3])) ?>.php?accesscode=<?= h($openAccessCode) ?>" 
 			target="_blank">
 				is published
 		</a>
