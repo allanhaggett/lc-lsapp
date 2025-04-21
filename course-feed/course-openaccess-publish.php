@@ -10,6 +10,10 @@ if (!$csvFile) {
 $header = fgetcsv($csvFile); // Skip header row
 $allCourseIds = []; // Track all course IDs for later cleanup
 
+$accessCodeJson = '../data/open-access-code.json';
+$accessCodeData = file_exists($accessCodeJson) ? json_decode(file_get_contents($accessCodeJson), true) : [];
+$expectedCode = $accessCodeData[0]['code'] ?? '';
+
 while (($course = fgetcsv($csvFile)) !== false) {
     $allCourseIds[] = $course[0]; // Track all course IDs for later cleanup
     if (isset($course[57]) && strtolower(trim($course[57])) === 'true' || strtolower(trim($course[57])) === 'on') {
@@ -120,8 +124,8 @@ while (($course = fgetcsv($csvFile)) !== false) {
         // Content for the index.php file (including the access code check)
         $pageContent = "<?php 
         \$code = \$_GET['accesscode'] ?? ''; 
-        if(\$code !== 'mciencui33') { 
-            die('Sorry, you do not have access.'); 
+        if (\$code !== '" . addslashes($expectedCode) . "') {
+            die('Sorry, you do not have access.');
         } 
         ?>" . PHP_EOL;
 
