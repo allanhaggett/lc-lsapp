@@ -286,6 +286,7 @@ $teams = getTeams();
 				<a class="dropdown-item" href="/lsapp/elm-sync-upload.php">Learning System Synchronize</a>
 				<a class="dropdown-item" href="/lsapp/course-feed/">LearningHUB Synchronize</a>
 				<a class="dropdown-item" href="/lsapp/elm-audit.php">Learning System Audit</a>
+				<a class="dropdown-item" href="/lsapp/open-access-code-manager.php">Open Access Code Manager</a>
 				<!-- <a class="dropdown-item" href="/lsapp/ondeck.php">On Deck for Tomorrow</a> -->
 				<a class="dropdown-item" href="/lsapp/external-mailing-list.php">Weekly Stats Update</a>
 				
