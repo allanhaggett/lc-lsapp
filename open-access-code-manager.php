@@ -83,7 +83,7 @@ $sortedCourses = $allCourses;
         <?php foreach ($sortedCourses as $course): ?>
             <li class="list-group-item">
                 <span class="coursename">
-                    <a href="/lsapp/course.php?id=<?= urlencode($course[0]) ?>">
+                    <a href="/lsapp/course.php?courseid=<?= urlencode($course[0]) ?>">
                         <?= htmlspecialchars($course[2]) ?>
                     </a>
                     (<a href="https://learn.bcpublicservice.gov.bc.ca/openaccess/<?= str_replace(' ', '-', strtolower($course[3])) ?>.php?accesscode=<?= h($currentCode) ?>" 
