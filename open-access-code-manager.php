@@ -25,15 +25,23 @@ $history = $data[1]['history'] ?? [];
 <div class="row justify-content-md-center">
 <div class="col-md-8 col-xl-6">
 
-<h1>Manage Open Access Code</h1>
+    <h1>Manage Open Access Code</h1>
     <div class="card mt-4">
         <div class="card-body">
             <h5 class="card-title">Current Access Code</h5>
             <p class="display-2"><?= htmlspecialchars($currentCode) ?></p>
             <p><strong>Created:</strong> <?= htmlspecialchars($currentCreated) ?></p>
             <form method="post" action="open-access-rotate-code.php">
-                <button type="submit" class="btn btn-danger">Invalidate and Generate New Code</button>
+                <button type="submit" 
+                        class="btn btn-danger" 
+                        onclick="return confirm('Are you sure you want to re-generate this code? It will cut access off to ALL OPEN ACCESS COURSES! Only do this if you know what you\'re doing and can communicate the change back to our partners.')">
+                            Invalidate and Generate New Code
+                </button>
             </form>
+            <div class="alert alert-danger mt-3">
+                <strong>Warning:</strong> Regenerating the code will cut off access to <strong>all Open Access courses</strong>. 
+                Only do this if you know what you're doing and can communicate the change back to our partners.
+            </div>
             <p class="mt-3">In order for a new code to take effect, the synchronization process needs 
                 to happen. <a href="/lsapp/course-feed/">Sync now</a>, or wait until the automated
                 sync happens at 7am, 12pm, and 4pm daily.</p>
