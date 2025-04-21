@@ -34,7 +34,7 @@ $sortedCourses = $allCourses;
 </div>
 <div class="col-md-6">
 
-    <div class="card mt-4">
+    <div class="card">
         <div class="card-body">
             <h5 class="card-title">Current Access Code</h5>
             <p class="display-2"><?= htmlspecialchars($currentCode) ?></p>
