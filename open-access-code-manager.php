@@ -57,10 +57,6 @@ $sortedCourses = $allCourses;
                             Invalidate and Generate New Code
                 </button>
             </form>
-            <div class="alert alert-danger mt-3">
-                <strong>Warning:</strong> Regenerating the code will cut off access to <strong>all Open Access courses</strong>. 
-                Only do this if you know what you're doing and can communicate the change back to our partners.
-            </div>
             <p class="mt-3">In order for a new code to take effect, the synchronization process needs 
                 to happen. <a href="/lsapp/course-feed/">Sync now</a>, or wait until the automated
                 sync happens at 7am, 12pm, and 4pm daily.</p>
