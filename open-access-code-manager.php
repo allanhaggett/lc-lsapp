@@ -66,11 +66,19 @@ $sortedCourses = $allCourses;
         <hr>
         <h5>Archived Codes</h5>
         <ul class="list-group">
-            <?php foreach (array_reverse($history) as $entry): ?>
+            <?php foreach (array_reverse($history) as $i => $entry): 
+                        $index = count($history) - 1 - $i; ?>
                 <li class="list-group-item">
                     <strong>Code:</strong> <?= htmlspecialchars($entry['code']) ?><br>
                     <strong>Created:</strong> <?= htmlspecialchars($entry['created']) ?><br>
                     <strong>By:</strong> <?= htmlspecialchars($entry['createdby']) ?>
+                    <div class="mt-2">
+                        <a class="btn btn-sm btn-outline-primary"
+                           href="open-access-rotate-code.php?restore=<?= $index ?>"
+                           onclick="return confirm('Are you sure you want to restore this code? This will become the current access code for all Open Access courses.')">
+                           Restore this code
+                        </a>
+                    </div>
                 </li>
             <?php endforeach; ?>
         </ul>
