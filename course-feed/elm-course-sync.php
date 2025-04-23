@@ -134,7 +134,8 @@ foreach ($hubCourses as $hcCode => $hc) {
             'Yes',                  // HUBInclude
             '',                     // RegistrationLink
             $slug,                  // CourseNameSlug
-            ''                      // HubExpirationDate
+            '',                     // HubExpirationDate
+            0                      // OpenAccessOptin
         ];
         $itemCode = $newCourse[4];
         $updatedCourses[$itemCode] = $newCourse;
@@ -180,7 +181,8 @@ if ($fpTemp !== false) {
         'Color', 'Featured', 'Developer', 'EvaluationsLink', 'LearningHubPartner', 'Alchemer',
         'Topics', 'Audience', 'Levels', 'Reporting', 'PathLAN', 'PathStaging', 'PathLive',
         'PathNIK', 'PathTeams', 'isMoodle', 'TaxProcessed', 'TaxProcessedBy', 'ELMCourseID',
-        'Modified', 'Platform', 'HUBInclude', 'RegistrationLink', 'CourseNameSlug', 'HubExpirationDate'
+        'Modified', 'Platform', 'HUBInclude', 'RegistrationLink', 'CourseNameSlug', 
+        'HubExpirationDate', 'OpenAccessOptin'
     ]);
 
     if (($fpOriginal = fopen($coursesPath, 'r')) !== false) {
