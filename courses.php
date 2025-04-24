@@ -13,7 +13,6 @@ $level = urldecode($levelid);
 $catid = (isset($_GET['category'])) ? $_GET['category'] : 0;
 $cat = urldecode($catid); 
 
-
 // Retrieve all the courses 
 $courses = getCourses();
 array_shift($courses); // Remove the header row from the courses list
@@ -31,15 +30,6 @@ if(!empty($_GET['sort']) == 'dateadded') {
 	$sortdir = SORT_DESC;
 	$sortfield = 13;
 }
-
-// Ben testing new sort method to pull active courses then inactive courses
-
-// TODO add active inactive filter options
-
-// usort($active_courses, function($a, $b) use ($sortfield, $sortdir) {
-//     return ($sortdir === SORT_ASC ? strcmp($a[$sortfield], $b[$sortfield]) : strcmp($b[$sortfield], $a[$sortfield]));
-// });
-
 
 function sortCourses($a, $b) {
 	global $sortdir, $sortfield;
@@ -72,35 +62,6 @@ if (!empty($_GET['status'])) {
 } else {
 	$courses_sorted = array_merge($active_tmp, $inactive_tmp);
 }
-
-
-// $courses_sorted = array_merge($active_tmp, $inactive_tmp);
-
-
-
-
-// Previous version of course sort with edits
-
-// foreach($courses as $line) {
-// 	if ($line[1] == 'Inactive') {
-// 		$inactive_tmp[] = $line[$sortfield];
-// 	} else {
-// 		$active_tmp[] = $line[$sortfield];
-// 	}
-// }
-// array_multisort($active_tmp, $sortdir);
-// array_multisort($inactive_tmp, $sortdir);
-
-// $tmp = array_merge($active_tmp, $inactive_tmp);
-
-// array_multisort($tmp, $courses);
-
-
-
-
-
-
-
 
 // If a taxonomy has an applied filter, check that the course has it 
 // and if it doesn't, don't add it to our list of filtered courses
@@ -160,6 +121,7 @@ $processedget = '';
 $topicget = '';
 $deliveryget = '';
 $dmethod = '';
+$hubonlyget = '';
 
 if (!empty($_GET['level'])) {
 	$levelget .= '&level=' . urlencode($_GET['level']);
@@ -193,15 +155,12 @@ if (!empty($_GET['hubonly'])) {
 ?>
 <?php getHeader() ?>
 
-
 <title>Learning Centre Course Catalog</title>
 
 <?php getScripts() ?>
 
-
 <body>
 <?php getNavigation() ?>
-
 
 <div id="courses">
 <div class="container-fluid">
@@ -227,31 +186,21 @@ if (!empty($_GET['hubonly'])) {
 <input class="search form-control mb-2" placeholder="search">
 
 <div class="mb-2">
-	<a class="badge bg-light-subtle text-primary-emphasis" href="./courses.php">All Alphabetically</a>  <!-- text-light-emphasis bg-light-subtle -->
+	<a class="badge bg-light-subtle text-primary-emphasis" href="./courses.php">All Alphabetically</a> 
 	<a class="badge bg-light-subtle text-primary-emphasis" href="./courses.php?sort=dateadded">All Recent</a>
 	<a class="badge bg-light-subtle text-primary-emphasis" href="./courses.php?status=active">All Active</a>
 	<a class="badge bg-light-subtle text-primary-emphasis" href="./courses.php?status=inactive">All Inactive</a>
-	<?php //if($_GET['processed']): ?>
-	<!-- <a class="badge bg-dark text-primary-emphasis" href="./courses.php?processed=0">Show Processed</a> -->
-	<?php //else: ?>
-	<!-- <a class="badge bg-dark-subtle text-primary-emphasis" href="./courses.php?processed=1">Hide Processed</a> -->
-	<?php //endif ?>
-	<!-- <a class="badge bg-dark-subtle text-primary-emphasis" href="./courses-wtaxup.php">Taxonomy Updater</a> -->
 </div>
 <div class="mb-3">
 <?php if (!empty($_GET['openaccess'])): ?>
-    <a href="courses.php?<?php echo $processedget . $audienceget . $topicget . $levelget . $deliveryget ?>" 
+    <a href="courses.php?<?php echo $processedget . $audienceget . $topicget . $levelget . $deliveryget . $hubonlyget ?>" 
        class="badge bg-dark-subtle text-primary-emphasis">&times; Open Access</a>
 <?php else: ?>
-    <a href="courses.php?openaccess=true<?php echo $processedget . $audienceget . $topicget . $levelget . $deliveryget ?>" 
+    <a href="courses.php?openaccess=true<?php echo $processedget . $audienceget . $topicget . $levelget . $deliveryget . $hubonlyget ?>" 
        class="badge bg-light-subtle text-primary-emphasis">Open Access</a>
 <?php endif; ?>
-</div>
-<div class="mb-2">
-	
 
-<div class="my-2">
-	<?php
+<?php
 $hubget = '';
 if (!empty($_GET['hubonly']) && strtolower($_GET['hubonly']) === 'true') {
 	// Show a "remove" button if active
@@ -317,9 +266,6 @@ if (!empty($_GET['hubonly']) && strtolower($_GET['hubonly']) === 'true') {
 	<?php endforeach; ?>
 	</div>
 
-
-
-</div>
 </div>
 
 
