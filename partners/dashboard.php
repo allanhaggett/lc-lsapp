@@ -55,7 +55,7 @@ if (!empty($pendingPartners)):
             <h2>Partner Contacts</h2>
             <p>Partner contacts to be added to an existing partner.</p>
 <?php
-$contactRequestsFile = '../../lsapp/data/partner_contact_requests.json';
+$contactRequestsFile = '../data/partner_contact_requests.json';
 if (file_exists($contactRequestsFile)):
     $contactRequests = json_decode(file_get_contents($contactRequestsFile), true);
     if (!empty($contactRequests)):
@@ -68,7 +68,7 @@ if (file_exists($contactRequestsFile)):
                 to <strong><?= htmlspecialchars($request['partner_name']) ?></strong>.
                 <br>
                 <small class="text-muted"><?= date('F j, Y, g:i a', strtotime($request['timestamp'])) ?></small>
-                <form action="partners/approve-contact.php" method="POST" class="mt-2">
+                <form action="contact-approve.php" method="POST" class="mt-2">
                     <?php foreach (['partner_slug', 'partner_name', 'name', 'email', 'idir', 'title', 'role'] as $field): ?>
                         <input type="hidden" name="<?= $field ?>" value="<?= htmlspecialchars($request[$field]) ?>">
                     <?php endforeach; ?>
@@ -103,8 +103,8 @@ endif;
     <tbody>
         <?php foreach($filteredCourses as $course): ?>
         <tr>
-            <td><a href="/lsapp/course.php?courseid=<?php echo urlencode($course[0]); ?>"><?php echo htmlspecialchars($course[2]); ?></a></td>
-            <td><a href="partners/view.php?slug=<?php echo urlencode($partnerMap[$course[36]]); ?>"><?php echo htmlspecialchars($course[36]); ?></a></td>
+            <td><a href="../course.php?courseid=<?php echo urlencode($course[0]); ?>"><?php echo htmlspecialchars($course[2]); ?></a></td>
+            <td><a href="view.php?slug=<?php echo urlencode($partnerMap[$course[36]]); ?>"><?php echo htmlspecialchars($course[36]); ?></a></td>
             <td><?php echo htmlspecialchars($course[1]); ?></td>
             <td><?php echo htmlspecialchars($course[14]); ?></td>
             <td><?php echo htmlspecialchars($course[15]); ?></td>
