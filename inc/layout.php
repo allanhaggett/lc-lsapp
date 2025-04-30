@@ -233,7 +233,6 @@ $teams = getTeams();
 		<li class="nav-item">
 			<a class="nav-link" href="/lsapp/classes-past.php">Past</a>
 		</li>
-
     <li class="nav-item dropdown">
 			<a class="nav-link dropdown-toggle" href="#" id="teamsdrop" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 				Courses 
@@ -244,7 +243,9 @@ $teams = getTeams();
 				<a class="dropdown-item" href="/lsapp/course-change/guidance-manage.php">Course Change Guidance</a>
       </div>
     </li>
-
+    <li class="nav-item">
+			<a class="nav-link" href="/lsapp/partners/">Partners</a>
+		</li>
 		<li class="nav-item dropdown">
 			<a class="nav-link dropdown-toggle" href="#" id="teamsdrop" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 				More 
@@ -299,11 +300,6 @@ $teams = getTeams();
 		</li>
 		<?php endif ?>		
 		<?php if($context != 'footer'): ?>
-		<li class="nav-item ml-2">
-			<label for="namesearch" class="d-none sr-only">Person Search</label>
-        	<input type="text" name="namesearch" id="namesearch" class="form-control w-auto ml-2 d-block" placeholder="Person Search">
-    		<div id="personresults" class="position-absolute"></div>
-		</li>
 		<li class="nav-item dropdown">
             <button class="btn btn-link nav-link ml-3 py-2 px-0 px-lg-2 dropdown-toggle d-flex align-items-center" id="bd-theme" type="button" aria-expanded="false" data-bs-toggle="dropdown" data-bs-display="static" aria-label="Toggle theme (dark)">
               <span class="theme-icon-active"><i class="me-2"></i></span>
