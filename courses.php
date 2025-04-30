@@ -313,7 +313,7 @@ if (!empty($_GET['hubonly']) && strtolower($_GET['hubonly']) === 'true') {
 </div>
 
 <div class="col-md-6">
-<div class="p-2">Corp. Partner: <a href="learning-hub-partner.php?partnerid=<?php echo urlencode($course[36]) ?>"><?= $course[36] ?></a></div>
+<div class="p-2">Corp. Partner: <a href="partners/view.php?slug=<?php echo strtolower(preg_replace('/[^a-z0-9\s-]/i', '', str_replace(' ', '-', $course[36]))) ?>"><?= $course[36] ?></a></div>
 </div>
 </div>
 
