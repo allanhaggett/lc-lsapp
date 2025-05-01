@@ -64,8 +64,15 @@ $partners = file_exists($partnersFile) ? json_decode(file_get_contents($partners
                         </ul>
 
                         <div class="d-flex gap-2 mt-2">
-                            <a href="/lsapp/partners/view.php?slug=<?php echo htmlspecialchars($partner["slug"]); ?>" class="">View courses</a> | 
-                            <a href="<?php echo htmlspecialchars($partner["link"]); ?>" class="" target="_blank">LearningHUB</a>
+                            <a href="/lsapp/partners/view.php?slug=<?php echo htmlspecialchars($partner["slug"]); ?>" class="">
+                                View courses
+                            </a> | 
+                            <a href="<?php echo htmlspecialchars($partner["link"]); ?>" class="" target="_blank">
+                                LearningHUB
+                            </a> | 
+                            <a href="https://gww.bcpublicservice.gov.bc.ca/learning/hub/partners/course-form.php?partnerslug=<?php echo urlencode(htmlspecialchars($partner["name"])); ?>" class="" target="_blank">
+                                Partner Admin Panel
+                            </a>
                             <a href="form.php?id=<?php echo $partner['id']; ?>" class="btn btn-warning btn-sm">Edit</a>
                             <form action="process.php" method="POST" style="display:inline;">
                                 <input type="hidden" name="delete_id" value="<?php echo $partner['id']; ?>">

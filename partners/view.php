@@ -55,7 +55,12 @@ $pcourses = $partner ? getCoursesByPartnerName($partner["name"]) : [];
             <h5>Description:</h5>
             <p><?php echo nl2br(htmlspecialchars($partner["description"])); ?></p>
             <div class="my-3">
-                <a href="<?php echo htmlspecialchars($partner["link"]); ?>" class="" target="_blank">LearningHUB</a>
+                <a href="<?php echo htmlspecialchars($partner["link"]); ?>" class="" target="_blank">
+                    LearningHUB
+                </a> | 
+                <a href="https://gww.bcpublicservice.gov.bc.ca/learning/hub/partners/course-form.php?partnerslug=<?php echo urlencode(htmlspecialchars($partner["name"])); ?>" class="" target="_blank">
+                    Partner Admin Panel
+                </a>
             </div>
             <h5>Contacts:</h5>
             <?php if (!empty($partner["contacts"])): ?>
