@@ -2,7 +2,7 @@
     <div class="mb-2">
         <a target="_blank"
             rel="nooperner"
-            href="https://bcgov-my.sharepoint.com/:u:/r/personal/leah_hassall_gov_bc_ca/_layouts/15/Doc.aspx?sourcedoc=%7B0C19027C-EE0F-439A-9ABB-F3AE55B2A7EA%7D&file=course-revision-process-map-by-role.vsdx&action=default&mobileredirect=true" 
+            href="https://bcgov.sharepoint.com/:w:/r/teams/00440/Shared%20Documents/LC%20design_faciliation%20guidelines/CL-course-revision-process.docx?d=wda0cc1137afc430eabc7c800b986e62a&csf=1&web=1&e=vqHp7k&xsdata=MDV8MDJ8QWxsYW4uSGFnZ2V0dEBnb3YuYmMuY2F8NjA1NGMzYTk2Y2U5NGI5MDgzYTYwOGRkN2JhMGFiODZ8NmZkYjUyMDAzZDBkNGE4YWIwMzZkMzY4NWUzNTlhZGN8MHwwfDYzODgwMjY1MjE2NzgxODM0MHxVbmtub3dufFRXRnBiR1pzYjNkOGV5SkZiWEIwZVUxaGNHa2lPblJ5ZFdVc0lsWWlPaUl3TGpBdU1EQXdNQ0lzSWxBaU9pSlhhVzR6TWlJc0lrRk9Jam9pVFdGcGJDSXNJbGRVSWpveWZRPT18MHx8fA%3d%3d&sdata=WWxaSW90YjRRazZmaVM2NStDZDcyQTlSNGZRWnYvNzZjZkhHREcrK2h4QT0%3d" 
             class="btn btn-secondary">
                 Process documentation
         </a>

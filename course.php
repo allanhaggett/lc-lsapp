@@ -34,21 +34,6 @@ if (file_exists($categoriesFile)) {
     if (json_last_error() !== JSON_ERROR_NONE) {
         die("Error reading categories.json: " . json_last_error_msg());
     }
-
-    foreach ($categories as $key => $cat) {
-        if ($deets[1] === 'Active') {
-            // If the course is active and the guidance is "Open Course", remove it from the list
-            if ($cat['category'] === 'Open Course') {
-                unset($categories[$key]);
-            }
-        } else {
-            // If the course is not active and the guidance is "Close Course", remove it from the list
-            if ($cat['category'] === 'Close Course') {
-                unset($categories[$key]);
-            }
-        }
-    }
-
     // Reindex the array after unsetting
     $categories = array_values($categories);
 }

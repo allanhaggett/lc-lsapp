@@ -60,9 +60,10 @@ function getGuidanceByCategory($cat, $categoriesFile) {
 }
 
 // Example usage
-$cat = urldecode($_GET['cat']) ?? '';
+$cat = isset($_GET['cat']) ? urldecode($_GET['cat']) : '';
 $categoriesFile = 'guidance.json';
 $guidance = getGuidanceByCategory($cat, $categoriesFile);
+
 
 ?>
 
@@ -105,6 +106,31 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
     <div class="row justify-content-md-center">
     <div class="col-md-6">
         
+        <?php if (empty($cat)): ?>
+            <?php
+            $categories = [];
+            if (file_exists($categoriesFile)) {
+                $json = json_decode(file_get_contents($categoriesFile), true);
+                if (is_array($json)) {
+                    $categories = array_column($json, 'category');
+                }
+            }
+            ?>
+            <form method="get" class="mb-3">
+                <input type="hidden" name="courseid" value="<?= htmlspecialchars($courseid) ?>">
+                <div class="alert alert-warning"><strong>Please select a category before proceeding.</strong></div>
+                <label for="category-selector" class="form-label">Category</label>
+                <select id="category-selector" name="cat" class="form-select" required>
+                    <option value="" selected>-- Choose a category --</option>
+                    <?php foreach ($categories as $category): ?>
+                        <option value="<?= htmlspecialchars($category) ?>"><?= htmlspecialchars($category) ?></option>
+                    <?php endforeach; ?>
+                </select>
+                <button type="submit" class="btn btn-primary mt-2" id="category-submit" disabled>Continue</button>
+            </form>
+        <?php endif; ?>
+
+        <div id="form-wrapper" style="opacity: <?= empty($cat) ? '0.5' : '1' ?>">
         <form action="controller.php" method="post" enctype="multipart/form-data" class="needs-validation mt-3" novalidate>
 
             <!-- Hidden Fields -->
@@ -156,7 +182,7 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
                     <button class="btn btn-sm bg-light-subtle" type="button" onclick="applyList('unordered')">Unordered List</button>
                     <button class="btn btn-sm bg-light-subtle" type="button" onclick="applyList('ordered')">Ordered List</button>
                 </div>
-                <textarea id="description" name="description" class="form-control" rows="4" required placeholder="Detailed description"><?php echo $formData['description']; ?></textarea>
+                <textarea id="description" name="description" class="form-control" rows="4" required placeholder="Detailed description" <?= empty($cat) ? 'disabled' : '' ?>><?php echo $formData['description']; ?></textarea>
                 <div class="invalid-feedback">Please provide a description of the request.</div>
                 <script>
                     function applyMarkdown(before, after) {
@@ -392,6 +418,7 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
             <button type="submit" class="btn btn-primary w-100"><?php echo $changeid ? 'Update' : 'Submit'; ?></button>
         
         </form>
+        </div>
 
 </div>
 <div class="col-md-6">
@@ -427,4 +454,19 @@ $guidance = getGuidanceByCategory($cat, $categoriesFile);
 <?php endif ?>
 
 <?php require('../templates/javascript.php') ?>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const selector = document.getElementById('category-selector');
+    const submitButton = document.getElementById('category-submit');
+
+    if (selector && submitButton) {
+        // Set initial state based on current selection
+        submitButton.disabled = !selector.value || selector.value === "";
+
+        selector.addEventListener('change', function () {
+            submitButton.disabled = !this.value;
+        });
+    }
+});
+</script>
 <?php require('../templates/footer.php') ?>
