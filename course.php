@@ -69,9 +69,11 @@ if (file_exists($categoriesFile)) {
 	</div>
 	<div class="col-6 col-md-3"><strong>Delivery method:</strong><br> <?= $deets[21] ?></div>
 </div>
-<?php if(isAdmin()): ?>
+
 	<div class="btn-group float-end">
-		<a href="course-update.php?courseid=<?= $courseid ?>" class="btn btn-light float-end">Edit details</a>
+		<?php if(isAdmin()): ?>
+			<a href="course-update.php?courseid=<?= $courseid ?>" class="btn btn-light float-end">Edit details</a>
+		<?php endif ?>
 		<div class="btn-group">
 			<button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 				Requests
@@ -91,7 +93,7 @@ if (file_exists($categoriesFile)) {
 		</div>
 
 	</div>
-	<?php endif ?>
+	
 <h1><?= $deets[2] ?></h1>
 <div class="col-12">DESCRIPTION</div>
 <div class=""><?= $deets[16] ?></div>
