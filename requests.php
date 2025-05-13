@@ -54,17 +54,37 @@
 		<?php // Sort the courses by CourseName
 			usort($courses, function($a, $b) {
 				return $a[2] <=> $b[2];
-			})
+			});
+
+			$categoriesFile = 'course-change/guidance.json';
+			$categories = [];
+
+			if (file_exists($categoriesFile)) {
+				$categories = json_decode(file_get_contents($categoriesFile), true);
+				if (json_last_error() !== JSON_ERROR_NONE) {
+					die("Error reading categories.json: " . json_last_error_msg());
+				}
+				// Reindex the array after unsetting
+				$categories = array_values($categories);
+			}
 		?>
 
 		<form action="class-bulk-insert.php" method="get">
-			<select name="courseid" id="courseid" class="form-select" required>
+			<select name="courseid" id="courseid" class="form-select mb-3" required>
 				<option value="" selected>Choose a course&hellip;</option>
 				<?php foreach($courses as $c): ?>
-				<option value="<?= $c[0] ?>"><?= $c[2] ?></option>
+					<option value="<?= $c[0] ?>"><?= $c[2] ?></option>
 				<?php endforeach ?>
 			</select>
-			<button class="btn btn-primary mt-2">Create Service Requests</button>
+			<p>Next, choose the type of request.</p>
+			<select name="categoryid" id="categoryid" class="form-select mb-3" required>
+				<option value="" selected>Choose a request type&hellip;</option>
+				<?php foreach($categories as $cat): ?>
+					<option value="<?= $cat[0] ?>"><?= htmlspecialchars($cat['category']); ?></option>
+				<?php endforeach ?>
+				<option value="New Class Date">New Class Date</option>
+			</select>
+			<button class="btn btn-primary mt-2">Create Request</button>
 		</form>
 	</div>
 
