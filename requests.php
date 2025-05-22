@@ -26,7 +26,7 @@
 		you need probably need to start with <a href="course-request.php">a new 
 		course request</a>.</p>
 
-	<div class="my-2 p-2 bg-light-subtle border border-secondary-subtle rounded-3">
+	<div class="my-3 p-3 bg-light-subtle border border-secondary-subtle rounded-3">
 		<h2>New Courses</h2>
 
 		<p>Add a new course into the PSA Learning System. Class dates cannot be scheduled until the course has first been requested and processed.</p>
@@ -37,7 +37,7 @@
 		<!--<a href="courses-requested.php" class="btn btn-sm btn-link btn-block">All Requested Courses</a>-->
 	</div>
 
-	<div class="my-2 p-2 bg-light-subtle border border-secondary-subtle rounded-3">
+	<div class="my-3 p-3 bg-light-subtle border border-secondary-subtle rounded-3">
 		<h2>Existing Courses and Classes</h2>
 		
 		<p class="">Request changes to an existing course or new class offerings.</p>
@@ -55,21 +55,9 @@
 			usort($courses, function($a, $b) {
 				return $a[2] <=> $b[2];
 			});
-
-			$categoriesFile = 'course-change/guidance.json';
-			$categories = [];
-
-			if (file_exists($categoriesFile)) {
-				$categories = json_decode(file_get_contents($categoriesFile), true);
-				if (json_last_error() !== JSON_ERROR_NONE) {
-					die("Error reading categories.json: " . json_last_error_msg());
-				}
-				// Reindex the array after unsetting
-				$categories = array_values($categories);
-			}
 		?>
 
-		<form action="class-bulk-insert.php" method="get">
+		<form action="requests-controller.php" method="post">
 			<select name="courseid" id="courseid" class="form-select mb-3" required>
 				<option value="" selected>Choose a course&hellip;</option>
 				<?php foreach($courses as $c): ?>
@@ -77,14 +65,15 @@
 				<?php endforeach ?>
 			</select>
 			<p>Next, choose the type of request.</p>
-			<select name="categoryid" id="categoryid" class="form-select mb-3" required>
-				<option value="" selected>Choose a request type&hellip;</option>
-				<?php foreach($categories as $cat): ?>
-					<option value="<?= $cat[0] ?>"><?= htmlspecialchars($cat['category']); ?></option>
-				<?php endforeach ?>
-				<option value="New Class Date">New Class Date</option>
-			</select>
-			<button class="btn btn-primary mt-2">Create Request</button>
+			<div class="form-check m-3">
+				<input class="form-check-input" type="radio" name="categoryid" id="changeCourse" value="Course Change">
+				<label class="form-check-label" for="changeCourse">Change a Course</label>
+			</div>
+			<div class="form-check m-3">
+				<input class="form-check-input" type="radio" name="categoryid" id="newClass" value="New Class Date">
+				<label class="form-check-label" for="newClass">New Class Offering</label>
+			</div>
+			<button class="btn btn-primary">Create Request</button>
 		</form>
 	</div>
 
