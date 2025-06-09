@@ -140,6 +140,8 @@ foreach ($items as $item) {
     $row['Audience']         = $taxonomies['audience'][0] ?? '';
     $row['LearningHubPartner'] = $taxonomies['learning_partner'][0] ?? '';
     $row['Platform']         = $taxonomies['external_system'][0] ?? '';
+    $row['Requested']        = date('Y-m-d H:i:s');
+    $row['RequestedBy']      = 'SYNCBOT';
 
     $courseLink = '';
     foreach ($item->children('wp', true)->postmeta as $meta) {
