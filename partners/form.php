@@ -66,6 +66,45 @@ if (isset($_GET["id"])) {
                 contactGroup.remove();
             }
         }
+        
+        function deleteContact(button, contactIndex, contactName) {
+            if (confirm(`Are you sure you want to permanently delete "${contactName}" from this partner?\n\nThis action cannot be undone and will not preserve the contact in history.`)) {
+                // Add a hidden input to mark this contact for deletion
+                let form = button.closest('form');
+                let deleteInput = document.createElement('input');
+                deleteInput.type = 'hidden';
+                deleteInput.name = 'delete_contact[]';
+                deleteInput.value = contactIndex;
+                form.appendChild(deleteInput);
+                
+                // Apply visual changes to the contact group
+                let contactGroup = button.closest('.contact-group');
+                if (contactGroup) {
+                    // Add Bootstrap classes for dark mode compatibility
+                    contactGroup.classList.add('border-danger', 'bg-danger-subtle');
+                    contactGroup.style.opacity = '0.7';
+                    
+                    // Strike through only the input fields, not the entire content
+                    let inputs = contactGroup.querySelectorAll('input[type="text"], input[type="email"]');
+                    inputs.forEach(input => {
+                        input.style.textDecoration = 'line-through';
+                        input.classList.add('bg-danger-subtle', 'text-danger-emphasis');
+                        input.disabled = true;
+                    });
+                    
+                    // Add a visual indicator using Bootstrap alert classes
+                    let deletedLabel = document.createElement('div');
+                    deletedLabel.className = 'alert alert-danger mt-2';
+                    deletedLabel.innerHTML = '<strong>Marked for deletion:</strong> This contact will be permanently removed when you save.';
+                    contactGroup.appendChild(deletedLabel);
+                    
+                    // Disable the delete button
+                    button.disabled = true;
+                    button.textContent = 'Marked for Deletion';
+                    button.className = 'btn btn-secondary btn-sm';
+                }
+            }
+        }
     </script>
 </head>
 <body>
@@ -142,6 +181,19 @@ if (isset($_GET["id"])) {
                                 <p>If this person is no longer in this role, we need to "retire" them. Their information is still available as part of the record of this partnership.</p>
                                 <button type="button" class="btn btn-danger btn-sm mt-2" onclick="removeContactField(this)">Retire</button>
                             </details>
+                            
+                            <?php if (isAdmin()): ?>
+                            <!-- "Delete" Button for Admins only -->
+                            <details class="mt-2">
+                                <summary class="text-danger">Delete</summary>
+                                <div class="alert alert-danger">
+                                    <strong>⚠️ Warning:</strong> This will permanently delete this contact from the partner. This action cannot be undone and the contact will not be moved to the contact history.
+                                </div>
+                                <button type="button" class="btn btn-outline-danger btn-sm" onclick="deleteContact(this, <?php echo $index; ?>, '<?php echo htmlspecialchars($contact['name']); ?>')">
+                                    <i class="bi bi-trash"></i> Permanently Delete Contact
+                                </button>
+                            </details>
+                            <?php endif; ?>
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>

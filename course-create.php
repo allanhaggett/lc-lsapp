@@ -1,112 +1,145 @@
 <?php 
 require('inc/lsapp.php');
 opcache_reset();
-if(canAccess()):
 
-	$fromform = $_POST;
+if(!canAccess()) {
+    header('Location: /lsapp/');
+    exit;
+}
 
-	$courseid = date('YmdHis');
-	$now = date('Y-m-d\TH:i:s');
+// Validate required fields
+$requiredFields = ['CourseName', 'CourseDescription', 'LearningHubPartner', 'Platform', 'Method', 'CourseOwner', 'EffectiveDate'];
+$missingFields = [];
 
+foreach($requiredFields as $field) {
+    if(empty($_POST[$field])) {
+        $missingFields[] = $field;
+    }
+}
 
-	
-	// if(!isset($fromform['Category'])) {
-	// 	echo 'Please assign at least one category to this course.<br>';
-	// 	echo 'If there is not a category that fits, please email Operations before proceeding.';
-	// 	exit;
-	// }
-	$coursecat = '';
-	// foreach($fromform['Category'] as $c) {
-	// 	$coursecat .= $c . ',';
-	// }
-	$weship = 'Yes';
-	if(!isset($fromform['WeShip'])) {
-		$weship = 'No';
-	}
-	$alchemer = 'Yes';
-	if(!isset($fromform['Alchemer'])) {
-		$alchemer = 'No';
-	}
-	$combinedtimes = h($fromform['StartTime']) . ' - ' . h($fromform['EndTime']);
-	$slug = createSlug($_POST['CourseName']);
-	$newcourse = Array($courseid,
-					'Requested',
-					h($fromform['CourseName']),
-					h($fromform['CourseShort']),
-					'', // ItemCode,
-					$combinedtimes,
-					h($fromform['ClassDays']),
-					'', // ELM link
-					h($fromform['PreWork']),
-					h($fromform['PostWork']),
-					h($fromform['CourseOwner']),
-					'', // used to be min/max now unused
-					h($fromform['CourseNotes']),
-					h($fromform['Requested']),
-					h($fromform['RequestedBy']),
-					h($fromform['EffectiveDate']),
-					h($fromform['CourseDescription']),
-					h($fromform['CourseAbstract']),
-					h($fromform['Prerequisites']),
-					h($fromform['Keywords']),
-					$coursecat,
-					h($fromform['Method']),
-					h($fromform['elearning']),
-					$weship,
-					'', // ProjectNumber
-					'', // Responsibility
-					'', // ServiceLine
-					'', // STOB
-					h($fromform['MinEnroll']),
-					h($fromform['MaxEnroll']),
-					h($fromform['StartTime']),
-					h($fromform['EndTime']),
-					'#F1F1F1',
-					1,
-					h($fromform['Developer']),
-					h($fromform['EvaluationsLink']),
-					h($fromform['LearningHubPartner']),
-					$alchemer,
-					h($fromform['Topics']),
-					h($fromform['Audience']),
-					h($fromform['Levels']),
-					h($fromform['Reporting']),
-					'', // PathLAN
-					'', // PathStaging
-					'', // PathLive
-					'', // PathNIK
-					'', // PathTeams
-					0, // isMoodle,
-					0, // TaxProcessed
-					'', // TaxProcessedBy
-					'',  // ELMCourseID - field #50
-					$now,
-					h($_POST['Platform']),
-					h($_POST['HUBInclude']),
-					h($_POST['RegistrationLink']),
-					$slug,
-					h($_POST['HubExpirationDate']),
-					0
-		);
-		
-	$course = array($newcourse);
-	$fp = fopen('data/courses.csv', 'a+');
-	foreach ($course as $fields) {
-		fputcsv($fp, $fields);
-	}
-	fclose($fp);
+if(!empty($missingFields)) {
+    // Redirect back with error message
+    $error = urlencode('Missing required fields: ' . implode(', ', $missingFields));
+    header("Location: course-request.php?error={$error}");
+    exit;
+}
 
-	// CourseID,Role,IDIR,Date
-	$peoplefp = fopen('data/course-people.csv', 'a+');
-	$stew = [$courseid,'steward',$fromform['CourseOwner'], $now];
-	fputcsv($peoplefp, $stew);
+// Generate unique course ID and timestamp
+$courseid = date('YmdHis');
+$now = date('Y-m-d\TH:i:s');
 
-	$dev = [$courseid,'dev',$fromform['Developer'], $now];
-	fputcsv($peoplefp, $dev);
+// Process checkboxes with proper defaults
+$weship = isset($_POST['WeShip']) ? 'Yes' : 'No';
+$alchemer = isset($_POST['Alchemer']) ? 'Yes' : 'No';
+$hubInclude = 'No';
 
-	fclose($peoplefp);
+// Combine start and end times (if provided)
+$combinedtimes = '';
+if(!empty($_POST['StartTime']) && !empty($_POST['EndTime'])) {
+    $combinedtimes = sanitize($_POST['StartTime']) . ' - ' . sanitize($_POST['EndTime']);
+}
 
-	header('Location: /lsapp/course.php?courseid=' . $courseid);
-else:
-	include('templates/noaccess.php');
-endif;
+// Create URL slug from course name
+$slug = createSlug($_POST['CourseName']);
+
+// Build course data array with proper sanitization
+$newcourse = [
+    $courseid,                                      // 0: CourseID
+    'Requested',                                    // 1: Status
+    sanitize($_POST['CourseName']),                 // 2: CourseName
+    sanitize($_POST['CourseShort'] ?? ''),          // 3: CourseShort
+    '',                                             // 4: ItemCode (empty for new requests)
+    $combinedtimes,                                 // 5: ClassTimes
+    sanitize($_POST['ClassDays'] ?? ''),            // 6: ClassDays
+    '',                                             // 7: ELM link (empty for new requests)
+    sanitize($_POST['PreWork'] ?? ''),              // 8: PreWork
+    sanitize($_POST['PostWork'] ?? ''),             // 9: PostWork
+    sanitize($_POST['CourseOwner']),                // 10: CourseOwner
+    '',                                             // 11: MinMax (legacy field, unused)
+    sanitize($_POST['CourseNotes'] ?? ''),          // 12: CourseNotes
+    sanitize($_POST['Requested']),                  // 13: Requested date
+    sanitize($_POST['RequestedBy']),                // 14: RequestedBy
+    sanitize($_POST['EffectiveDate']),              // 15: EffectiveDate
+    sanitize($_POST['CourseDescription']),          // 16: CourseDescription
+    sanitize($_POST['CourseAbstract'] ?? ''),       // 17: CourseAbstract
+    sanitize($_POST['Prerequisites'] ?? ''),        // 18: Prerequisites
+    sanitize($_POST['Keywords'] ?? ''),             // 19: Keywords
+    '',                                             // 20: Category (legacy field)
+    sanitize($_POST['Method']),                     // 21: Method
+    sanitize($_POST['elearning'] ?? ''),            // 22: elearning URL
+    $weship,                                        // 23: WeShip
+    '',                                             // 24: ProjectNumber (empty for requests)
+    '',                                             // 25: Responsibility (empty for requests)
+    '',                                             // 26: ServiceLine (empty for requests)
+    '',                                             // 27: STOB (empty for requests)
+    sanitize($_POST['MinEnroll'] ?? ''),            // 28: MinEnroll
+    sanitize($_POST['MaxEnroll'] ?? ''),            // 29: MaxEnroll
+    sanitize($_POST['StartTime'] ?? ''),            // 30: StartTime
+    sanitize($_POST['EndTime'] ?? ''),              // 31: EndTime
+    '#F1F1F1',                                      // 32: CourseColor (default)
+    0,                                              // 33: Featured (default false)
+    sanitize($_POST['Developer'] ?? ''),            // 34: Developer
+    '',                                             // 35: EvaluationsLink (empty for requests)
+    sanitize($_POST['LearningHubPartner']),         // 36: LearningHubPartner
+    $alchemer,                                      // 37: Alchemer
+    sanitize($_POST['Topics'] ?? ''),               // 38: Topics
+    sanitize($_POST['Audience'] ?? ''),             // 39: Audience
+    sanitize($_POST['Levels'] ?? ''),               // 40: Levels
+    sanitize($_POST['Reporting'] ?? ''),            // 41: Reporting
+    '',                                             // 42: PathLAN (empty for requests)
+    '',                                             // 43: PathStaging (empty for requests)
+    '',                                             // 44: PathLive (empty for requests)
+    '',                                             // 45: PathNIK (empty for requests)
+    '',                                             // 46: PathTeams (empty for requests)
+    0,                                              // 47: isMoodle (default false)
+    0,                                              // 48: TaxonomyProcessed (default false)
+    '',                                             // 49: TaxonomyProcessedBy (empty)
+    '',                                             // 50: ELMCourseID (empty for requests)
+    $now,                                           // 51: LastModified
+    sanitize($_POST['Platform']),                   // 52: Platform
+    $hubInclude,                                    // 53: HUBInclude
+    sanitize($_POST['RegistrationLink'] ?? ''),     // 54: RegistrationLink
+    $slug,                                          // 55: Slug
+    sanitize($_POST['HubExpirationDate'] ?? ''),    // 56: HubExpirationDate
+    0                                               // 57: OpenAccessOptin (default false)
+];
+
+// Write course to CSV file
+$fp = fopen('data/courses.csv', 'a+');
+if($fp === false) {
+    die('Error: Could not open courses.csv file for writing');
+}
+
+if(fputcsv($fp, $newcourse) === false) {
+    fclose($fp);
+    die('Error: Could not write course data to file');
+}
+fclose($fp);
+
+// Add course people relationships if specified
+if(!empty($_POST['CourseOwner']) || !empty($_POST['Developer'])) {
+    $peoplefp = fopen('data/course-people.csv', 'a+');
+    if($peoplefp === false) {
+        // Course was created but people relationships failed - log this but continue
+        error_log("Warning: Could not open course-people.csv for course ID: {$courseid}");
+    } else {
+        // Add steward relationship
+        if(!empty($_POST['CourseOwner'])) {
+            $stew = [$courseid, 'steward', sanitize($_POST['CourseOwner']), $now];
+            fputcsv($peoplefp, $stew);
+        }
+        
+        // Add developer relationship
+        if(!empty($_POST['Developer'])) {
+            $dev = [$courseid, 'dev', sanitize($_POST['Developer']), $now];
+            fputcsv($peoplefp, $dev);
+        }
+        
+        fclose($peoplefp);
+    }
+}
+
+// Redirect to the new course page
+header("Location: /lsapp/course.php?courseid={$courseid}");
+exit;
+?>

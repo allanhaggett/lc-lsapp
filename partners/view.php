@@ -17,6 +17,27 @@ if ($partnerSlug) {
 }
 
 $pcourses = $partner ? getCoursesByPartnerName($partner["name"]) : [];
+
+// Separate and sort courses
+$activeCourses = [];
+$inactiveCourses = [];
+
+foreach ($pcourses as $course) {
+    if ($course[1] === 'Active') {
+        $activeCourses[] = $course;
+    } else {
+        $inactiveCourses[] = $course;
+    }
+}
+
+// Sort by creation date (field 13) - most recent first
+usort($activeCourses, function($a, $b) {
+    return strcmp($b[13], $a[13]); // Descending order (newest first)
+});
+
+usort($inactiveCourses, function($a, $b) {
+    return strcmp($b[13], $a[13]); // Descending order (newest first)
+});
 ?>
 
 <?php if(canACcess() && $partner): ?>
@@ -125,23 +146,65 @@ $pcourses = $partner ? getCoursesByPartnerName($partner["name"]) : [];
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
-                <h5>Courses Offered</h5>
+                <h5>Courses Offered (<?= count($pcourses) ?>)</h5>
+                <input class="search form-control" placeholder="Search courses..." />
             </div>
-            <div class="card-body">
-                <table class="table table-striped">
-                    <?php foreach ($pcourses as $course): ?>
-                    <tr>
-                        <td>
-                            <?php echo htmlspecialchars($course[1]); ?>
-                        </td>
-                        <td>
-                            <a href="/lsapp/course.php?courseid=<?php echo htmlspecialchars($course[0]); ?>">
-                                <?php echo htmlspecialchars($course[2] ?? 'Untitled Course'); ?>
-                            </a>
-                        </td>
-                    </tr>
-                    <?php endforeach; ?>
-                </table>
+            <div class="card-body" id="course-list">
+                
+                <?php if (!empty($activeCourses)): ?>
+                <div class="mb-4">
+                    <h6 class="text-success">Active Courses (<?= count($activeCourses) ?>)</h6>
+                    <div class="list">
+                        <?php foreach ($activeCourses as $course): ?>
+                        <div class="mb-2 p-2 bg-light-subtle rounded course-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="course-name">
+                                        <a href="/lsapp/course.php?courseid=<?php echo htmlspecialchars($course[0]); ?>">
+                                            <?php echo htmlspecialchars($course[2] ?? 'Untitled Course'); ?>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="status ms-2">
+                                    <span class="badge bg-success"><?php echo htmlspecialchars($course[1]); ?></span>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+                
+                <?php if (!empty($inactiveCourses)): ?>
+                <div class="mb-4">
+                    <h6 class="text-secondary">Inactive Courses (<?= count($inactiveCourses) ?>)</h6>
+                    <div class="list">
+                        <?php foreach ($inactiveCourses as $course): ?>
+                        <div class="mb-2 p-2 bg-light-subtle rounded course-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="course-name">
+                                        <a href="/lsapp/course.php?courseid=<?php echo htmlspecialchars($course[0]); ?>">
+                                            <?php echo htmlspecialchars($course[2] ?? 'Untitled Course'); ?>
+                                        </a>
+                                    </div>
+                                </div>
+                                <div class="status ms-2">
+                                    <span class="badge bg-secondary"><?php echo htmlspecialchars($course[1]); ?></span>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+                
+                <?php if (empty($activeCourses) && empty($inactiveCourses)): ?>
+                <div class="alert alert-info">
+                    No courses found for this partner.
+                </div>
+                <?php endif; ?>
+                
             </div>
         </div>
     </div>
@@ -152,4 +215,57 @@ $pcourses = $partner ? getCoursesByPartnerName($partner["name"]) : [];
 <?php endif ?>
 
 <?php require('../templates/javascript.php') ?>
+
+<script>
+$(document).ready(function(){
+    // Initialize List.js for course search
+    var options = {
+        valueNames: ['course-name']
+    };
+    var courseList = new List('course-list', options);
+    
+    // Custom search to handle both active and inactive sections
+    $('.search').on('keyup', function() {
+        var searchTerm = $(this).val().toLowerCase();
+        
+        if (searchTerm === '') {
+            // Show all courses when search is empty
+            $('.course-item').show();
+        } else {
+            // Hide/show courses based on search term
+            $('.course-item').each(function() {
+                var courseName = $(this).find('.course-name').text().toLowerCase();
+                
+                if (courseName.includes(searchTerm)) {
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        }
+        
+        // Update section headings to show/hide if no results
+        updateSectionVisibility();
+    });
+    
+    function updateSectionVisibility() {
+        // Check if any active courses are visible
+        var visibleActiveCourses = $('.mb-4:first .course-item:visible').length;
+        if (visibleActiveCourses === 0) {
+            $('.mb-4:first h6').hide();
+        } else {
+            $('.mb-4:first h6').show();
+        }
+        
+        // Check if any inactive courses are visible
+        var visibleInactiveCourses = $('.mb-4:last .course-item:visible').length;
+        if (visibleInactiveCourses === 0) {
+            $('.mb-4:last h6').hide();
+        } else {
+            $('.mb-4:last h6').show();
+        }
+    }
+});
+</script>
+
 <?php require('../templates/footer.php') ?>

@@ -38,10 +38,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         $contactHistory = $existingData[$partnerIndex]["contact_history"] ?? [];
     }
 
+    // Get list of contacts to permanently delete (admin only)
+    $contactsToDelete = [];
+    if (isset($_POST["delete_contact"]) && is_array($_POST["delete_contact"])) {
+        $contactsToDelete = array_map('intval', $_POST["delete_contact"]);
+    }
+
     // Process new contacts
     $newContacts = [];
     if (isset($_POST["contacts"]) && is_array($_POST["contacts"])) {
-        foreach ($_POST["contacts"] as $contact) {
+        foreach ($_POST["contacts"] as $index => $contact) {
+            // Skip contacts marked for deletion
+            if (in_array($index, $contactsToDelete)) {
+                continue;
+            }
+            
             // Check if contact is new (not in existing contacts)
             $isNewContact = true;
             foreach ($existingContacts as $existingContact) {
@@ -67,8 +78,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 
-    // Detect removed contacts and move them to history
-    foreach ($existingContacts as $oldContact) {
+    // Detect removed contacts and move them to history (but not deleted ones)
+    foreach ($existingContacts as $index => $oldContact) {
+        // Skip contacts that were permanently deleted
+        if (in_array($index, $contactsToDelete)) {
+            continue;
+        }
+        
         $existsInNewContacts = false;
         foreach ($newContacts as $newContact) {
             if ($oldContact["email"] === $newContact["email"]) {
