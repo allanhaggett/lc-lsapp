@@ -43,37 +43,25 @@ function sortCourses($a, $b) {
         : strcmp($b[$sortField], $a[$sortField]);
 }
 
-// Separate active and inactive courses
-$activeCourses = [];
-$inactiveCourses = [];
-foreach ($courses as $course) {
-    if ($course[1] === 'Inactive') {
-        $inactiveCourses[] = $course;
-    } else {
-        $activeCourses[] = $course;
-    }
-}
-
-// Sort both arrays
-usort($activeCourses, 'sortCourses');
-usort($inactiveCourses, 'sortCourses');
-
-// Combine based on status filter
-$sortedCourses = [];
-if ($filters['status'] === 'active') {
-    $sortedCourses = $activeCourses;
-} elseif ($filters['status'] === 'inactive') {
-    $sortedCourses = $inactiveCourses;
-} else {
-    $sortedCourses = array_merge($activeCourses, $inactiveCourses);
-}
-
-// Apply filters
+// Apply filters first, then sort
 $filteredCourses = [];
 $activeCount = 0;
+$inactiveCount = 0;
 
-foreach ($sortedCourses as $course) {
-    // Check each filter
+foreach ($courses as $course) {
+    // Status filter - if no status filter specified, only show active courses
+    // If "inactive" is specified, only show inactive courses
+    // If "active" is specified, only show active courses
+    if (!$filters['status']) {
+        // Default: only show active courses
+        if ($course[1] === 'Inactive') continue;
+    } elseif ($filters['status'] === 'active') {
+        if ($course[1] !== 'Active') continue;
+    } elseif ($filters['status'] === 'inactive') {
+        if ($course[1] !== 'Inactive') continue;
+    }
+    
+    // Apply other filters
     if ($filters['level'] && $filters['level'] !== $course[40]) continue;
     if ($filters['audience'] && $filters['audience'] !== $course[39]) continue;
     if ($filters['topic'] && $filters['topic'] !== $course[38]) continue;
@@ -83,12 +71,28 @@ foreach ($sortedCourses as $course) {
     if ($filters['openaccess'] && !($course[57] === 'true' || $course[57] === 'on')) continue;
     if ($filters['hubonly'] && strtolower($filters['hubonly']) === 'true' && strtolower($course[53]) !== 'yes') continue;
     
-    // Count active courses
+    // Count courses by status
     if ($course[1] === 'Active') {
         $activeCount++;
+    } else {
+        $inactiveCount++;
     }
     
     $filteredCourses[] = $course;
+}
+
+// Sort the filtered courses
+usort($filteredCourses, 'sortCourses');
+
+// Get total counts for all courses (for display purposes)
+$totalActiveCount = 0;
+$totalInactiveCount = 0;
+foreach ($courses as $course) {
+    if ($course[1] === 'Active') {
+        $totalActiveCount++;
+    } elseif ($course[1] === 'Inactive') {
+        $totalInactiveCount++;
+    }
 }
 
 // Get filter options
@@ -143,14 +147,12 @@ function getFilterLink($filters, $key, $value = null) {
 <div class="row justify-content-md-center">
 
 <div class="col-md-8">
-    <?php if (!empty($filteredCourses)): ?>
-        <?php if ($filters['status'] === 'inactive'): ?>
-            <h1><span class="badge bg-secondary"><?= count($inactiveCourses) ?></span> Inactive Courses</h1>
-        <?php else: ?>
-            <h1><span class="badge bg-primary"><?= $activeCount ?></span> Active Courses</h1>
-        <?php endif; ?>
+    <?php if ($filters['status'] === 'inactive'): ?>
+        <h1>Inactive Courses</h1>
+    <?php elseif ($filters['status'] === 'active'): ?>
+        <h1>Active Courses</h1>
     <?php else: ?>
-        <h1><span class="badge bg-primary"><?= count($activeCourses) ?></span> Courses</h1>
+        <h1>Courses</h1>
     <?php endif; ?>
 </div>
 </div>
@@ -162,10 +164,7 @@ function getFilterLink($filters, $key, $value = null) {
     
     <!-- Quick filters -->
     <div class="mb-2">
-        <a class="badge bg-light-subtle text-primary-emphasis" href="courses.php">All Alphabetically</a> 
-        <a class="badge bg-light-subtle text-primary-emphasis" href="courses.php?sort=dateadded">All Recent</a>
-        <a class="badge bg-light-subtle text-primary-emphasis" href="courses.php?status=active">All Active</a>
-        <a class="badge bg-light-subtle text-primary-emphasis" href="courses.php?status=inactive">All Inactive</a>
+        <a class="badge bg-light-subtle text-primary-emphasis" href="courses.php">Clear All Filters</a>
     </div>
     
     <!-- Special filters -->
@@ -180,6 +179,22 @@ function getFilterLink($filters, $key, $value = null) {
             <a href="<?= getFilterLink($filters, 'hubonly') ?>" class="badge bg-dark-subtle text-primary-emphasis">&times; LearningHUB</a>
         <?php else: ?>
             <a href="<?= getFilterLink($filters, 'hubonly', 'true') ?>" class="badge bg-light-subtle text-primary-emphasis">LearningHUB</a>
+        <?php endif; ?>
+    </div>
+    
+    <!-- Status Filter -->
+    <div class="mb-3">
+        <div class="fw-bold">Status</div>
+        <?php if ($filters['status'] === 'active'): ?>
+            <a href="<?= getFilterLink($filters, 'status') ?>" class="badge bg-dark-subtle text-primary-emphasis">&times; Active</a>
+        <?php else: ?>
+            <a href="<?= getFilterLink($filters, 'status', 'active') ?>" class="badge bg-light-subtle text-primary-emphasis">Active</a>
+        <?php endif; ?>
+        
+        <?php if ($filters['status'] === 'inactive'): ?>
+            <a href="<?= getFilterLink($filters, 'status') ?>" class="badge bg-dark-subtle text-secondary-emphasis">&times; Inactive</a>
+        <?php else: ?>
+            <a href="<?= getFilterLink($filters, 'status', 'inactive') ?>" class="badge bg-light-subtle text-secondary-emphasis">Inactive</a>
         <?php endif; ?>
     </div>
     
@@ -234,6 +249,35 @@ function getFilterLink($filters, $key, $value = null) {
 </div>
 
 <div class="col-md-5">
+    <!-- Sorting Options -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div class="text-muted small" id="course-count">
+            <span class="course-total"><?= count($filteredCourses) ?></span> course<span class="course-plural"><?= count($filteredCourses) !== 1 ? 's' : '' ?></span> found
+        </div>
+        <div class="dropdown">
+            <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-sort-down"></i>
+                <?php if ($filters['sort'] === 'dateadded'): ?>
+                    Sort: Recent First
+                <?php else: ?>
+                    Sort: Alphabetical
+                <?php endif; ?>
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="sortDropdown">
+                <li>
+                    <a class="dropdown-item <?= !$filters['sort'] ? 'active' : '' ?>" href="<?= getFilterLink($filters, 'sort') ?>">
+                        <i class="bi bi-sort-alpha-down me-2"></i>Alphabetical (A-Z)
+                    </a>
+                </li>
+                <li>
+                    <a class="dropdown-item <?= $filters['sort'] === 'dateadded' ? 'active' : '' ?>" href="<?= getFilterLink($filters, 'sort', 'dateadded') ?>">
+                        <i class="bi bi-sort-numeric-down me-2"></i>Recent First
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    
     <div class="list">
     <?php foreach ($filteredCourses as $course): ?>
         <div class="mb-2 p-3 bg-light-subtle border border-secondary-subtle rounded-3">
@@ -258,7 +302,7 @@ function getFilterLink($filters, $key, $value = null) {
             </div>
             
             <div class="name" style="font-size: 1.3em">
-                <a href="/lsapp/course.php?courseid=<?= $course[0] ?>"><?= h($course[2]) ?></a>
+                <a href="/lsapp/course.php?courseid=<?= $course[0] ?>"><?= sanitize($course[2]) ?></a>
             </div>
             
             <div class="mb-3">
@@ -266,7 +310,7 @@ function getFilterLink($filters, $key, $value = null) {
                     <a class="badge bg-light-subtle text-primary-emphasis" 
                        title="Find course in ELM by ITEM-code" 
                        target="_blank" 
-                       href="https://learning.gov.bc.ca/psc/CHIPSPLM_6/EMPLOYEE/ELM/c/LM_OD_EMPLOYEE_FL.LM_FND_LRN_FL.GBL?Page=LM_FND_LRN_RSLT_FL&Action=U&KWRD=%22<?= h($course[4]) ?>%22">
+                       href="https://learning.gov.bc.ca/psc/CHIPSPLM_6/EMPLOYEE/ELM/c/LM_OD_EMPLOYEE_FL.LM_FND_LRN_FL.GBL?Page=LM_FND_LRN_RSLT_FL&Action=U&KWRD=%22<?= sanitize($course[4]) ?>%22">
                        <?= $course[4] ?>
                     </a>
                 <?php endif; ?>
@@ -274,7 +318,7 @@ function getFilterLink($filters, $key, $value = null) {
                     <a class="badge bg-light-subtle text-primary-emphasis" 
                        title="Edit course in ELM" 
                        target="_blank" 
-                       href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/LM_COURSESTRUCTURE.LM_CI_LA_CMP.GBL?LM_CI_ID=<?= h($course[50]) ?>">
+                       href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/LM_COURSESTRUCTURE.LM_CI_LA_CMP.GBL?LM_CI_ID=<?= sanitize($course[50]) ?>">
                        <?= $course[50] ?>
                     </a>
                 <?php endif; ?>
@@ -288,7 +332,7 @@ function getFilterLink($filters, $key, $value = null) {
                             <?php 
                             $platformId = strtolower(str_replace(' ', '-', preg_replace('/[^a-z0-9\s-]/i', '', $course[52])));
                             ?>
-                            <a href="/lsapp/platform.php?id=<?= urlencode($platformId) ?>"><?= h($course[52]) ?></a>
+                            <a href="/lsapp/platform.php?id=<?= urlencode($platformId) ?>"><?= sanitize($course[52]) ?></a>
                         <?php else: ?>
                             N/A
                         <?php endif; ?>
@@ -301,7 +345,7 @@ function getFilterLink($filters, $key, $value = null) {
                             <?php 
                             $partnerSlug = strtolower(preg_replace('/[^a-z0-9\s-]/i', '', str_replace(' ', '-', $course[36])));
                             ?>
-                            <a href="partners/view.php?slug=<?= $partnerSlug ?>"><?= h($course[36]) ?></a>
+                            <a href="partners/view.php?slug=<?= $partnerSlug ?>"><?= sanitize($course[36]) ?></a>
                         <?php else: ?>
                             N/A
                         <?php endif; ?>
@@ -324,6 +368,17 @@ var options = {
     valueNames: ['name', 'delivery', 'category']
 };
 var courses = new List('courses', options);
+
+// Update course count as user searches
+courses.on('searchComplete', function() {
+    var count = courses.update().matchingItems.length;
+    var countElement = document.getElementById('course-count');
+    var totalElement = countElement.querySelector('.course-total');
+    var pluralElement = countElement.querySelector('.course-plural');
+    
+    totalElement.textContent = count;
+    pluralElement.textContent = count !== 1 ? 's' : '';
+});
 </script>
 
 <?php require('templates/footer.php') ?>
