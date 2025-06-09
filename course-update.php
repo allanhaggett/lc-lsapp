@@ -206,6 +206,9 @@ $reportinglist = getReportingList();
     font-size: 0.875rem;
     margin-bottom: 1rem;
 }
+.info-modal {
+    font-size: 0.875rem;
+}
 </style>
 
 <?php getScripts() ?>
@@ -229,31 +232,42 @@ $reportinglist = getReportingList();
     <input type="hidden" name="RequestedBy" value="<?= sanitize($deets[14]) ?>">
     <input type="hidden" name="TaxonomyProcessed" value="<?= sanitize($deets[48]) ?>">
     <input type="hidden" name="TaxonomyProcessedBy" value="<?= sanitize($deets[49]) ?>">
+    <input type="hidden" name="ProjectNumber" value="<?= sanitize($deets[24]) ?>">
+    <input type="hidden" name="Responsibility" value="<?= sanitize($deets[25]) ?>">
+    <input type="hidden" name="ServiceLine" value="<?= sanitize($deets[26]) ?>">
+    <input type="hidden" name="STOB" value="<?= sanitize($deets[27]) ?>">
+    <input type="hidden" name="Prerequisites" value="<?= sanitize($deets[18]) ?>">
     
     <!-- Basic Information Section -->
     <div class="form-section">
         <div class="form-section-title">Basic Information</div>
+        
         <div class="row">
-            <div class="col-md-3 mb-3">
-                <label for="Status" class="form-label">Status</label>
-                <select name="Status" id="Status" class="form-select" required>
-                    <option value="" disabled>Select one</option>
-                    <?php $statuses = ['Requested','Active','Inactive'] ?>
-                    <?php foreach($statuses as $s): ?>
-                        <option value="<?= $s ?>" <?= ($s == $deets[1]) ? 'selected' : '' ?>><?= $s ?></option>
+            <div class="col-md-4 mb-3">
+                <label for="LearningHubPartner" class="form-label">
+                    Learning Hub Partner
+                </label>
+                <select name="LearningHubPartner" id="LearningHubPartner" class="form-select" required>
+                    <option value="" disabled <?= empty($deets[36]) ? 'selected' : '' ?>>Select one</option>
+                    <?php foreach($partners as $partner): ?>
+                        <option value="<?= sanitize($partner['name']) ?>" <?= ($partner['name'] == $deets[36]) ? 'selected' : '' ?>>
+                            <?= sanitize($partner['name']) ?>
+                        </option>
                     <?php endforeach ?>
                 </select>
             </div>
-            <div class="col-md-3 mb-3">
-                <label for="CourseShort" class="form-label">Short Name</label>
-                <small class="d-block text-muted">Max 10 chars, no spaces</small>
-                <input type="text" name="CourseShort" id="CourseShort" class="form-control" value="<?= sanitize($deets[3]) ?>" maxlength="10">
+            <div class="col-md-4 mb-3">
+                <label for="Platform" class="form-label">Platform</label>
+                <select name="Platform" id="Platform" class="form-select" required>
+                    <option value="" disabled <?= empty($deets[52]) ? 'selected' : '' ?>>Select one</option>
+                    <?php foreach($platforms as $platform): ?>
+                        <option value="<?= sanitize($platform['name']) ?>" <?= ($platform['name'] == $deets[52]) ? 'selected' : '' ?>>
+                            <?= sanitize($platform['name']) ?>
+                        </option>
+                    <?php endforeach ?>
+                </select>
             </div>
-            <div class="col-md-3 mb-3">
-                <label for="ItemCode" class="form-label">Item Code</label>
-                <input type="text" name="ItemCode" id="ItemCode" class="form-control" value="<?= sanitize($deets[4]) ?>">
-            </div>
-            <div class="col-md-3 mb-3">
+            <div class="col-md-4 mb-3">
                 <label for="Method" class="form-label">Delivery Method</label>
                 <select name="Method" id="Method" class="form-select" required>
                     <option value="" disabled>Select one</option>
@@ -266,58 +280,41 @@ $reportinglist = getReportingList();
         </div>
         
         <div class="row">
-            <div class="col-md-6 mb-3">
-                <label for="LearningHubPartner" class="form-label">Learning Hub Partner</label>
-                <select name="LearningHubPartner" id="LearningHubPartner" class="form-select" required>
-                    <option value="" disabled <?= empty($deets[36]) ? 'selected' : '' ?>>Select one</option>
-                    <?php foreach($partners as $partner): ?>
-                        <option value="<?= sanitize($partner['name']) ?>" <?= ($partner['name'] == $deets[36]) ? 'selected' : '' ?>>
-                            <?= sanitize($partner['name']) ?>
-                        </option>
+            <div class="col-md-3 mb-3">
+                <label for="Status" class="form-label">Status</label>
+                <select name="Status" id="Status" class="form-select" required>
+                    <option value="" disabled>Select one</option>
+                    <?php $statuses = ['Requested','Active','Inactive'] ?>
+                    <?php foreach($statuses as $s): ?>
+                        <option value="<?= $s ?>" <?= ($s == $deets[1]) ? 'selected' : '' ?>><?= $s ?></option>
                     <?php endforeach ?>
                 </select>
             </div>
-            <div class="col-md-6 mb-3">
-                <label for="Platform" class="form-label">Platform</label>
-                <select name="Platform" id="Platform" class="form-select" required>
-                    <option value="" disabled <?= empty($deets[52]) ? 'selected' : '' ?>>Select one</option>
-                    <?php foreach($platforms as $platform): ?>
-                        <option value="<?= sanitize($platform['name']) ?>" <?= ($platform['name'] == $deets[52]) ? 'selected' : '' ?>>
-                            <?= sanitize($platform['name']) ?>
-                        </option>
-                    <?php endforeach ?>
-                </select>
+            <div class="col-md-3 mb-3">
+                <label for="CourseColor" class="form-label">Color</label>
+                <input type="text" name="CourseColor" id="CourseColor" class="form-control" value="<?= sanitize($deets[32]) ?>">
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="ItemCode" class="form-label">Item Code</label>
+                <input type="text" name="ItemCode" id="ItemCode" class="form-control" value="<?= sanitize($deets[4]) ?>">
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="ELMCourseID" class="form-label">ELM Course ID</label>
+                <input type="text" name="ELMCourseID" id="ELMCourseID" class="form-control" value="<?= sanitize($deets[50]) ?>">
             </div>
         </div>
         
-        <div class="row">
-            <div class="col-md-3">
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input" name="HUBInclude" id="HUBInclude" 
-                           <?= ($deets[53] == 'Yes' || $deets[53] == 1) ? 'checked' : '' ?>>
-                    <label class="form-check-label" for="HUBInclude">Include in LearningHUB?</label>
+        <div id="notelm" class="<?= ($deets[52] == 'PSA Learning System') ? 'd-none' : '' ?>">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="RegistrationLink" class="form-label">Registration Link</label>
+                    <small class="d-block text-muted">If not in Learning System, where to register?</small>
+                    <input type="url" name="RegistrationLink" id="RegistrationLink" class="form-control" value="<?= sanitize($deets[54]) ?>">
                 </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input" name="OpenAccessOptin" id="OpenAccessOptin" 
-                           <?= ($deets[57] == 'Yes' || $deets[57] == 1) ? 'checked' : '' ?>
-                           <?= empty($deets[3]) ? 'disabled' : '' ?>>
-                    <label class="form-check-label" for="OpenAccessOptin">OpenAccess Publish?</label>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input" name="Featured" id="Featured" 
-                           <?= ($deets[33] == 'Yes' || $deets[33] == 1) ? 'checked' : '' ?>>
-                    <label class="form-check-label" for="Featured">Featured?</label>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input" name="WeShip" id="WeShip" 
-                           <?= ($deets[23] == 'Yes' || $deets[23] == 1) ? 'checked' : '' ?>>
-                    <label class="form-check-label" for="WeShip">We Ship?</label>
+                <div class="col-md-6 mb-3">
+                    <label for="HubExpirationDate" class="form-label">Expiration Date</label>
+                    <small class="d-block text-muted">Date to remove from search results</small>
+                    <input type="date" name="HubExpirationDate" id="HubExpirationDate" class="form-control" value="<?= sanitize($deets[56]) ?>">
                 </div>
             </div>
         </div>
@@ -331,39 +328,39 @@ $reportinglist = getReportingList();
             <label for="CourseName" class="form-label">Course Name (Long)</label>
             <small class="d-block text-muted">Max 200 characters - Full/Complete title of the course</small>
             <input type="text" name="CourseName" id="CourseName" class="form-control" required value="<?= sanitize($deets[2]) ?>" maxlength="200">
+            <div class="form-text" id="cnameCharNum"></div>
         </div>
         
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label for="ELMCourseID" class="form-label">ELM Course ID</label>
-                <input type="text" name="ELMCourseID" id="ELMCourseID" class="form-control" value="<?= sanitize($deets[50]) ?>">
-            </div>
-            <div class="col-md-6 mb-3">
-                <label for="CourseColor" class="form-label">Color</label>
-                <input type="text" name="CourseColor" id="CourseColor" class="form-control" value="<?= sanitize($deets[32]) ?>">
-            </div>
+        <div class="mb-3">
+            <label for="CourseShort" class="form-label">Course Name (Short)</label>
+            <small class="d-block text-muted">Max 10 characters, no spaces - Appropriate acronym</small>
+            <input type="text" name="CourseShort" id="CourseShort" class="form-control" value="<?= sanitize($deets[3]) ?>" maxlength="10">
+            <div class="form-text" id="cnameshortCharNum"></div>
         </div>
         
         <div class="mb-3">
             <label for="CourseDescription" class="form-label">Course Description</label>
-            <small class="d-block text-muted">Max 254 characters - Overall purpose in 2-3 sentences including: duration, target learners, delivery method</small>
+            <small class="d-block text-muted">Max 254 characters - Overall purpose in 2-3 sentences including: course duration, target learners, delivery method</small>
             <textarea name="CourseDescription" id="CourseDescription" class="form-control" rows="3" required maxlength="254"><?= sanitize($deets[16]) ?></textarea>
+            <div class="form-text" id="cdescChar"></div>
         </div>
         
         <div class="mb-3">
             <label for="CourseAbstract" class="form-label">Course Abstract</label>
-            <small class="d-block text-muted">Max 4000 characters - Detailed elaboration including background, objectives, benefits, structure</small>
-            <textarea name="CourseAbstract" id="CourseAbstract" class="form-control" rows="6"><?= sanitize($deets[17]) ?></textarea>
+            <small class="d-block text-muted">Max 4000 characters - Detailed elaboration including background, objectives, benefits, structure, competencies</small>
+            <textarea name="CourseAbstract" id="CourseAbstract" class="form-control" rows="6" maxlength="4000"><?= sanitize($deets[17]) ?></textarea>
+            <div class="form-text" id="cabstractChar"></div>
         </div>
         
         <div class="row">
-            <div class="col-md-6 mb-3">
+            <!-- <div class="col-md-6 mb-3">
                 <label for="Prerequisites" class="form-label">Prerequisites</label>
+                <small class="d-block text-muted">Required courses or resources to complete before this course</small>
                 <input type="text" name="Prerequisites" id="Prerequisites" class="form-control" value="<?= sanitize($deets[18]) ?>">
-            </div>
-            <div class="col-md-6 mb-3">
+            </div> -->
+            <div class="col mb-3">
                 <label for="Keywords" class="form-label">Keywords</label>
-                <small class="d-block text-muted">Comma-separated search terms</small>
+                <small class="d-block text-muted">Comma-separated search terms <span class="fw-bold">not in title/description</span></small>
                 <input type="text" name="Keywords" id="Keywords" class="form-control" value="<?= sanitize($deets[19]) ?>">
             </div>
         </div>
@@ -408,7 +405,7 @@ $reportinglist = getReportingList();
                 </select>
             </div>
             <div class="col-md-6 mb-3">
-                <label for="Reporting" class="form-label">Reporting</label>
+                <label for="Reporting" class="form-label">Evaluation</label>
                 <select name="Reporting" id="Reporting" class="form-select">
                     <option value="" disabled <?= empty($deets[41]) ? 'selected' : '' ?>>Select one</option>
                     <?php foreach($reportinglist as $r): ?>
@@ -424,10 +421,10 @@ $reportinglist = getReportingList();
         <div class="form-section-title">People</div>
         <div class="row">
             <div class="col-md-6 mb-3">
-                <label for="CourseOwner" class="form-label">Steward</label>
-                <small class="d-block text-muted">Responsible for delivery</small>
-                <select name="CourseOwner" id="CourseOwner" class="form-select">
-                    <option value="">Unassigned</option>
+                <label for="CourseOwner" class="form-label">Owner</label>
+                <small class="d-block text-muted">The manager responsible for delivery</small>
+                <select name="CourseOwner" id="CourseOwner" class="form-select" required>
+                    <option value="">Select one</option>
                     <?php getPeople($deets[10]) ?>
                 </select>
             </div>
@@ -435,45 +432,30 @@ $reportinglist = getReportingList();
                 <label for="Developer" class="form-label">Developer</label>
                 <small class="d-block text-muted">Responsible for materials creation/revisions</small>
                 <select name="Developer" id="Developer" class="form-select">
-                    <option value="">Unassigned</option>
+                    <option value="">Select one</option>
                     <?php getPeople($deets[34]) ?>
                 </select>
             </div>
         </div>
+        <div class="mb-3">
+            <label for="EffectiveDate" class="form-label">Effective Date</label>
+            <small class="d-block text-muted">Date the course should be visible to learners</small>
+            <input type="date" name="EffectiveDate" id="EffectiveDate" class="form-control" value="<?= sanitize($deets[15]) ?>" required>
+        </div>
     </div>
     
-    <!-- Administrative Details Section -->
+    <!-- Delivery Details Section -->
     <div class="form-section">
-        <div class="form-section-title">Administrative Details</div>
-        
-        <div class="row">
-            <div class="col-md-6 mb-3">
-                <label for="EffectiveDate" class="form-label">Effective Date</label>
-                <small class="d-block text-muted">Date the course should be visible to learners</small>
-                <input type="date" name="EffectiveDate" id="EffectiveDate" class="form-control" value="<?= sanitize($deets[15]) ?>">
-            </div>
-            <div class="col-md-6 mb-3">
-                <div class="form-check mt-4">
-                    <input type="checkbox" class="form-check-input" name="Alchemer" id="Alchemer" 
-                           <?= ($deets[37] == 'Yes' || $deets[37] == 1) ? 'checked' : '' ?>>
-                    <label class="form-check-label" for="Alchemer">Alchemer?</label>
-                </div>
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input" name="isMoodle" id="isMoodle" 
-                           <?= ($deets[47] == 'Yes' || $deets[47] == 1) ? 'checked' : '' ?>>
-                    <label class="form-check-label" for="isMoodle">Moodle Course?</label>
-                </div>
-            </div>
-        </div>
+        <div class="form-section-title">Delivery Details</div>
         
         <div class="row">
             <div class="col-md-3 mb-3">
                 <label for="MinEnroll" class="form-label">Min Participants</label>
-                <input type="number" name="MinEnroll" id="MinEnroll" class="form-control" value="<?= sanitize($deets[28]) ?>">
+                <input type="number" name="MinEnroll" id="MinEnroll" class="form-control" min="1" value="<?= sanitize($deets[28]) ?>">
             </div>
             <div class="col-md-3 mb-3">
                 <label for="MaxEnroll" class="form-label">Max Participants</label>
-                <input type="number" name="MaxEnroll" id="MaxEnroll" class="form-control" value="<?= sanitize($deets[29]) ?>">
+                <input type="number" name="MaxEnroll" id="MaxEnroll" class="form-control" min="1" value="<?= sanitize($deets[29]) ?>">
             </div>
             <div class="col-md-2 mb-3">
                 <label for="ClassDays" class="form-label">Days</label>
@@ -488,34 +470,20 @@ $reportinglist = getReportingList();
                 <input type="text" name="EndTime" id="EndTime" class="form-control endtime" value="<?= sanitize($deets[31]) ?>">
             </div>
         </div>
-        
-        <div id="notelm" class="<?= ($deets[52] == 'PSA Learning System') ? 'd-none' : '' ?>">
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label for="RegistrationLink" class="form-label">Registration Link</label>
-                    <small class="d-block text-muted">If not in Learning System, where to register?</small>
-                    <input type="url" name="RegistrationLink" id="RegistrationLink" class="form-control" value="<?= sanitize($deets[54]) ?>">
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label for="HubExpirationDate" class="form-label">Expiration Date</label>
-                    <small class="d-block text-muted">Date to remove from search results</small>
-                    <input type="date" name="HubExpirationDate" id="HubExpirationDate" class="form-control" value="<?= sanitize($deets[56]) ?>">
-                </div>
-            </div>
-        </div>
     </div>
     
-    <!-- Links Section -->
+    <!-- Links & Resources Section -->
     <div class="form-section">
         <div class="form-section-title">Links & Resources</div>
         <div class="row">
             <div class="col-md-6 mb-3">
-                <label for="ELM" class="form-label">ELM Link</label>
-                <input type="url" name="ELM" id="ELM" class="form-control" value="<?= sanitize($deets[7]) ?>">
+                <label for="elearning" class="form-label">eLearning Course URL</label>
+                <small class="d-block text-muted">Include the URL link for the course</small>
+                <input type="url" name="elearning" id="elearning" class="form-control" value="<?= sanitize($deets[22]) ?>">
             </div>
             <div class="col-md-6 mb-3">
-                <label for="elearning" class="form-label">eLearning Course URL</label>
-                <input type="url" name="elearning" id="elearning" class="form-control" value="<?= sanitize($deets[22]) ?>">
+                <label for="ELM" class="form-label">ELM Link</label>
+                <input type="url" name="ELM" id="ELM" class="form-control" value="<?= sanitize($deets[7]) ?>">
             </div>
         </div>
         <div class="row">
@@ -534,7 +502,71 @@ $reportinglist = getReportingList();
         </div>
     </div>
     
-    <!-- Print Details Section -->
+    <!-- Additional Options Section -->
+    <div class="form-section">
+        <div class="form-section-title">Additional Options</div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="alert alert-secondary">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="WeShip" id="WeShip" 
+                               <?= ($deets[23] == 'Yes' || $deets[23] == 1) ? 'checked' : '' ?>>
+                        <label class="form-check-label" for="WeShip">
+                            <strong>Learning Centre ships materials?</strong><br>
+                            <small>Check if Learning Centre manages &amp; ships course materials</small>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="alert alert-secondary">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="Alchemer" id="Alchemer" value="1"
+                               <?= ($deets[37] == 'Yes' || $deets[37] == 1) ? 'checked' : '' ?>>
+                        <label class="form-check-label" for="Alchemer">
+                            <strong>Uses Alchemer survey?</strong><br>
+                            <small>Check if this course uses an Alchemer survey</small>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-4">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="HUBInclude" id="HUBInclude" 
+                           <?= ($deets[53] == 'Yes' || $deets[53] == 1) ? 'checked' : '' ?>>
+                    <label class="form-check-label" for="HUBInclude">Include in LearningHUB?</label>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="OpenAccessOptin" id="OpenAccessOptin" 
+                           <?= ($deets[57] == 'Yes' || $deets[57] == 1) ? 'checked' : '' ?>
+                           <?= empty($deets[3]) ? 'disabled' : '' ?>>
+                    <label class="form-check-label" for="OpenAccessOptin">OpenAccess Publish?</label>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="Featured" id="Featured" 
+                           <?= ($deets[33] == 'Yes' || $deets[33] == 1) ? 'checked' : '' ?>>
+                    <label class="form-check-label" for="Featured">Featured?</label>
+                </div>
+            </div>
+        </div>
+        <div class="row mt-3">
+            <div class="col-md-12">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="isMoodle" id="isMoodle" 
+                           <?= ($deets[47] == 'Yes' || $deets[47] == 1) ? 'checked' : '' ?>>
+                    <label class="form-check-label" for="isMoodle">Moodle Course?</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Print Details Section 
     <div class="form-section">
         <div class="form-section-title">Print Materials Operating Codes</div>
         <div class="row">
@@ -556,6 +588,7 @@ $reportinglist = getReportingList();
             </div>
         </div>
     </div>
+    -->
     
     <!-- Developer File Paths Section -->
     <div class="form-section">
@@ -586,9 +619,8 @@ $reportinglist = getReportingList();
         </div>
     </div>
     
-    <div class="d-flex justify-content-between">
-        <button type="submit" class="btn btn-primary">Save Course Info</button>
-        <a href="course.php?courseid=<?= $courseid ?>" class="btn btn-secondary">Cancel</a>
+    <div class="d-flex justify-content-center">
+        <button type="submit" class="btn btn-primary btn-lg">Save Course Info</button>
     </div>
 </form>
 
@@ -629,30 +661,129 @@ $(document).ready(function(){
         }
     });
     
+    // Character count for Course Name
+    $('#CourseName').on('input', function() {
+        var max = 200;
+        var len = $(this).val().length;
+        var remaining = max - len;
+        var $feedback = $('#cnameCharNum');
+        
+        if (len >= max) {
+            $feedback.removeClass('text-success').addClass('text-danger')
+                .text('Character limit reached');
+        } else if (remaining <= 20) {
+            $feedback.removeClass('text-success').addClass('text-warning')
+                .text(remaining + ' characters remaining');
+        } else {
+            $feedback.removeClass('text-danger text-warning').addClass('text-success')
+                .text(remaining + ' characters remaining');
+        }
+    });
+    
+    // Character count for Course Short Name
+    $('#CourseShort').on('input', function() {
+        var max = 10;
+        var len = $(this).val().length;
+        var remaining = max - len;
+        var $feedback = $('#cnameshortCharNum');
+        
+        if (len >= max) {
+            $feedback.removeClass('text-success').addClass('text-danger')
+                .text('Character limit reached');
+        } else {
+            $feedback.removeClass('text-danger').addClass('text-success')
+                .text(remaining + ' characters remaining');
+        }
+    });
+    
+    // Character count for Course Description
+    $('#CourseDescription').on('input', function() {
+        var max = 254;
+        var len = $(this).val().length;
+        var remaining = max - len;
+        var $feedback = $('#cdescChar');
+        
+        if (len >= max) {
+            $feedback.removeClass('text-success').addClass('text-danger')
+                .text('Character limit reached');
+        } else if (remaining <= 50) {
+            $feedback.removeClass('text-success').addClass('text-warning')
+                .text(remaining + ' characters remaining');
+        } else {
+            $feedback.removeClass('text-danger text-warning').addClass('text-success')
+                .text(remaining + ' characters remaining');
+        }
+    });
+    
+    // Character count for Course Abstract
+    $('#CourseAbstract').on('input', function() {
+        var max = 4000;
+        var len = $(this).val().length;
+        var remaining = max - len;
+        var $feedback = $('#cabstractChar');
+        
+        if (len >= max) {
+            $feedback.removeClass('text-success').addClass('text-danger')
+                .text('Character limit reached');
+        } else if (remaining <= 200) {
+            $feedback.removeClass('text-success').addClass('text-warning')
+                .text(remaining + ' characters remaining');
+        } else {
+            $feedback.removeClass('text-danger text-warning').addClass('text-success')
+                .text(remaining + ' characters remaining');
+        }
+    });
+    
     // Form validation
     $('#courseupdateform').on('submit', function(e) {
         var isValid = true;
+        var errors = [];
         
         // Check required selects
         $(this).find('select[required]').each(function() {
             if(!$(this).val() || $(this).val() === '') {
                 isValid = false;
                 $(this).addClass('is-invalid');
+                errors.push('Please select a ' + $(this).prev('label').text().replace(':', ''));
             } else {
                 $(this).removeClass('is-invalid');
             }
         });
         
+        // Check required inputs
+        $(this).find('input[required], textarea[required]').each(function() {
+            if(!$(this).val().trim()) {
+                isValid = false;
+                $(this).addClass('is-invalid');
+                errors.push('Please fill in ' + $(this).prev('label').text().replace(':', ''));
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+        
+        // Check delivery method dropdown
+        if(!$('#Method').val()) {
+            isValid = false;
+            $('#Method').addClass('is-invalid');
+            errors.push('Please select a delivery method');
+        }
+        
         if(!isValid) {
             e.preventDefault();
-            alert('Please fill in all required fields.');
+            alert('Please correct the following errors:\n\n' + errors.join('\n'));
         }
     });
     
-    // Remove invalid class on change
-    $('select[required]').on('change', function() {
+    // Remove invalid class on change/input
+    $('select[required], input[required], textarea[required]').on('change input', function() {
         $(this).removeClass('is-invalid');
     });
+    
+    // Initialize character counters on page load
+    $('#CourseName').trigger('input');
+    $('#CourseShort').trigger('input');
+    $('#CourseDescription').trigger('input');
+    $('#CourseAbstract').trigger('input');
 });
 </script>
 <?php require('templates/footer.php') ?>

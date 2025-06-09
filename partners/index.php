@@ -40,7 +40,8 @@ $partners = file_exists($partnersFile) ? json_decode(file_get_contents($partners
 
         <h1>Corporate Learning Partners</h1>
 
-        <a href="form.php" class="btn btn-primary mb-3">Add New Partner</a>
+        <a href="dashboard.php" class="btn btn-link mb-3">Partner Admin Dashboard</a>
+        <a href="form.php" class="btn btn-link mb-3">Add New Partner</a>
         
         
         <div id="partner-list">

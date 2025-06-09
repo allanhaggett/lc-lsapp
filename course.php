@@ -19,6 +19,21 @@ $audits = getCourseAudits($courseid);
 
 $stewsdevs = getCoursePeople($courseid);
 
+// Load partners data
+$partnersJson = file_get_contents('data/partners.json');
+$partners = json_decode($partnersJson, true);
+
+// Find the partner slug for this course
+$partnerSlug = '';
+if (!empty($deets[36])) {
+    foreach ($partners as $partner) {
+        if ($partner['name'] === $deets[36]) {
+            $partnerSlug = $partner['slug'];
+            break;
+        }
+    }
+}
+
 // echo '<pre>'; print_r($stewsdevs); exit;
 
 // 0-CourseID,1-Status,2-CourseName,3-CourseShort,4-ItemCode,5-ClassTimes,6-ClassDays,7-ELM,8-PreWork,9-PostWork,
@@ -68,7 +83,6 @@ if (file_exists($categoriesFile)) {
 		<span style="font-size:10px">
 		(<a target="_blank" href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/LM_COURSESTRUCTURE.LM_CI_LA_CMP.GBL?LM_CI_ID=<?= h($deets[50]) ?>"><?= $deets[50] ?></a>)</span>
 	</div>
-	<div class="col-6 col-md-3"><strong>Delivery method:</strong><br> <?= $deets[21] ?></div>
 </div>
 
 	<div class="btn-group float-end">
@@ -94,7 +108,16 @@ if (file_exists($categoriesFile)) {
 		</div>
 
 	</div>
-	
+
+<div class="mb-3">
+    <span class="badge bg-secondary-subtle text-secondary-emphasis fs-6"><?= $deets[21] ?></span>
+    <span class="badge bg-secondary-subtle text-secondary-emphasis fs-6"><a href="platform.php?platform=<?= urlencode($deets[52]) ?>" class="text-decoration-none text-secondary-emphasis"><?= $deets[52] ?></a></span>
+    <?php if($deets[53] == 'Yes' || $deets[53] == 1): ?>
+    <span class="badge bg-success text-white fs-6">Learning<strong>HUB</strong></span>
+    <?php else: ?>
+    <span class="badge bg-light text-dark fs-6">Learning<strong>HUB</strong></span>
+    <?php endif ?>
+</div>
 <h1><?= $deets[2] ?></h1>
 <div class="col-12">DESCRIPTION</div>
 <div class=""><?= $Parsedown->text($deets[16]) ?></div>
@@ -227,7 +250,13 @@ if (file_exists($categoriesFile)) {
 	<?php endif ?> 
 </div>
 <div class="col-md-4">
-<div class=""><strong>Corp. Partner:</strong><br> <a href="learning-hub-partner.php?partnerid=<?php echo urlencode($deets[36]) ?>"><?= $deets[36] ?></a></div>
+<div class=""><strong>Corp. Partner:</strong><br> 
+<?php if (!empty($partnerSlug)): ?>
+    <a href="/lsapp/partners/view.php?slug=<?= $partnerSlug ?>"><?= $deets[36] ?></a>
+<?php else: ?>
+    <?= $deets[36] ?>
+<?php endif ?>
+</div>
 </div>
 </div>
 

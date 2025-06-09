@@ -54,10 +54,8 @@ $reportinglist = getReportingList();
 <div class="row justify-content-md-center">
 <div class="col-md-10">
 
-<div class="mb-4">
-    <h1>Request a Course</h1>
-    <p class="lead">Submit this form and the Learning Support Admin Team will process your request, entering the information into the PSA Learning System.</p>
-</div>
+
+<h1 class="mb-4">Request a Course</h1>
 
 <form method="post" action="course-create.php" class="mb-3" id="serviceRequestForm">
     
@@ -71,12 +69,9 @@ $reportinglist = getReportingList();
         <div class="form-section-title">Basic Information</div>
         
         <div class="row">
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
                 <label for="LearningHubPartner" class="form-label">
                     Learning Hub Partner
-                    <button type="button" class="btn btn-outline-secondary btn-sm ms-1" data-bs-toggle="modal" data-bs-target="#learnhubinfo">
-                        <i class="bi bi-info-circle"></i> Info
-                    </button>
                 </label>
                 <select name="LearningHubPartner" id="LearningHubPartner" class="form-select" required>
                     <option value="" disabled selected>Select one</option>
@@ -85,13 +80,23 @@ $reportinglist = getReportingList();
                     <?php endforeach ?>
                 </select>
             </div>
-            <div class="col-md-6 mb-3">
+            <div class="col-md-4 mb-3">
                 <label for="Platform" class="form-label">Platform</label>
                 <select name="Platform" id="Platform" class="form-select" required>
                     <option value="" disabled selected>Select one</option>
                     <?php foreach($platforms as $platform): ?>
                         <option value="<?= sanitize($platform['name']) ?>"><?= sanitize($platform['name']) ?></option>
                     <?php endforeach ?>
+                </select>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="Method" class="form-label">Delivery Method</label>
+                <select name="Method" id="Method" class="form-select" required>
+                    <option value="" disabled selected>Select one</option>
+                    <option value="Classroom">Classroom</option>
+                    <option value="eLearning">eLearning</option>
+                    <option value="Blended">Blended</option>
+                    <option value="Webinar">Webinar</option>
                 </select>
             </div>
         </div>
@@ -145,14 +150,14 @@ $reportinglist = getReportingList();
         </div>
         
         <div class="row">
-            <div class="col-md-6 mb-3">
+            <!-- <div class="col-md-6 mb-3">
                 <label for="Prerequisites" class="form-label">Prerequisites</label>
                 <small class="d-block text-muted">Required courses or resources to complete before this course</small>
                 <input type="text" name="Prerequisites" id="Prerequisites" class="form-control">
-            </div>
-            <div class="col-md-6 mb-3">
+            </div> -->
+            <div class="col mb-3">
                 <label for="Keywords" class="form-label">Keywords</label>
-                <small class="d-block text-muted">Comma-separated search terms not in title/description</small>
+                <small class="d-block text-muted">Comma-separated search terms <span class="fw-bold">not in title/description</span></small>
                 <input type="text" name="Keywords" id="Keywords" class="form-control">
             </div>
         </div>
@@ -240,37 +245,6 @@ $reportinglist = getReportingList();
     <div class="form-section">
         <div class="form-section-title">Delivery Details</div>
         
-        <div class="mb-3">
-            <label class="form-label">Delivery Method</label>
-            <small class="d-block text-muted mb-2">Select the primary delivery method</small>
-            <div class="row">
-                <div class="col-md-3">
-                    <div class="form-check">
-                        <input type="radio" name="Method" id="classroom" class="form-check-input" value="Classroom" required>
-                        <label class="form-check-label" for="classroom">Classroom</label>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-check">
-                        <input type="radio" name="Method" id="elearning" class="form-check-input" value="eLearning" required>
-                        <label class="form-check-label" for="elearning">eLearning</label>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-check">
-                        <input type="radio" name="Method" id="blended" class="form-check-input" value="Blended" required>
-                        <label class="form-check-label" for="blended">Blended</label>
-                    </div>
-                </div>
-                <div class="col-md-3">
-                    <div class="form-check">
-                        <input type="radio" name="Method" id="webinar" class="form-check-input" value="Webinar" required>
-                        <label class="form-check-label" for="webinar">Webinar</label>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
         <div class="row">
             <div class="col-md-3 mb-3">
                 <label for="MinEnroll" class="form-label">Min Participants</label>
@@ -325,7 +299,7 @@ $reportinglist = getReportingList();
         <div class="form-section-title">Additional Options</div>
         <div class="row">
             <div class="col-md-6">
-                <div class="alert alert-warning">
+                <div class="alert alert-secondary">
                     <div class="form-check">
                         <input type="checkbox" class="form-check-input" name="WeShip" id="WeShip">
                         <label class="form-check-label" for="WeShip">
@@ -336,7 +310,7 @@ $reportinglist = getReportingList();
                 </div>
             </div>
             <div class="col-md-6">
-                <div class="alert alert-info">
+                <div class="alert alert-secondary">
                     <div class="form-check">
                         <input type="checkbox" class="form-check-input" name="Alchemer" id="Alchemer" value="1">
                         <label class="form-check-label" for="Alchemer">
@@ -358,28 +332,6 @@ $reportinglist = getReportingList();
 </div>
 </div>
 
-<!-- Learning Hub Info Modal -->
-<div class="modal fade" id="learnhubinfo" tabindex="-1" aria-labelledby="learnhubinfoLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="learnhubinfoLabel">LearningHUB Information</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body info-modal">
-                <p><a href="https://learningcentre.gww.gov.bc.ca/hub" target="_blank">LearningHUB</a> is a portal
-                website that attempts to aggregate all corporate learning that is available to all BCPS 
-                employees, all in one place. Learning Centre is 1 "Learning Partner" of many.</p>
-                <p><strong>In order for a course in ELM to be included in the LearningHUB</strong>, a "Learning Partner"
-                keyword needs to be added to each course.</p>
-                <p>More info coming soon!</p>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
 
 <?php require('templates/javascript.php') ?>
 <script>
@@ -514,9 +466,10 @@ $(document).ready(function(){
             }
         });
         
-        // Check delivery method radio buttons
-        if(!$('input[name="Method"]:checked').length) {
+        // Check delivery method dropdown
+        if(!$('#Method').val()) {
             isValid = false;
+            $('#Method').addClass('is-invalid');
             errors.push('Please select a delivery method');
         }
         
@@ -529,10 +482,6 @@ $(document).ready(function(){
     // Remove invalid class on change/input
     $('select[required], input[required], textarea[required]').on('change input', function() {
         $(this).removeClass('is-invalid');
-    });
-    
-    $('input[name="Method"]').on('change', function() {
-        $('input[name="Method"]').removeClass('is-invalid');
     });
 });
 </script>

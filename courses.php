@@ -13,6 +13,7 @@ $filters = [
     'processed' => $_GET['processed'] ?? '',
     'openaccess' => $_GET['openaccess'] ?? '',
     'hubonly' => $_GET['hubonly'] ?? '',
+    'moodle' => $_GET['moodle'] ?? '',
     'sort' => $_GET['sort'] ?? ''
 ];
 
@@ -52,6 +53,7 @@ foreach ($courses as $course) {
     // Status filter - if no status filter specified, only show active courses
     // If "inactive" is specified, only show inactive courses
     // If "active" is specified, only show active courses
+    // If "requested" is specified, only show requested courses
     if (!$filters['status']) {
         // Default: only show active courses
         if ($course[1] === 'Inactive') continue;
@@ -59,6 +61,8 @@ foreach ($courses as $course) {
         if ($course[1] !== 'Active') continue;
     } elseif ($filters['status'] === 'inactive') {
         if ($course[1] !== 'Inactive') continue;
+    } elseif ($filters['status'] === 'requested') {
+        if ($course[1] !== 'Requested') continue;
     }
     
     // Apply other filters
@@ -70,6 +74,7 @@ foreach ($courses as $course) {
     if ($filters['processed'] && $course[48] == $filters['processed']) continue;
     if ($filters['openaccess'] && !($course[57] === 'true' || $course[57] === 'on')) continue;
     if ($filters['hubonly'] && strtolower($filters['hubonly']) === 'true' && strtolower($course[53]) !== 'yes') continue;
+    if ($filters['moodle'] && strtolower($filters['moodle']) === 'true' && strtolower($course[47]) !== 'yes') continue;
     
     // Count courses by status
     if ($course[1] === 'Active') {
@@ -151,6 +156,8 @@ function getFilterLink($filters, $key, $value = null) {
         <h1>Inactive Courses</h1>
     <?php elseif ($filters['status'] === 'active'): ?>
         <h1>Active Courses</h1>
+    <?php elseif ($filters['status'] === 'requested'): ?>
+        <h1>Requested Courses</h1>
     <?php else: ?>
         <h1>Courses</h1>
     <?php endif; ?>
@@ -162,13 +169,8 @@ function getFilterLink($filters, $key, $value = null) {
 
     <input class="search form-control mb-2" placeholder="search">
     
-    <!-- Quick filters -->
-    <div class="mb-2">
-        <a class="badge bg-light-subtle text-primary-emphasis" href="courses.php">Clear All Filters</a>
-    </div>
-    
     <!-- Special filters -->
-    <div class="mb-3">
+    <div class="my-3">
         <?php if ($filters['openaccess']): ?>
             <a href="<?= getFilterLink($filters, 'openaccess') ?>" class="badge bg-dark-subtle text-primary-emphasis">&times; Open Access</a>
         <?php else: ?>
@@ -180,6 +182,14 @@ function getFilterLink($filters, $key, $value = null) {
         <?php else: ?>
             <a href="<?= getFilterLink($filters, 'hubonly', 'true') ?>" class="badge bg-light-subtle text-primary-emphasis">LearningHUB</a>
         <?php endif; ?>
+        
+        <?php if ($filters['moodle'] === 'true'): ?>
+            <a href="<?= getFilterLink($filters, 'moodle') ?>" class="badge bg-dark-subtle text-primary-emphasis">&times; Moodle</a>
+        <?php else: ?>
+            <a href="<?= getFilterLink($filters, 'moodle', 'true') ?>" class="badge bg-light-subtle text-primary-emphasis">Moodle</a>
+        <?php endif; ?>
+        
+        <a class="badge bg-light-subtle text-primary-emphasis float-end" href="courses.php?sort=dateadded">Clear All Filters</a>
     </div>
     
     <!-- Status Filter -->
@@ -195,6 +205,12 @@ function getFilterLink($filters, $key, $value = null) {
             <a href="<?= getFilterLink($filters, 'status') ?>" class="badge bg-dark-subtle text-secondary-emphasis">&times; Inactive</a>
         <?php else: ?>
             <a href="<?= getFilterLink($filters, 'status', 'inactive') ?>" class="badge bg-light-subtle text-secondary-emphasis">Inactive</a>
+        <?php endif; ?>
+        
+        <?php if ($filters['status'] === 'requested'): ?>
+            <a href="<?= getFilterLink($filters, 'status') ?>" class="badge bg-dark-subtle text-warning-emphasis">&times; Requested</a>
+        <?php else: ?>
+            <a href="<?= getFilterLink($filters, 'status', 'requested') ?>" class="badge bg-light-subtle text-warning-emphasis">Requested</a>
         <?php endif; ?>
     </div>
     
