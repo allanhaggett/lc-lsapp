@@ -2092,6 +2092,56 @@ function h($str) {
 	return $str;
 }
 
+/**
+ * Secure sanitization function for user input/output
+ * Provides proper XSS protection by escaping HTML special characters
+ * 
+ * @param string $str The string to sanitize
+ * @param int $flags Optional flags for htmlspecialchars (default: ENT_QUOTES | ENT_HTML5)
+ * @return string The sanitized string
+ */
+function sanitize($str, $flags = null) {
+	// Return empty string for null values
+	if ($str === null) {
+		return '';
+	}
+	
+	// Convert to string if needed
+	$str = (string) $str;
+	
+	// Trim whitespace
+	$str = trim($str);
+	
+	// Set default flags if not provided
+	if ($flags === null) {
+		$flags = ENT_QUOTES | ENT_HTML5;
+	}
+	
+	// Convert special characters to HTML entities to prevent XSS
+	$str = htmlspecialchars($str, $flags, 'UTF-8', false);
+	
+	return $str;
+}
+
+/**
+ * Sanitize array values recursively
+ * Useful for sanitizing entire $_POST arrays
+ * 
+ * @param array $array The array to sanitize
+ * @return array The sanitized array
+ */
+function sanitizeArray($array) {
+	$sanitized = array();
+	foreach ($array as $key => $value) {
+		if (is_array($value)) {
+			$sanitized[$key] = sanitizeArray($value);
+		} else {
+			$sanitized[$key] = sanitize($value);
+		}
+	}
+	return $sanitized;
+}
+
 function createSlug($string) {
     // Define a list of common words to remove
     $commonWords = ['and', 'the', 'of', 'in', 'for', 'on', 'with', 'at', 'by', 'to', 'a', 'an'];

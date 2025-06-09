@@ -1,799 +1,658 @@
-<?php ob_start(); ?>
-<?php require('inc/lsapp.php') ?>
-<?php opcache_reset(); ?>
-<?php if(isAdmin()): ?>
-<?php if($_POST): ?>
 <?php 
+ob_start();
+require('inc/lsapp.php');
+require('inc/Parsedown.php');
+$Parsedown = new Parsedown();
+opcache_reset();
 
-// Start by validating if pre and post work links are secure HTTPS 
-// protocol and silently force-update them if they're not.
-//
-$prework = h($_POST['PreWork']);
-$securepre = $prework;
-$scheem = parse_url($prework, PHP_URL_SCHEME);
-if($scheem != 'https') {
-	$securepre = str_replace('http://', 'https://', $prework );
-}
-$postwork = h($_POST['PostWork']);
-$securepost = $postwork;
-$scheem = parse_url($securepost, PHP_URL_SCHEME);
-if($scheem != 'https') {
-	$securepost = str_replace('http://', 'https://', $postwork );
+if(!isAdmin()) {
+    header('Location: /lsapp/');
+    exit;
 }
 
-
-$f = fopen('data/courses.csv','r');
-$temp_table = fopen('data/courses-temp.csv','w');
-// pop the headers off the source file and start the new file with those headers
-$headers = fgetcsv($f);
-fputcsv($temp_table,$headers);
-
-
-$coursecat = '';
-// foreach($_POST['Category'] as $c) {
-// 	$coursecat .= $c . ',';
-// }
-
-if(!isset($_POST['WeShip'])) {
-	$weship = 'No';
-} else {
-	$weship = 'Yes';
+// Handle form submission
+if($_POST) {
+    // Validate and sanitize inputs
+    $courseid = filter_var($_POST['CourseID'], FILTER_VALIDATE_INT);
+    if(!$courseid) {
+        die("Invalid course ID");
+    }
+    
+    // Ensure HTTPS for pre/post work links
+    $prework = sanitize($_POST['PreWork']);
+    $postwork = sanitize($_POST['PostWork']);
+    
+    if($prework) {
+        $scheme = parse_url($prework, PHP_URL_SCHEME);
+        if($scheme != 'https') {
+            $prework = str_replace('http://', 'https://', $prework);
+        }
+    }
+    
+    if($postwork) {
+        $scheme = parse_url($postwork, PHP_URL_SCHEME);
+        if($scheme != 'https') {
+            $postwork = str_replace('http://', 'https://', $postwork);
+        }
+    }
+    
+    // Process checkboxes
+    $weship = isset($_POST['WeShip']) ? 'Yes' : 'No';
+    $alchemer = isset($_POST['Alchemer']) ? 'Yes' : 'No';
+    $hubInclude = isset($_POST['HUBInclude']) ? 'Yes' : 'No';
+    $featured = isset($_POST['Featured']) ? 'Yes' : 'No';
+    $isMoodle = isset($_POST['isMoodle']) ? 'Yes' : 'No';
+    $openAccessOptin = isset($_POST['OpenAccessOptin']) ? 'Yes' : 'No';
+    
+    // Combine times
+    $combinedtimes = sanitize($_POST['StartTime']) . ' - ' . sanitize($_POST['EndTime']);
+    
+    // Clean LAN path
+    $lanpath = ltrim(trim($_POST['PathLAN']),'\\');
+    $lanpath = rtrim($lanpath,'\\');
+    
+    // Create slug
+    $slug = createSlug($_POST['CourseName']);
+    
+    // Get current timestamp
+    $now = date('Y-m-d\TH:i:s');
+    
+    // Build course data array
+    $course = [
+        $_POST['CourseID'],
+        sanitize($_POST['Status']),
+        sanitize($_POST['CourseName']),
+        sanitize($_POST['CourseShort']),
+        sanitize($_POST['ItemCode']),
+        $combinedtimes,
+        sanitize($_POST['ClassDays']),
+        sanitize($_POST['ELM']),
+        $prework,
+        $postwork,
+        sanitize($_POST['CourseOwner'] ?? ''),
+        '', // old minmax field
+        sanitize($_POST['CourseNotes']),
+        sanitize($_POST['Requested']),
+        sanitize($_POST['RequestedBy']),
+        sanitize($_POST['EffectiveDate']),
+        sanitize($_POST['CourseDescription']),
+        sanitize($_POST['CourseAbstract']),
+        sanitize($_POST['Prerequisites']),
+        sanitize($_POST['Keywords']),
+        '', // old category field
+        sanitize($_POST['Method']),
+        sanitize($_POST['elearning']),
+        $weship,
+        sanitize($_POST['ProjectNumber']),
+        sanitize($_POST['Responsibility']),
+        sanitize($_POST['ServiceLine']),
+        sanitize($_POST['STOB']),
+        sanitize($_POST['MinEnroll']),
+        sanitize($_POST['MaxEnroll']),
+        sanitize($_POST['StartTime']),
+        sanitize($_POST['EndTime']),
+        sanitize($_POST['CourseColor']),
+        $featured,
+        sanitize($_POST['Developer'] ?? ''),
+        sanitize($_POST['EvaluationsLink']),
+        sanitize($_POST['LearningHubPartner']),
+        $alchemer,
+        sanitize($_POST['Topics']),
+        sanitize($_POST['Audience'] ?? ''),
+        sanitize($_POST['Levels'] ?? ''),
+        sanitize($_POST['Reporting'] ?? ''),
+        $lanpath,
+        sanitize($_POST['PathStaging']),
+        sanitize($_POST['PathLive']),
+        sanitize($_POST['PathNIK']),
+        sanitize($_POST['PathTeams']),
+        $isMoodle,
+        sanitize($_POST['TaxonomyProcessed'] ?? ''),
+        sanitize($_POST['TaxonomyProcessedBy'] ?? ''),
+        sanitize($_POST['ELMCourseID']),
+        $now,
+        sanitize($_POST['Platform']),
+        $hubInclude,
+        sanitize($_POST['RegistrationLink']),
+        $slug,
+        sanitize($_POST['HubExpirationDate']),
+        $openAccessOptin
+    ];
+    
+    // Update courses.csv
+    $f = fopen('data/courses.csv','r');
+    $temp_table = fopen('data/courses-temp.csv','w');
+    
+    // Copy headers
+    $headers = fgetcsv($f);
+    fputcsv($temp_table, $headers);
+    
+    // Process rows
+    $coursesteward = '';
+    $coursedeveloper = '';
+    
+    while (($data = fgetcsv($f)) !== FALSE) {
+        if($data[0] == $courseid) {
+            $coursesteward = $data[10];
+            $coursedeveloper = $data[34];
+            fputcsv($temp_table, $course);
+        } else {
+            fputcsv($temp_table, $data);
+        }
+    }
+    
+    fclose($f);
+    fclose($temp_table);
+    
+    rename('data/courses-temp.csv', 'data/courses.csv');
+    
+    // Update course-people.csv if steward or developer changed
+    $peoplefp = fopen('data/course-people.csv', 'a+');
+    
+    if(($_POST['CourseOwner'] ?? '') != $coursesteward && !empty($_POST['CourseOwner'])) {
+        $stew = [$courseid, 'steward', $_POST['CourseOwner'], $now];
+        fputcsv($peoplefp, $stew);
+    }
+    
+    if(isset($_POST['Developer']) && $_POST['Developer'] != $coursedeveloper && !empty($_POST['Developer'])) {
+        $dev = [$courseid, 'dev', $_POST['Developer'], $now];
+        fputcsv($peoplefp, $dev);
+    }
+    
+    fclose($peoplefp);
+    
+    header('Location: course.php?courseid=' . $courseid);
+    exit;
 }
 
-if(!isset($_POST['Alchemer'])) {
-	$alchemer = 'No';
-} else {
-	$alchemer = 'Yes';
+// Display form
+$courseid = (isset($_GET['courseid'])) ? $_GET['courseid'] : 0;
+$deets = getCourse($courseid);
+
+if(!$deets) {
+    header('Location: /lsapp/');
+    exit;
 }
 
-if(!isset($_POST['HUBInclude'])) {
-	$hubInclude = 'No';
-} else {
-	$hubInclude = 'Yes';
-}
+// Load partners and platforms from JSON files
+$partnersJson = file_get_contents('data/partners.json');
+$partners = json_decode($partnersJson, true);
 
-$now = date('Y-m-d\TH:i:s');
+$platformsJson = file_get_contents('data/platforms.json');
+$platforms = json_decode($platformsJson, true);
 
-$combinedtimes = h($_POST['StartTime']) . ' - ' . h($_POST['EndTime']);
+// Get taxonomy options
+$topics = getAllTopics();
+$audience = getAllAudiences();
+$deliverymethods = getDeliveryMethods();
+$levels = getLevels();
+$reportinglist = getReportingList();
 
-$lanpathfront = ltrim(trim($_POST['PathLAN']),'\\');
-$lanpathvalid = rtrim($lanpathfront,'\\');
-
-$slug = createSlug($_POST['CourseName']);
-
-$featured = $_POST['Featured'] ?? ''; // Default to empty string if not provided
-$developer = $_POST['Developer'] ?? ''; // Default to empty string if not provided
-$levels = $_POST['Levels'] ?? '';
-$reporting = $_POST['Reporting'] ?? '';
-$isMoodle = $_POST['isMoodle'] ?? '';
-$taxonomyProcessed = $_POST['TaxonomyProcessed'] ?? '';
-$taxonomyProcessedBy = $_POST['TaxonomyProcessedBy'] ?? '';
-
-
-$course = Array($_POST['CourseID'],
-				h($_POST['Status']),
-				h($_POST['CourseName']),
-				h($_POST['CourseShort']),
-				h($_POST['ItemCode']),
-				$combinedtimes,
-				h($_POST['ClassDays']),
-				h($_POST['ELM']),
-				$securepre,
-				$securepost,
-				h($_POST['CourseOwner'] ?? ''),
-				'', // used to be minmax
-				h($_POST['CourseNotes']),
-				h($_POST['Requested']),
-				h($_POST['RequestedBy']),
-				h($_POST['EffectiveDate']),
-				h($_POST['CourseDescription']),
-				h($_POST['CourseAbstract']),
-				h($_POST['Prerequisites']),
-				h($_POST['Keywords']),
-				$coursecat,
-				h($_POST['Method']),
-				h($_POST['elearning']),
-				h($weship),
-				h($_POST['ProjectNumber']),
-				h($_POST['Responsibility']),
-				h($_POST['ServiceLine']),
-				h($_POST['STOB']),
-				h($_POST['MinEnroll']),
-				h($_POST['MaxEnroll']),
-				h($_POST['StartTime']),
-				h($_POST['EndTime']),
-				h($_POST['CourseColor']),
-				$featured,
-				$developer,
-				h($_POST['EvaluationsLink']),
-				h($_POST['LearningHubPartner']),
-				h($alchemer),
-				h($_POST['Topics']),
-				h($_POST['Audience'] ?? ''),
-				$levels,
-				$reporting,
-				$lanpathvalid,
-				h($_POST['PathStaging']),
-				h($_POST['PathLive']),
-				h($_POST['PathNIK']),
-				h($_POST['PathTeams']),
-			    $isMoodle,
-				$taxonomyProcessed,
-				$taxonomyProcessedBy,
-				h($_POST['ELMCourseID']),
-				$now,
-				h($_POST['Platform']),
-				$hubInclude,
-				h($_POST['RegistrationLink']),
-				$slug,
-				h($_POST['HubExpirationDate']),
-				h($_POST['OpenAccessOptin'])
-
-			);
-
-$courseid = $_POST['CourseID'];
-while (($data = fgetcsv($f)) !== FALSE){
-	
-	if($data[0] == $courseid) {
-		$coursesteward = $data[10];
-		$coursedeveloper = $data[34];
-		fputcsv($temp_table,$course);
-	} else {
-		fputcsv($temp_table,$data);
-	}
-}
-fclose($f);
-fclose($temp_table);
-
-rename('data/courses-temp.csv','data/courses.csv');
-
-// CourseID,Role,IDIR,Date
-$peoplefp = fopen('data/course-people.csv', 'a+');
-if(($_POST['CourseOwner'] ?? '') != $coursesteward) {
-	$stew = [$courseid,'steward',$_POST['CourseOwner'] ?? '', $now];
-	fputcsv($peoplefp, $stew);
-}
-if(isset($_POST['Developer']) && $_POST['Developer'] != $coursedeveloper) {
-	$dev = [$courseid,'dev',$_POST['Developer'], $now];
-	fputcsv($peoplefp, $dev);
-}
-
-fclose($peoplefp);
-
-
-
-header('Location: course.php?courseid=' . $courseid);?>
-
-
-<?php else: ?>
-
-<?php $courseid = (isset($_GET['courseid'])) ? $_GET['courseid'] : 0 ?>
-<?php $course = getCourse($courseid) ?>
+?>
 <?php getHeader() ?>
 
-<title>Update <?= $course[2] ?></title>
-<!-- <link href="/lsapp/css/summernote-bs4.css" rel="stylesheet"> -->
+<title>Update <?= sanitize($deets[2]) ?></title>
+<style>
+.form-section {
+    background-color: var(--bs-light-bg-subtle);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.375rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+.form-section-title {
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}
+</style>
 
 <?php getScripts() ?>
-<body class="">
+<body>
 <?php getNavigation() ?>
 
-<?php if(canAccess()): ?>
-<div class="container mb-3">
-<div class="row justify-content-md-center mb-3">
-<div class="col-md-8 mb-3">
-
-<h1><?= h($course[2]) ?></h1>
-
-
-<form method="post" action="course-update.php" class="mb-3 pb-3" id="courseupdateform">
-
-<input class="TaxonomyUpdated" type="hidden" name="TaxonomyUpdated" value="<?= h($course[48]) ?>">
-<input class="TaxonomyUpdatedBy" type="hidden" name="TaxonomyUpdated" value="<?= h($course[49]) ?>">
-<input class="ELMCourseID" type="hidden" name="TaxonomyUpdated" value="<?= h($course[50]) ?>">
-
-
-<input class="Requested" type="hidden" name="Requested" value="<?= h($course[13]) ?>">
-<input class="RequestedBy" type="hidden" name="RequestedBy" value="<?= h($course[14]) ?>">
-<div class="form-group">
-<label for="Status">Status</label><br>
-<?php $statuses = Array('Requested','Active','Inactive') ?>
-<select name="Status" id="Status" class="form-select">
-<?php foreach($statuses as $s): ?>
-<?php if($s == $course[1]): ?>
-<option selected><?= $s ?></option>
-<?php else: ?>
-<option><?= $s ?></option>
-<?php endif ?>
-<?php endforeach ?>
-</select>
-</div>
-<div class="form-group">
-<label for="LearningHubPartner">Learning Hub Partner</label><br>
-<?php $learnpartners = getPartnersNew(); ?>
-<select name="LearningHubPartner" id="LearningHubPartner" class="form-select" required>
-<?php foreach($learnpartners as $part): ?>
-	<?php if($part->name == $course[36]): ?>
-	<option selected><?= $part->name ?></option>
-	<?php else: ?>
-	<option><?= $part->name ?></option>
-	<?php endif ?>
-<?php endforeach ?>
-</select>
-</div>
-
-<div class="form-group">
-<?php $platforms = getAllPlatforms(); ?>
-<label for="Platform">Platform</label><br>
-<select name="Platform" id="Platform" class="form-select">
-<?php foreach($platforms as $pl): ?>
-<?php if($course[52] == $pl): ?>
-<option selected><?= $pl ?></option>
-<?php else: ?>
-<option><?= $pl ?></option>
-<?php endif ?>
-<?php endforeach ?>
-</select>
-</div>
-
-<div id="notelm" class="d-none alert alert-primary">
-	<div class="form-group mb-3">
-		<label for="RegistrationLink">Registration Link</label><br>
-		<small>If this course does not have registration in the Learning System, 
-			then where do you go to register for it?</small>
-		<input type="text" name="RegistrationLink" id="RegistrationLink" class="form-control" value="<?= $course[54] ?>">
-	</div>
-	<div class="form-group">
-		<label for="HubExpirationDate">Expiration date</label><br>
-		<small>Date after which the course will be removed from the search results.</small>
-		<input type="date" name="HubExpirationDate" id="HubExpirationDate" class="form-control" value="<?= $course[56] ?>">
-	</div>
-</div>
-<script>
-document.addEventListener("DOMContentLoaded", function () {
-    const platformSelect = document.getElementById("Platform");
-    const notElmDiv = document.getElementById("notelm");
-
-    platformSelect.addEventListener("change", function () {
-        if (platformSelect.value === "PSA Learning System") {
-            notElmDiv.classList.add("d-none");
-        } else {
-            notElmDiv.classList.remove("d-none");
-        }
-    });
-});
-</script>
-
-
-<div class="form-group">
-<?php if($course[55] == 'on' || $course[55] == 'Yes'): ?>
-	<input type="checkbox" name="HUBInclude" id="HUBInclude" checked>
-	<label for="HUBInclude">Include in LearningHUB?</label>
-<?php else: ?>
-	<input type="checkbox" name="HUBInclude" id="HUBInclude">
-	<label for="HUBInclude">Include in LearningHUB?</label>
-<?php endif ?>
-</div>
-<div class="form-group">
-<?php if(!empty($course[3])): ?>
-	<?php if($course[57] == 'on' || $course[57] == 'Yes'): ?>
-	<input type="checkbox" name="OpenAccessOptin" id="OpenAccessOptin" checked>
-	<label for="OpenAccessOptin">OpenAccess Publish?</label>
-	<?php else: ?>
-	<input type="checkbox" name="OpenAccessOptin" id="OpenAccessOptin">
-	<label for="OpenAccessOptin">OpenAccess Publish?</label>
-	<?php endif ?>
-<?php else: ?>
-	<input type="checkbox" name="OpenAccessOptin" id="OpenAccessOptin" disabled>
-	<label for="OpenAccessOptin">OpenAccess Publish?</label>
-	<div class="alert alert-primary my-1">Cannot be published on Open Access server until a short name is set.</div>
-<?php endif ?>
-</div>
-
-
-
-
-
-<div class="form-group">
-<?php if($course[33] == 'on' || $course[33] == 'Yes'): ?>
-<input type="checkbox" name="Featured" id="Featured" checked> Featured?
-<?php else: ?>
-<input type="checkbox" name="Featured" id="Featured"> Featured?
-<?php endif ?>
-</div>
-
-
-<div class="form-group">
-<?php if($course[23] == 'on' || $course[23] == 'Yes'): ?>
-<input type="checkbox" name="WeShip" id="WeShip" checked> We Ship?
-<?php else: ?>
-<input type="checkbox" name="WeShip" id="WeShip"> We Ship?
-<?php endif ?>
-</div>
-
-
-<div class="form-group">
-<?php if($course[37] == 'on' || $course[37] == 'Yes'): ?>
-<label><input type="checkbox" name="Alchemer" id="Alchemer" checked> Alchemer?</label>
-<?php else: ?>
-<label><input type="checkbox" name="Alchemer" id="Alchemer"> Alchemer?</label>
-<?php endif ?>
-</div>
-
-
-
-
-<div class="form-group">	
-<label for="CourseName">Course Name (Long)</label><br>
-<small>(Max# characters, alpha/numeric =200) | Full/Complete title of the course</small>
-
-
-<input type="text" name="CourseName" id="CourseName" class="form-control" required value="<?= h($course[2]) ?>">
-
-
-<div class="alert alert-success" id="CNLNum"></div>
-</div>
-<div class="my-3">
-<label>
-	ELM Course ID
-	<input type="text" name="ELMCourseID" id="ELMCourseID" class="form-control" value="<?= h($course[50]) ?>">
-</label>
-</div>
-<div class="form-group">
-<label for="CourseShort">Course Name (Short)</label><br>
-<small>(Max# characters, alpha/numeric= 10; <strong>no spaces</strong>) | <a href="#" title="coming soon">Appropriate acronym following LC guidelines</a></small>
-<input type="text" name="CourseShort" id="CourseShort" class="form-control" value="<?= h($course[3]) ?>">
-<div class="alert alert-success" id="CNSNum"></div>
-</div>
-
-
-
-
-
-<input class="form-control CourseID" type="hidden" name="CourseID" value="<?= h($course[0]) ?>">
-
-<div class="row">
-<div class="col-md-6">
-
-<label for="ItemCode">Item Code</label>
-<input class="form-control ItemCode" type="text" name="ItemCode" value="<?= h($course[4]) ?>">
-
-</div>
-<div class="col-md-6">
-
-<label for="CourseColor">Color</label>
-<input class="form-control CourseColor" type="text" name="CourseColor" value="<?= h($course[32]) ?>">
-
-</div>
-</div>
-<div class="form-group">
-<label for="EvaluationsLink">Evaluation Link</label>
-<input class="form-control ELM" type="text" name="EvaluationsLink" value="<?= h($course[35]) ?>">
-</div>
-<div class="form-group">
-<label for="ELM">ELM Link</label>
-<input class="form-control ELM" type="text" name="ELM" value="<?= h($course[7]) ?>">
-</div>
-<div class="form-group">
-<label for="CourseNotes">Notes</label>
-<textarea class="form-control CourseNotes" type="text" name="CourseNotes"><?= h($course[12]) ?></textarea>
-</div>
-
-<div class="row my-4">
-<div class="col-md-6">
-<label for="CourseOwner">Steward</label><br>
-<small>Responsible for delivery.</small>
-<select class="form-select CourseOwner" name="CourseOwner" id="CourseOwner">
-<option selected disabled>Unassigned</option>
-<?php getPeople($course[10]) ?>
-</select>
-</div>
-<div class="col-md-6">
-
-<label for="Developer">Developer</label><br>
-<small>Responsible for materials creation/revisions.</small>
-<select class="form-select Developer" name="Developer" id="Developer">
-<option selected disabled>Unassigned</option>
-<?php getPeople($course[34]) ?>
-</select>
-
-</div>
-</div>
-<div class="col">
-<div class="form-group">
-<label for="EffectiveDate">Effective date</label><br>
-<small>Date the course should be made visible to learners</small>
-<input type="text" name="EffectiveDate" id="EffectiveDate" class="form-control" required value="<?= h($course[15]) ?>">
-</div>
-</div>
-
-
-
-<div class="form-group">
-<label for="CourseDescription">Course Description</label><br>
-<small>(Max# characters, alpha/numeric= 254)<br>
-The overall purpose of the training in 2 to 3 sentences (maximum) inclusive of:<br>
-<ol>
-<li>Course duration (# of days)
-<li>Target learners
-<li>Delivery method.
-</ol>
-</small>
-
-<textarea name="CourseDescription" id="CourseDescription" class="form-control" required><?= h($course[16]) ?></textarea>
-<div class="alert alert-success" id="CDNum"></div>
-</div>
-
-<div class="form-group">
-<label for="CourseAbstract">Course Abstract</label><br>
-<small>(Max# characters, alpha/numeric=4,000) <br>
-<div>An elaboration of the Course Description providing more information on course context, design and development as well as structure. It has the following information:</div>
-<ol>
-<li>Background – clarifying business case, the strategic intent and the need it addresses
-<li>Learning Objectives
-<li>Organizational Benefits
-<li>Course Development (if relevant to understanding the course: e.g., developed with the Aboriginal community or the Project Management Community of Practice)
-<li>Course Structure (if relevant to understanding the course: e.g., six sections (modularized)
-<li>Competencies
-</ol></small>
-<textarea name="CourseAbstract" id="CourseAbstract" class="form-control">
-<?= h($course[17]) ?>
-</textarea>
-<div class="alert alert-success" id="CANum"></div>
-</div>
-
-<div class="form-group">
-<label for="Prerequisites">Pre-requisites</label><br>
-<small>Any required stand-alone course/s and/or resources that course registrant needs to attend/complete any time prior to attendance of this course</small>
-<input type="text" name="Prerequisites" id="Prerequisites" class="form-control" value="<?= h($course[18]) ?>">
-
-</div>
-
-<h2>Taxonomies</h2>
-<div class="row">
-<!-- Topics,Audience,Levels,Reporting -->
-<?php
-$topics = getAllTopics();
-$audience = getAllAudiences ();
-$deliverymethods = getDeliveryMethods ();
-$levels = getLevels ();
-$reportinglist = getReportingList();
-?>
-<div class="col-6">
-<div class="form-group">
-<label for="Topics">Topics</label><br>
-<select name="Topics" id="Topics" class="form-select">
-	<option selected disabled>Unassigned</option>
-	<?php foreach($topics as $t): ?>
-	<?php if($course[38] == $t): ?>
-	<option selected><?= $t ?></option>
-	<?php else: ?>
-	<option><?= $t ?></option>
-	<?php endif ?>
-	<?php endforeach ?>
-</select>
-</div>
-<div class="form-group">
-<label for="Audience">Audience</label><br>
-<select name="Audience" id="Audience" class="form-select">
-	<option selected disabled>Unassigned</option>
-	<?php foreach($audience as $a): ?>
-	<?php if($course[39] == $a): ?>
-	<option selected><?= $a ?></option>
-	<?php else: ?>
-	<option><?= $a ?></option>
-	<?php endif ?>
-	<?php endforeach ?>
-</select>
-</div>
-
-
-</div>
-<div class="col-6">
-
-<div class="form-group">
-
-<label for="Levels">Levels</label><br>
-<select name="Levels" id="Levels" class="form-select">
-	<option selected disabled>Unassigned</option>
-	<?php foreach($levels as $l): ?>
-	<?php if($course[40] == $l): ?>
-	<option selected><?= $l ?></option>
-	<?php else: ?>
-	<option><?= $l ?></option>
-	<?php endif ?>
-	<?php endforeach ?>
-</select>
-</div>
-
-<div class="form-group">
-<label for="Reporting<?= $course[0] ?>">Evaluation</label><br>
-<select name="Reporting" id="Reporting<?= $course[0] ?>" class="form-select">
-	<option selected disabled>Unassigned</option>
-	<?php foreach($reportinglist as $r): ?>
-	<?php if($course[41] == $r): ?>
-	<option selected><?= $r ?></option>
-	<?php else: ?>
-	<option><?= $r ?></option>
-	<?php endif ?>
-	<?php endforeach ?>
-</select>
-</div>
-
-
-</div>
-</div>
-
-<div class="form-group">
-<label for="Keywords">Keywords</label><br>
-<small>Any word not included in the title or short description that could be used by a learner to search for the course</small>
-<input type="text" name="Keywords" id="Keywords" class="form-control" value="<?= h($course[19]) ?>">
-</div>
-<div class="row">
-
-<div class="col">
-
-<div class="form-group">
-
-<label>Delivery Method</label><br>
-<small>Please select from these options</small>
-<div class="mb-3 p-3 bg-light-subtle rounded-3">
-
-<?php $methods = array('Classroom','eLearning','Blended','Webinar') ?>
-<?php foreach($methods as $method): ?>
-<div class="form-check">
-	<?php if($method == $course[21]): ?>
-  <input type="radio" name="Method" id="<?= $method ?>" class="form-check-input" value="<?= $method ?>" checked>
-  <?php else: ?>
-  <input type="radio" name="Method" id="<?= $method ?>" class="form-check-input" value="<?= $method ?>">
-  <?php endif ?>
-  <label class="form-check-label" for="<?= $method ?>"><?= $method ?></label>
-</div>
-<?php endforeach ?>
-</div>
-
-<div class="mb-3 p-2 bg-light-subtle rounded-3">
-<?php if($course[47] == 'on' || $course[47] == 'Yes'): ?>
-<input type="checkbox" name="isMoodle" id="isMoodle" checked> Moodle Course?
-<?php else: ?>
-<input type="checkbox" name="isMoodle" id="isMoodle"> Moodle Course?
-<?php endif ?>
-</div>
-</div>
-</div>
-</div>
-<h2>Administative Details</h2>
-<div class="row">
-
-<div class="col-3">
-<div class="form-group">
-<label for="MinEnroll">Minimum # of Participants</label><br>
-<input type="text" name="MinEnroll" id="MinEnroll" class="form-control" value="<?= $course[28] ?>">
-</div>
-</div>
-
-<div class="col-3">
-<div class="form-group">
-<label for="MaxEnroll">Maximum # of Participants</label><br>
-<input type="text" name="MaxEnroll" id="MaxEnroll" class="form-control" value="<?= $course[29] ?>">
-</div>
-</div>
-
-<div class="col">
-<div class="form-group">
-<label for="elearning">eLearning Course</label><br>
-<small>Include the URL link for the course.</small>
-<input type="text" name="elearning" id="elearning" class="form-control" value="<?= $course[22] ?>">
-</div>
-</div>
-</div>
-
-<div class="row">
-
-
-<div class="col-6">
-<div class="form-group"> 	
-<label for="PreWork">Pre-work Link</label><br>
-<input type="text" name="PreWork" id="PreWork" class="form-control" value="<?= h($course[8]) ?>">
-<label for="PostWork">Post-work Link</label><br>
-<input type="text" name="PostWork" id="PostWork" class="form-control" value="<?= h($course[9]) ?>">
-</div>
-</div>
-
-<div class="col-6">
-<div class="form-group"> 	
-<label for="ClassDays">How Many Days?</label><br>
-<input type="text" name="ClassDays" id="ClassDays" class="form-control" value="<?= h($course[6]) ?>">
-<div class="row">
-<div class="col-md-6">
-<label for="st">Start time</label>
-<input class="form-select starttime" id="st" type="text" name="StartTime" value="<?= h($course[30]) ?>">
-</div>
-<div class="col-md-6">
-<label for="et">End time</label>
-<input class="form-select endtime" id="et" type="text" name="EndTime" value="<?= h($course[31]) ?>">
-</div>
-</div>
-<!--
-<label for="ClassTimes">What Times?</label><br>
-<input type="text" name="ClassTimes" id="ClassTimes" class="form-control" value="<?= h($course[5]) ?>">
--->
-</div>
-</div>
-</div>
-
-
-
-<h2>Print Details</h2>
-
-<div class="row">
-<div class="col-6">
-<div class="form-group"> 	
-<label for="ProjectNumber">Project Number</label><br>
-<input type="text" name="ProjectNumber" id="ProjectNumber" class="form-control" value="<?= h($course[24]) ?>">
-<label for="Responsibility">Responsibility</label><br>
-<input type="text" name="Responsibility" id="Responsibility" class="form-control" value="<?= h($course[25]) ?>">
-</div>
-</div>
-<div class="col-6">
-<div class="form-group"> 	
-<label for="ServiceLine">Service Line</label><br>
-<input type="text" name="ServiceLine" id="ServiceLine" class="form-control" value="<?= h($course[26]) ?>">
-<label for="STOB">STOB</label><br>
-<input type="text" name="STOB" id="STOB" class="form-control" value="<?= h($course[27]) ?>">
-</div>
-</div>
-</div>
-
-<h2>Developer File Paths</h2>
-<!-- //42-PathLAN,43-PathStaging,44-PathLive,45-PathNIK,46-PathTeams -->
-<div class="row">
-<div class="col-6">
-<div class="form-group"> 	
-<label for="PathLAN">LAN Path</label><br>
-<input type="text" name="PathLAN" id="PathLAN" class="form-control" value="<?= h($course[42]) ?>">
-<!-- <div class="alert alert-warning">Please remove leading and trailing slashes from LAN paths, e.g., <br>
-<div class="p-3">\\sfp.idir.bcgov\S142\S4333\Learning Centre\8. Courses 57820-20\Information Management\IM 117 - Privacy, Access and Records Management\ </div>
-<div><strong>would become</strong></div>
-<div class="p-3">sfp.idir.bcgov\S142\S4333\Learning Centre\8. Courses 57820-20\Information Management\IM 117 - Privacy, Access and Records Management</div>
-  </div> -->
-<label for="PathStaging">Staging Path</label><br>
-<input type="text" name="PathStaging" id="PathStaging" class="form-control" value="<?= h($course[43]) ?>">
-<label for="PathTeams">Teams Path</label><br>
-<input type="text" name="PathTeams" id="PathTeams" class="form-control" value="<?= h($course[46]) ?>">
-</div>
-</div>
-<div class="col-6">
-<div class="form-group"> 	
-<label for="PathLive">Live Path</label><br>
-<input type="text" name="PathLive" id="PathLive" class="form-control" value="<?= h($course[44]) ?>">
-<label for="PathNIK">NIK Path</label><br>
-<input type="text" name="PathNIK" id="PathNIK" class="form-control" value="<?= h($course[45]) ?>">
-</div>
-</div>
-
-
-</div>
-	
-<button class="btn btn-block btn-primary my-3">Save Course Info</button>
-</form>
-	
-</div>
-</div>
-</div>
-
-
-
-<?php else: ?>
-
-
-<div class="container">
+<div class="container mb-5">
 <div class="row justify-content-md-center">
-<div class="col-md-3">
+<div class="col-md-10">
 
-
-	<p class="my-3 p-3" style="background: #000">This is a restricted tool. Please email <a href="mailto:Learning.Centre.Admin@gov.bc.ca?subject=Service Request Access Request">Learning Centre Operations</a> with your IDIR to request access.</p>
-
-	
-	</div>
-</div>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Update: <?= sanitize($deets[2]) ?></h1>
+    <a href="course.php?courseid=<?= $courseid ?>" class="btn btn-light">Cancel</a>
 </div>
 
+<form method="post" action="course-update.php" class="mb-3" id="courseupdateform">
+    
+    <!-- Hidden fields -->
+    <input type="hidden" name="CourseID" value="<?= sanitize($deets[0]) ?>">
+    <input type="hidden" name="Requested" value="<?= sanitize($deets[13]) ?>">
+    <input type="hidden" name="RequestedBy" value="<?= sanitize($deets[14]) ?>">
+    <input type="hidden" name="TaxonomyProcessed" value="<?= sanitize($deets[48]) ?>">
+    <input type="hidden" name="TaxonomyProcessedBy" value="<?= sanitize($deets[49]) ?>">
+    
+    <!-- Basic Information Section -->
+    <div class="form-section">
+        <div class="form-section-title">Basic Information</div>
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <label for="Status" class="form-label">Status</label>
+                <select name="Status" id="Status" class="form-select" required>
+                    <option value="" disabled>Select one</option>
+                    <?php $statuses = ['Requested','Active','Inactive'] ?>
+                    <?php foreach($statuses as $s): ?>
+                        <option value="<?= $s ?>" <?= ($s == $deets[1]) ? 'selected' : '' ?>><?= $s ?></option>
+                    <?php endforeach ?>
+                </select>
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="CourseShort" class="form-label">Short Name</label>
+                <small class="d-block text-muted">Max 10 chars, no spaces</small>
+                <input type="text" name="CourseShort" id="CourseShort" class="form-control" value="<?= sanitize($deets[3]) ?>" maxlength="10">
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="ItemCode" class="form-label">Item Code</label>
+                <input type="text" name="ItemCode" id="ItemCode" class="form-control" value="<?= sanitize($deets[4]) ?>">
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="Method" class="form-label">Delivery Method</label>
+                <select name="Method" id="Method" class="form-select" required>
+                    <option value="" disabled>Select one</option>
+                    <?php $methods = ['Classroom','eLearning','Blended','Webinar'] ?>
+                    <?php foreach($methods as $method): ?>
+                        <option value="<?= $method ?>" <?= ($method == $deets[21]) ? 'selected' : '' ?>><?= $method ?></option>
+                    <?php endforeach ?>
+                </select>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="LearningHubPartner" class="form-label">Learning Hub Partner</label>
+                <select name="LearningHubPartner" id="LearningHubPartner" class="form-select" required>
+                    <option value="" disabled <?= empty($deets[36]) ? 'selected' : '' ?>>Select one</option>
+                    <?php foreach($partners as $partner): ?>
+                        <option value="<?= sanitize($partner['name']) ?>" <?= ($partner['name'] == $deets[36]) ? 'selected' : '' ?>>
+                            <?= sanitize($partner['name']) ?>
+                        </option>
+                    <?php endforeach ?>
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="Platform" class="form-label">Platform</label>
+                <select name="Platform" id="Platform" class="form-select" required>
+                    <option value="" disabled <?= empty($deets[52]) ? 'selected' : '' ?>>Select one</option>
+                    <?php foreach($platforms as $platform): ?>
+                        <option value="<?= sanitize($platform['name']) ?>" <?= ($platform['name'] == $deets[52]) ? 'selected' : '' ?>>
+                            <?= sanitize($platform['name']) ?>
+                        </option>
+                    <?php endforeach ?>
+                </select>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-3">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="HUBInclude" id="HUBInclude" 
+                           <?= ($deets[53] == 'Yes' || $deets[53] == 1) ? 'checked' : '' ?>>
+                    <label class="form-check-label" for="HUBInclude">Include in LearningHUB?</label>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="OpenAccessOptin" id="OpenAccessOptin" 
+                           <?= ($deets[57] == 'Yes' || $deets[57] == 1) ? 'checked' : '' ?>
+                           <?= empty($deets[3]) ? 'disabled' : '' ?>>
+                    <label class="form-check-label" for="OpenAccessOptin">OpenAccess Publish?</label>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="Featured" id="Featured" 
+                           <?= ($deets[33] == 'Yes' || $deets[33] == 1) ? 'checked' : '' ?>>
+                    <label class="form-check-label" for="Featured">Featured?</label>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="WeShip" id="WeShip" 
+                           <?= ($deets[23] == 'Yes' || $deets[23] == 1) ? 'checked' : '' ?>>
+                    <label class="form-check-label" for="WeShip">We Ship?</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Course Details Section -->
+    <div class="form-section">
+        <div class="form-section-title">Course Details</div>
+        
+        <div class="mb-3">
+            <label for="CourseName" class="form-label">Course Name (Long)</label>
+            <small class="d-block text-muted">Max 200 characters - Full/Complete title of the course</small>
+            <input type="text" name="CourseName" id="CourseName" class="form-control" required value="<?= sanitize($deets[2]) ?>" maxlength="200">
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="ELMCourseID" class="form-label">ELM Course ID</label>
+                <input type="text" name="ELMCourseID" id="ELMCourseID" class="form-control" value="<?= sanitize($deets[50]) ?>">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="CourseColor" class="form-label">Color</label>
+                <input type="text" name="CourseColor" id="CourseColor" class="form-control" value="<?= sanitize($deets[32]) ?>">
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <label for="CourseDescription" class="form-label">Course Description</label>
+            <small class="d-block text-muted">Max 254 characters - Overall purpose in 2-3 sentences including: duration, target learners, delivery method</small>
+            <textarea name="CourseDescription" id="CourseDescription" class="form-control" rows="3" required maxlength="254"><?= sanitize($deets[16]) ?></textarea>
+        </div>
+        
+        <div class="mb-3">
+            <label for="CourseAbstract" class="form-label">Course Abstract</label>
+            <small class="d-block text-muted">Max 4000 characters - Detailed elaboration including background, objectives, benefits, structure</small>
+            <textarea name="CourseAbstract" id="CourseAbstract" class="form-control" rows="6"><?= sanitize($deets[17]) ?></textarea>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="Prerequisites" class="form-label">Prerequisites</label>
+                <input type="text" name="Prerequisites" id="Prerequisites" class="form-control" value="<?= sanitize($deets[18]) ?>">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="Keywords" class="form-label">Keywords</label>
+                <small class="d-block text-muted">Comma-separated search terms</small>
+                <input type="text" name="Keywords" id="Keywords" class="form-control" value="<?= sanitize($deets[19]) ?>">
+            </div>
+        </div>
+        
+        <div class="mb-3">
+            <label for="CourseNotes" class="form-label">Notes</label>
+            <textarea name="CourseNotes" id="CourseNotes" class="form-control" rows="3"><?= sanitize($deets[12]) ?></textarea>
+        </div>
+    </div>
+    
+    <!-- Taxonomies Section -->
+    <div class="form-section">
+        <div class="form-section-title">Taxonomies</div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="Topics" class="form-label">Topic</label>
+                <select name="Topics" id="Topics" class="form-select" required>
+                    <option value="" disabled <?= empty($deets[38]) ? 'selected' : '' ?>>Select one</option>
+                    <?php foreach($topics as $t): ?>
+                        <option value="<?= $t ?>" <?= ($deets[38] == $t) ? 'selected' : '' ?>><?= $t ?></option>
+                    <?php endforeach ?>
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="Audience" class="form-label">Audience</label>
+                <select name="Audience" id="Audience" class="form-select" required>
+                    <option value="" disabled <?= empty($deets[39]) ? 'selected' : '' ?>>Select one</option>
+                    <?php foreach($audience as $a): ?>
+                        <option value="<?= $a ?>" <?= ($deets[39] == $a) ? 'selected' : '' ?>><?= $a ?></option>
+                    <?php endforeach ?>
+                </select>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="Levels" class="form-label">Group</label>
+                <select name="Levels" id="Levels" class="form-select" required>
+                    <option value="" disabled <?= empty($deets[40]) ? 'selected' : '' ?>>Select one</option>
+                    <?php foreach($levels as $l): ?>
+                        <option value="<?= $l ?>" <?= ($deets[40] == $l) ? 'selected' : '' ?>><?= $l ?></option>
+                    <?php endforeach ?>
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="Reporting" class="form-label">Reporting</label>
+                <select name="Reporting" id="Reporting" class="form-select">
+                    <option value="" disabled <?= empty($deets[41]) ? 'selected' : '' ?>>Select one</option>
+                    <?php foreach($reportinglist as $r): ?>
+                        <option value="<?= $r ?>" <?= ($deets[41] == $r) ? 'selected' : '' ?>><?= $r ?></option>
+                    <?php endforeach ?>
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <!-- People Section -->
+    <div class="form-section">
+        <div class="form-section-title">People</div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="CourseOwner" class="form-label">Steward</label>
+                <small class="d-block text-muted">Responsible for delivery</small>
+                <select name="CourseOwner" id="CourseOwner" class="form-select">
+                    <option value="">Unassigned</option>
+                    <?php getPeople($deets[10]) ?>
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="Developer" class="form-label">Developer</label>
+                <small class="d-block text-muted">Responsible for materials creation/revisions</small>
+                <select name="Developer" id="Developer" class="form-select">
+                    <option value="">Unassigned</option>
+                    <?php getPeople($deets[34]) ?>
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Administrative Details Section -->
+    <div class="form-section">
+        <div class="form-section-title">Administrative Details</div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="EffectiveDate" class="form-label">Effective Date</label>
+                <small class="d-block text-muted">Date the course should be visible to learners</small>
+                <input type="date" name="EffectiveDate" id="EffectiveDate" class="form-control" value="<?= sanitize($deets[15]) ?>">
+            </div>
+            <div class="col-md-6 mb-3">
+                <div class="form-check mt-4">
+                    <input type="checkbox" class="form-check-input" name="Alchemer" id="Alchemer" 
+                           <?= ($deets[37] == 'Yes' || $deets[37] == 1) ? 'checked' : '' ?>>
+                    <label class="form-check-label" for="Alchemer">Alchemer?</label>
+                </div>
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input" name="isMoodle" id="isMoodle" 
+                           <?= ($deets[47] == 'Yes' || $deets[47] == 1) ? 'checked' : '' ?>>
+                    <label class="form-check-label" for="isMoodle">Moodle Course?</label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <label for="MinEnroll" class="form-label">Min Participants</label>
+                <input type="number" name="MinEnroll" id="MinEnroll" class="form-control" value="<?= sanitize($deets[28]) ?>">
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="MaxEnroll" class="form-label">Max Participants</label>
+                <input type="number" name="MaxEnroll" id="MaxEnroll" class="form-control" value="<?= sanitize($deets[29]) ?>">
+            </div>
+            <div class="col-md-2 mb-3">
+                <label for="ClassDays" class="form-label">Days</label>
+                <input type="text" name="ClassDays" id="ClassDays" class="form-control" value="<?= sanitize($deets[6]) ?>">
+            </div>
+            <div class="col-md-2 mb-3">
+                <label for="StartTime" class="form-label">Start Time</label>
+                <input type="text" name="StartTime" id="StartTime" class="form-control starttime" value="<?= sanitize($deets[30]) ?>">
+            </div>
+            <div class="col-md-2 mb-3">
+                <label for="EndTime" class="form-label">End Time</label>
+                <input type="text" name="EndTime" id="EndTime" class="form-control endtime" value="<?= sanitize($deets[31]) ?>">
+            </div>
+        </div>
+        
+        <div id="notelm" class="<?= ($deets[52] == 'PSA Learning System') ? 'd-none' : '' ?>">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label for="RegistrationLink" class="form-label">Registration Link</label>
+                    <small class="d-block text-muted">If not in Learning System, where to register?</small>
+                    <input type="url" name="RegistrationLink" id="RegistrationLink" class="form-control" value="<?= sanitize($deets[54]) ?>">
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label for="HubExpirationDate" class="form-label">Expiration Date</label>
+                    <small class="d-block text-muted">Date to remove from search results</small>
+                    <input type="date" name="HubExpirationDate" id="HubExpirationDate" class="form-control" value="<?= sanitize($deets[56]) ?>">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Links Section -->
+    <div class="form-section">
+        <div class="form-section-title">Links & Resources</div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="ELM" class="form-label">ELM Link</label>
+                <input type="url" name="ELM" id="ELM" class="form-control" value="<?= sanitize($deets[7]) ?>">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="elearning" class="form-label">eLearning Course URL</label>
+                <input type="url" name="elearning" id="elearning" class="form-control" value="<?= sanitize($deets[22]) ?>">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="PreWork" class="form-label">Pre-work Link</label>
+                <input type="url" name="PreWork" id="PreWork" class="form-control" value="<?= sanitize($deets[8]) ?>">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="PostWork" class="form-label">Post-work Link</label>
+                <input type="url" name="PostWork" id="PostWork" class="form-control" value="<?= sanitize($deets[9]) ?>">
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="EvaluationsLink" class="form-label">Evaluation Link</label>
+            <input type="url" name="EvaluationsLink" id="EvaluationsLink" class="form-control" value="<?= sanitize($deets[35]) ?>">
+        </div>
+    </div>
+    
+    <!-- Print Details Section -->
+    <div class="form-section">
+        <div class="form-section-title">Print Materials Operating Codes</div>
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <label for="ProjectNumber" class="form-label">Project Number</label>
+                <input type="text" name="ProjectNumber" id="ProjectNumber" class="form-control" value="<?= sanitize($deets[24]) ?>">
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="Responsibility" class="form-label">Responsibility</label>
+                <input type="text" name="Responsibility" id="Responsibility" class="form-control" value="<?= sanitize($deets[25]) ?>">
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="ServiceLine" class="form-label">Service Line</label>
+                <input type="text" name="ServiceLine" id="ServiceLine" class="form-control" value="<?= sanitize($deets[26]) ?>">
+            </div>
+            <div class="col-md-3 mb-3">
+                <label for="STOB" class="form-label">STOB</label>
+                <input type="text" name="STOB" id="STOB" class="form-control" value="<?= sanitize($deets[27]) ?>">
+            </div>
+        </div>
+    </div>
+    
+    <!-- Developer File Paths Section -->
+    <div class="form-section">
+        <div class="form-section-title">Developer File Paths</div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="PathLAN" class="form-label">LAN Path</label>
+                <input type="text" name="PathLAN" id="PathLAN" class="form-control" value="<?= sanitize($deets[42]) ?>">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="PathStaging" class="form-label">Staging Path</label>
+                <input type="text" name="PathStaging" id="PathStaging" class="form-control" value="<?= sanitize($deets[43]) ?>">
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="PathLive" class="form-label">Live Path</label>
+                <input type="text" name="PathLive" id="PathLive" class="form-control" value="<?= sanitize($deets[44]) ?>">
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="PathNIK" class="form-label">NIK Path</label>
+                <input type="text" name="PathNIK" id="PathNIK" class="form-control" value="<?= sanitize($deets[45]) ?>">
+            </div>
+        </div>
+        <div class="mb-3">
+            <label for="PathTeams" class="form-label">Teams Path</label>
+            <input type="text" name="PathTeams" id="PathTeams" class="form-control" value="<?= sanitize($deets[46]) ?>">
+        </div>
+    </div>
+    
+    <div class="d-flex justify-content-between">
+        <button type="submit" class="btn btn-primary">Save Course Info</button>
+        <a href="course.php?courseid=<?= $courseid ?>" class="btn btn-secondary">Cancel</a>
+    </div>
+</form>
 
-
-
-
-
-<?php endif ?>
-<?php endif ?>
-<?php else: ?>
-<?php require('templates/noaccess.php') ?>
-<?php endif ?>
-
-
-
+</div>
+</div>
+</div>
 
 <?php require('templates/javascript.php') ?>
-<!-- <script src="/lsapp/js/summernote-bs4.js"></script> -->
 <script>
 $(document).ready(function(){
-	var moment = rome.moment;
-	var endtime = rome(document.querySelector('.endtime'), { 
-						date: false,
-						timeValidator: function (d) {
-							var m = moment(d);
-							var start = m.clone().hour(07).minute(59).second(59);
-							var end = m.clone().hour(16).minute(30).second(1);
-							return m.isAfter(start) && m.isBefore(end);
-						}
-				});
-	var starttime = rome(document.querySelector('.starttime'), { 
-						date: false,
-						timeValidator: function (d) {
-							var m = moment(d);
-							var start = m.clone().hour(07).minute(59).second(59);
-							var end = m.clone().hour(16).minute(00).second(1);
-							return m.isAfter(start) && m.isBefore(end);
-						}
-				});
-
-	// $('.summernote').summernote({
-	// 	toolbar: [
-	// 		// [groupName, [list of button]]
-	// 		['style', ['bold', 'italic']],
-	// 		['para', ['ul', 'ol']],
-	// 		['color', ['color']],
-	// 		['link']
-	// 	],
-	// 	placeholder: 'Type here'
-		
-	// });	
-
-	
-
-	$('#CourseName').keyup(function () {
-	  var max = 254;
-	  var len = $(this).val().length;
-	  if (len >= max) {
-		$('#CNLNum').text(' you have reached the limit');
-	  } else {
-		var char = max - len;
-		$('#CNLNum').text(char + ' characters left');
-	  }
-	});
-
-	$('#CourseShort').keyup(function () {
-	  var max = 11;
-	  var len = $(this).val().length;
-	  if (len >= max) {
-		$('#CNSNum').text(' you have reached the limit');
-	  } else {
-		var char = max - len;
-		$('#CNSNum').text(char + ' characters left');
-	  }
-	});	
-	$('#CourseDescription').keyup(function () {
-	  var max = 254;
-	  var len = $(this).val().length;
-	  if (len >= max) {
-		$('#CDNum').text(' you have reached the limit');
-	  } else {
-		var char = max - len;
-		$('#CDNum').text(char + ' characters left');
-	  }
-	});
-	$('#CourseAbstract').keyup(function () {
-	  var max = 4000;
-	  var len = $(this).val().length;
-	  if (len >= max) {
-		$('#CANum').text(' you have reached the limit');
-	  } else {
-		var char = max - len;
-		$('#CANum').text(char + ' characters left');
-	  }
-	});		
-	
-	
+    // Platform-based field visibility
+    $('#Platform').on('change', function() {
+        if($(this).val() === 'PSA Learning System') {
+            $('#notelm').addClass('d-none');
+        } else {
+            $('#notelm').removeClass('d-none');
+        }
+    });
+    
+    // Time picker setup
+    var moment = rome.moment;
+    var endtime = rome(document.querySelector('.endtime'), { 
+        date: false,
+        timeValidator: function (d) {
+            var m = moment(d);
+            var start = m.clone().hour(7).minute(59).second(59);
+            var end = m.clone().hour(16).minute(30).second(1);
+            return m.isAfter(start) && m.isBefore(end);
+        }
+    });
+    var starttime = rome(document.querySelector('.starttime'), { 
+        date: false,
+        timeValidator: function (d) {
+            var m = moment(d);
+            var start = m.clone().hour(7).minute(59).second(59);
+            var end = m.clone().hour(16).minute(0).second(1);
+            return m.isAfter(start) && m.isBefore(end);
+        }
+    });
+    
+    // Form validation
+    $('#courseupdateform').on('submit', function(e) {
+        var isValid = true;
+        
+        // Check required selects
+        $(this).find('select[required]').each(function() {
+            if(!$(this).val() || $(this).val() === '') {
+                isValid = false;
+                $(this).addClass('is-invalid');
+            } else {
+                $(this).removeClass('is-invalid');
+            }
+        });
+        
+        if(!isValid) {
+            e.preventDefault();
+            alert('Please fill in all required fields.');
+        }
+    });
+    
+    // Remove invalid class on change
+    $('select[required]').on('change', function() {
+        $(this).removeClass('is-invalid');
+    });
 });
 </script>
 <?php require('templates/footer.php') ?>

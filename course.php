@@ -87,7 +87,9 @@ if (file_exists($categoriesFile)) {
 </div>
 
 	<div class="btn-group float-end">
+		<?php if(isAdmin()): ?>
 		<a href="course-update.php?courseid=<?= $courseid ?>" class="btn btn-light float-end">Edit details</a>
+		<?php endif ?>
 		<div class="btn-group">
 			<button class="btn btn-light dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
 				Requests
