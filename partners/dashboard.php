@@ -114,9 +114,99 @@ endif;
 </table>
 </div>
 </div>
+
+<!-- All Partner Contacts -->
+<div class="row mt-5">
+    <div class="col-12">
+        <h2>All Partner Contacts</h2>
+        <p>Browse and search through all partner contacts.</p>
+        
+        <?php
+        // Build array of all contacts with partner info
+        $allContacts = [];
+        foreach ($partnerData as $partner) {
+            if (isset($partner['contacts']) && is_array($partner['contacts'])) {
+                foreach ($partner['contacts'] as $contact) {
+                    // Skip unassigned and unknown contacts
+                    if ($contact['idir'] !== 'unassigned' && $contact['idir'] !== 'unknown') {
+                        $contact['partner_name'] = $partner['name'];
+                        $contact['partner_slug'] = $partner['slug'];
+                        $allContacts[] = $contact;
+                    }
+                }
+            }
+        }
+        ?>
+        
+        <?php if (count($allContacts) > 0): ?>
+        <div id="contactsList">
+            <div class="mb-3">
+                <input type="text" class="search form-control" placeholder="Search contacts by name, email, IDIR, title, role, or partner...">
+            </div>
+            
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>IDIR</th>
+                        <th>Title</th>
+                        <th>Role</th>
+                        <th>Partner</th>
+                        <th>Added</th>
+                    </tr>
+                </thead>
+                <tbody class="list">
+                    <?php foreach ($allContacts as $contact): ?>
+                    <tr>
+                        <td class="name"><?= htmlspecialchars($contact['name'] ?? '-') ?></td>
+                        <td class="email"><?= htmlspecialchars($contact['email'] ?? '-') ?></td>
+                        <td class="idir"><?= htmlspecialchars($contact['idir'] ?? '-') ?></td>
+                        <td class="title"><?= htmlspecialchars($contact['title'] ?? '-') ?></td>
+                        <td class="role"><?= htmlspecialchars($contact['role'] ?? '-') ?></td>
+                        <td class="partner"><a href="view.php?slug=<?= urlencode($contact['partner_slug']) ?>"><?= htmlspecialchars($contact['partner_name']) ?></a></td>
+                        <td class="added"><?= isset($contact['added_at']) ? date('Y-m-d', strtotime($contact['added_at'])) : '-' ?></td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+            
+            <p class="text-muted"><small>Showing <?= count($allContacts) ?> active contacts</small></p>
+        </div>
+        <?php else: ?>
+        <p class="alert alert-info">No active contacts found in the partner database. Most partners currently have "unassigned" or "unknown" contacts.</p>
+        <?php endif; ?>
+    </div>
+</div>
 </div>
 
 <?php require('../templates/javascript.php') ?>
+
+<?php if (count($allContacts) > 0): ?>
+<script>
+// Initialize List.js for the contacts table
+var options = {
+    valueNames: ['name', 'email', 'idir', 'title', 'role', 'partner', 'added'],
+    searchClass: 'search'
+};
+
+var contactsList = new List('contactsList', options);
+
+// Add counter for filtered results
+contactsList.on('searchComplete', function() {
+    var visibleItems = contactsList.visibleItems.length;
+    var totalItems = contactsList.size();
+    var counterText = document.querySelector('#contactsList .text-muted small');
+    
+    if (visibleItems === totalItems) {
+        counterText.textContent = `Showing ${totalItems} active contacts`;
+    } else {
+        counterText.textContent = `Showing ${visibleItems} of ${totalItems} active contacts`;
+    }
+});
+</script>
+<?php endif; ?>
+
 <?php require('../templates/footer.php') ?>
 
 <?php endif ?>
