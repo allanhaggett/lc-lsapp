@@ -103,14 +103,35 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // Generate slug from name if not set
     $slug = !empty($_POST["slug"]) ? $_POST["slug"] : strtolower(preg_replace('/[^a-z0-9\s-]/', '', str_replace(' ', '-', $_POST["name"])));
 
+    // Handle employee-facing contact based on type selection (required field)
+    $employeeFacingContact = "";
+    if (!isset($_POST["employee_contact_type"]) || empty($_POST["employee_contact_type"])) {
+        die("Error: Employee-facing contact type is required.");
+    }
+    
+    if ($_POST["employee_contact_type"] === "email") {
+        if (empty($_POST["employee_facing_contact"])) {
+            die("Error: Email address is required when email contact type is selected.");
+        }
+        if (!filter_var($_POST["employee_facing_contact"], FILTER_VALIDATE_EMAIL)) {
+            die("Error: Please provide a valid email address.");
+        }
+        $employeeFacingContact = $_POST["employee_facing_contact"];
+    } elseif ($_POST["employee_contact_type"] === "crm") {
+        $employeeFacingContact = "CRM";
+    } else {
+        die("Error: Invalid employee contact type selected.");
+    }
+
     // Construct the updated partner data
-    $status = isset($_POST["status"]) ? "active" : "inactive"; // Set to 'active' if checked, otherwise 'inactive'
+    $status = isset($_POST["status"]) ? $_POST["status"] : "inactive";
     $newPartner = [
         "id" => ($partnerIndex !== -1) ? $existingData[$partnerIndex]["id"] : (count($existingData) ? max(array_column($existingData, 'id')) + 1 : 1),
         "name" => $_POST["name"],
         "slug" => $slug,
         "description" => $_POST["description"],
         "link" => $_POST["link"],
+        "employee_facing_contact" => $employeeFacingContact,
         "contacts" => $newContacts,
         "contact_history" => $contactHistory, // Preserve the history
         "status" => $status

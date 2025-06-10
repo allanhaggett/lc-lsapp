@@ -131,6 +131,7 @@ endif;
                     if ($contact['idir'] !== 'unassigned' && $contact['idir'] !== 'unknown') {
                         $contact['partner_name'] = $partner['name'];
                         $contact['partner_slug'] = $partner['slug'];
+                        $contact['employee_facing_contact'] = $partner['employee_facing_contact'] ?? '';
                         $allContacts[] = $contact;
                     }
                 }
@@ -153,6 +154,7 @@ endif;
                         <th>Title</th>
                         <th>Role</th>
                         <th>Partner</th>
+                        <th>Employee Contact</th>
                         <th>Added</th>
                     </tr>
                 </thead>
@@ -165,6 +167,17 @@ endif;
                         <td class="title"><?= htmlspecialchars($contact['title'] ?? '-') ?></td>
                         <td class="role"><?= htmlspecialchars($contact['role'] ?? '-') ?></td>
                         <td class="partner"><a href="view.php?slug=<?= urlencode($contact['partner_slug']) ?>"><?= htmlspecialchars($contact['partner_name']) ?></a></td>
+                        <td class="employee-contact">
+                            <?php 
+                            if ($contact['employee_facing_contact'] === 'CRM') {
+                                echo 'CRM';
+                            } elseif (filter_var($contact['employee_facing_contact'], FILTER_VALIDATE_EMAIL)) {
+                                echo 'Email';
+                            } else {
+                                echo 'Not Set';
+                            }
+                            ?>
+                        </td>
                         <td class="added"><?= isset($contact['added_at']) ? date('Y-m-d', strtotime($contact['added_at'])) : '-' ?></td>
                     </tr>
                     <?php endforeach; ?>
@@ -186,7 +199,7 @@ endif;
 <script>
 // Initialize List.js for the contacts table
 var options = {
-    valueNames: ['name', 'email', 'idir', 'title', 'role', 'partner', 'added'],
+    valueNames: ['name', 'email', 'idir', 'title', 'role', 'partner', 'employee-contact', 'added'],
     searchClass: 'search'
 };
 

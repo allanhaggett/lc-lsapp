@@ -31,6 +31,10 @@ foreach ($partners as &$partner) {
         if (!isset($partner['contacts']) || !is_array($partner['contacts'])) {
             $partner['contacts'] = [];
         }
+        // Ensure employee_facing_contact field exists
+        if (!isset($partner['employee_facing_contact'])) {
+            $partner['employee_facing_contact'] = '';
+        }
         $partner['contacts'][] = $contact;
         break;
     }

@@ -5,7 +5,7 @@ $path = '../inc/lsapp.php';
 require($path); 
 $partnersFile = "../data/partners.json";
 $partners = file_exists($partnersFile) ? json_decode(file_get_contents($partnersFile), true) : [];
-$partner = ["id" => "", "name" => "", "slug" => "", "description" => "", "link" => "", "contacts" => [], "status" => "inactive"];
+$partner = ["id" => "", "name" => "", "slug" => "", "description" => "", "link" => "", "employee_facing_contact" => "", "contacts" => [], "status" => "inactive"];
 
 // Load existing partner if editing
 if (isset($_GET["id"])) {
@@ -145,6 +145,57 @@ if (isset($_GET["id"])) {
                         <label class="form-label">Link</label>
                         <input type="url" name="link" class="form-control" required value="<?php echo htmlspecialchars($partner["link"]); ?>">
                     </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Employee-facing Contact <small class="text-muted">(Contact information displayed to employees)</small></label>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <select name="employee_contact_type" class="form-select" required onchange="toggleContactInput(this.value)">
+                                    <?php 
+                                    $isEmail = isset($partner["employee_facing_contact"]) && filter_var($partner["employee_facing_contact"], FILTER_VALIDATE_EMAIL);
+                                    $isCRM = isset($partner["employee_facing_contact"]) && $partner["employee_facing_contact"] === "CRM";
+                                    $defaultToEmail = !$isEmail && !$isCRM; // Default to email for new entries
+                                    ?>
+                                    <option value="email" <?php echo ($isEmail || $defaultToEmail) ? "selected" : ""; ?>>Email Address</option>
+                                    <option value="crm" <?php echo $isCRM ? "selected" : ""; ?>>CRM System</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8">
+                                <input type="email" name="employee_facing_contact" id="employee_contact_email" class="form-control" placeholder="Enter email address" 
+                                       value="<?php echo ($isEmail) ? htmlspecialchars($partner["employee_facing_contact"]) : ""; ?>"
+                                       style="display: <?php echo ($isEmail || $defaultToEmail) ? "block" : "none"; ?>;" 
+                                       <?php echo ($isEmail || $defaultToEmail) ? "required" : ""; ?>>
+                                <div id="crm_notice" class="alert alert-info mb-0" style="display: <?php echo $isCRM ? "block" : "none"; ?>;">
+                                    Employees will be directed to use the CRM system for support.
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-text">This contact information will be shown to employees who need support with courses from this partner. <strong>Required field.</strong></div>
+                    </div>
+
+                    <script>
+                        function toggleContactInput(type) {
+                            const emailInput = document.getElementById('employee_contact_email');
+                            const crmNotice = document.getElementById('crm_notice');
+                            
+                            if (type === 'email') {
+                                emailInput.style.display = 'block';
+                                emailInput.required = true;
+                                crmNotice.style.display = 'none';
+                            } else if (type === 'crm') {
+                                emailInput.style.display = 'none';
+                                emailInput.required = false;
+                                emailInput.value = '';
+                                crmNotice.style.display = 'block';
+                            } else {
+                                // For the placeholder option, hide both
+                                emailInput.style.display = 'none';
+                                emailInput.required = false;
+                                emailInput.value = '';
+                                crmNotice.style.display = 'none';
+                            }
+                        }
+                    </script>
 
                     <h4>Contacts</h4>
                     <div id="contacts-container">
