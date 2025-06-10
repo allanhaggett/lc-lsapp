@@ -146,14 +146,14 @@ usort($inactiveCourses, function($a, $b) {
     <div class="col-md-6">
         <div class="card">
             <div class="card-header">
-                <h5>Courses Offered (<?= count($pcourses) ?>)</h5>
+                <h5>Courses Offered</h5>
                 <input class="search form-control" placeholder="Search courses..." />
             </div>
             <div class="card-body" id="course-list">
                 
                 <?php if (!empty($activeCourses)): ?>
                 <div class="mb-4">
-                    <h6 class="text-success">Active Courses (<?= count($activeCourses) ?>)</h6>
+                    <h6 class="text-success">Active Courses (<span id="active-count"><?= count($activeCourses) ?></span>)</h6>
                     <div class="list">
                         <?php foreach ($activeCourses as $course): ?>
                         <div class="mb-2 p-2 bg-light-subtle rounded course-item">
@@ -165,8 +165,12 @@ usort($inactiveCourses, function($a, $b) {
                                         </a>
                                     </div>
                                 </div>
-                                <div class="status ms-2">
-                                    <span class="badge bg-success"><?php echo htmlspecialchars($course[1]); ?></span>
+                                <div class="hub-status ms-2">
+                                    <?php if ($course[53] == 'Yes' || $course[53] == 1): ?>
+                                        <span class="badge bg-success">Learning<strong>HUB</strong></span>
+                                    <?php else: ?>
+                                        <span class="badge bg-light text-dark">Learning<strong>HUB</strong></span>
+                                    <?php endif ?>
                                 </div>
                             </div>
                         </div>
@@ -177,7 +181,7 @@ usort($inactiveCourses, function($a, $b) {
                 
                 <?php if (!empty($inactiveCourses)): ?>
                 <div class="mb-4">
-                    <h6 class="text-secondary">Inactive Courses (<?= count($inactiveCourses) ?>)</h6>
+                    <h6 class="text-secondary">Inactive Courses (<span id="inactive-count"><?= count($inactiveCourses) ?></span>)</h6>
                     <div class="list">
                         <?php foreach ($inactiveCourses as $course): ?>
                         <div class="mb-2 p-2 bg-light-subtle rounded course-item">
@@ -189,8 +193,12 @@ usort($inactiveCourses, function($a, $b) {
                                         </a>
                                     </div>
                                 </div>
-                                <div class="status ms-2">
-                                    <span class="badge bg-secondary"><?php echo htmlspecialchars($course[1]); ?></span>
+                                <div class="hub-status ms-2">
+                                    <?php if ($course[53] == 'Yes' || $course[53] == 1): ?>
+                                        <span class="badge bg-success">Learning<strong>HUB</strong></span>
+                                    <?php else: ?>
+                                        <span class="badge bg-light text-dark">Learning<strong>HUB</strong></span>
+                                    <?php endif ?>
                                 </div>
                             </div>
                         </div>
@@ -255,6 +263,7 @@ $(document).ready(function(){
             $('.mb-4:first h6').hide();
         } else {
             $('.mb-4:first h6').show();
+            $('#active-count').text(visibleActiveCourses);
         }
         
         // Check if any inactive courses are visible
@@ -263,6 +272,7 @@ $(document).ready(function(){
             $('.mb-4:last h6').hide();
         } else {
             $('.mb-4:last h6').show();
+            $('#inactive-count').text(visibleInactiveCourses);
         }
     }
 });

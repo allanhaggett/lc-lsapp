@@ -202,15 +202,15 @@ function getFilterLink($filters, $key, $value = null) {
         <?php endif; ?>
         
         <?php if ($filters['status'] === 'inactive'): ?>
-            <a href="<?= getFilterLink($filters, 'status') ?>" class="badge bg-dark-subtle text-secondary-emphasis">&times; Inactive</a>
+            <a href="<?= getFilterLink($filters, 'status') ?>" class="badge bg-dark-subtle text-primary-emphasis">&times; Inactive</a>
         <?php else: ?>
-            <a href="<?= getFilterLink($filters, 'status', 'inactive') ?>" class="badge bg-light-subtle text-secondary-emphasis">Inactive</a>
+            <a href="<?= getFilterLink($filters, 'status', 'inactive') ?>" class="badge bg-light-subtle text-primary-emphasis">Inactive</a>
         <?php endif; ?>
         
         <?php if ($filters['status'] === 'requested'): ?>
-            <a href="<?= getFilterLink($filters, 'status') ?>" class="badge bg-dark-subtle text-warning-emphasis">&times; Requested</a>
+            <a href="<?= getFilterLink($filters, 'status') ?>" class="badge bg-dark-subtle text-primary-emphasis">&times; Requested</a>
         <?php else: ?>
-            <a href="<?= getFilterLink($filters, 'status', 'requested') ?>" class="badge bg-light-subtle text-warning-emphasis">Requested</a>
+            <a href="<?= getFilterLink($filters, 'status', 'requested') ?>" class="badge bg-light-subtle text-primary-emphasis">Requested</a>
         <?php endif; ?>
     </div>
     

@@ -23,12 +23,27 @@ $stewsdevs = getCoursePeople($courseid);
 $partnersJson = file_get_contents('data/partners.json');
 $partners = json_decode($partnersJson, true);
 
+// Load platforms data
+$platformsJson = file_get_contents('data/platforms.json');
+$platformsData = json_decode($platformsJson, true);
+
 // Find the partner slug for this course
 $partnerSlug = '';
 if (!empty($deets[36])) {
     foreach ($partners as $partner) {
         if ($partner['name'] === $deets[36]) {
             $partnerSlug = $partner['slug'];
+            break;
+        }
+    }
+}
+
+// Find the platform slug for this course
+$platformSlug = '';
+if (!empty($deets[52])) {
+    foreach ($platformsData as $platform) {
+        if ($platform['name'] === $deets[52]) {
+            $platformSlug = $platform['id'];
             break;
         }
     }
@@ -111,7 +126,13 @@ if (file_exists($categoriesFile)) {
 
 <div class="mb-3">
     <span class="badge bg-secondary-subtle text-secondary-emphasis fs-6"><?= $deets[21] ?></span>
-    <span class="badge bg-secondary-subtle text-secondary-emphasis fs-6"><a href="platform.php?platform=<?= urlencode($deets[52]) ?>" class="text-decoration-none text-secondary-emphasis"><?= $deets[52] ?></a></span>
+    <span class="badge bg-secondary-subtle text-secondary-emphasis fs-6">
+        <?php if (!empty($platformSlug)): ?>
+            <a href="platform.php?id=<?= $platformSlug ?>" class="text-decoration-none text-secondary-emphasis"><?= $deets[52] ?></a>
+        <?php else: ?>
+            <?= $deets[52] ?>
+        <?php endif ?>
+    </span>
     <?php if($deets[53] == 'Yes' || $deets[53] == 1): ?>
     <span class="badge bg-success text-white fs-6">Learning<strong>HUB</strong></span>
     <?php else: ?>

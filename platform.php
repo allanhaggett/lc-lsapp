@@ -9,7 +9,7 @@ $platforms = json_decode($jsonContent, true);
 // Find the specific platform
 $currentPlatform = null;
 foreach ($platforms as $platform) {
-    if ($platform['id'] === $platformId) {
+    if ($platform['id'] === strtolower($platformId)) {
         $currentPlatform = $platform;
         break;
     }

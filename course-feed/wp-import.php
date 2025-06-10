@@ -22,7 +22,12 @@ class SimpleHtmlToMarkdown {
         $markdown = preg_replace('/<b>(.*?)<\/b>/i', '**$1**', $markdown);
         $markdown = preg_replace('/<em>(.*?)<\/em>/i', '*$1*', $markdown);
         $markdown = preg_replace('/<i>(.*?)<\/i>/i', '*$1*', $markdown);
-        $markdown = preg_replace('/<a href="(.*?)">(.*?)<\/a>/i', '[$2]($1)', $markdown);
+        
+        // Handle links with any attributes (not just href)
+        // First, handle links with various attributes
+        $markdown = preg_replace('/<a\s+(?:[^>]*?\s+)?href="([^"]*)"[^>]*?>(.*?)<\/a>/i', '[$2]($1)', $markdown);
+        // Also handle single-quoted hrefs
+        $markdown = preg_replace('/<a\s+(?:[^>]*?\s+)?href=\'([^\']*)\'[^>]*?>(.*?)<\/a>/i', '[$2]($1)', $markdown);
 
         // Strip remaining tags
         $markdown = strip_tags($markdown);
