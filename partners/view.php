@@ -75,6 +75,20 @@ usort($inactiveCourses, function($a, $b) {
         <div class="card-body">
             <h5>Description:</h5>
             <p><?php echo nl2br(htmlspecialchars($partner["description"])); ?></p>
+            
+            <?php if (!empty($partner["employee_facing_contact"])): ?>
+            <div class="alert alert-secondary">
+                <h6 class="alert-heading">Employee Support Contact</h6>
+                <?php if ($partner["employee_facing_contact"] === "CRM"): ?>
+                    <p class="mb-0">Employees should use the CRM system for support with courses from this partner.</p>
+                <?php elseif (filter_var($partner["employee_facing_contact"], FILTER_VALIDATE_EMAIL)): ?>
+                    <p class="mb-0">Contact: <a href="mailto:<?php echo htmlspecialchars($partner["employee_facing_contact"]); ?>"><?php echo htmlspecialchars($partner["employee_facing_contact"]); ?></a></p>
+                <?php else: ?>
+                    <p class="mb-0"><?php echo htmlspecialchars($partner["employee_facing_contact"]); ?></p>
+                <?php endif; ?>
+            </div>
+            <?php endif; ?>
+            
             <div class="my-3">
                 <a href="<?php echo htmlspecialchars($partner["link"]); ?>" class="" target="_blank">
                     LearningHUB
@@ -83,7 +97,7 @@ usort($inactiveCourses, function($a, $b) {
                     Partner Admin Panel
                 </a>
             </div>
-            <h5>Contacts:</h5>
+            <h5>Administrative Contacts:</h5>
             <?php if (!empty($partner["contacts"])): ?>
             <ul class="list-group">
                 <?php foreach ($partner["contacts"] as $contact): ?>
