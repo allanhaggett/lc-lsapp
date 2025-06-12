@@ -189,7 +189,7 @@ function getFilterLink($filters, $key, $value = null) {
             <a href="<?= getFilterLink($filters, 'moodle', 'true') ?>" class="badge bg-light-subtle text-primary-emphasis">Moodle</a>
         <?php endif; ?>
         
-        <a class="badge bg-light-subtle text-primary-emphasis float-end" href="courses.php?sort=dateadded">Clear All Filters</a>
+        <!-- <a class="badge bg-light-subtle text-primary-emphasis float-end" href="courses.php?sort=dateadded">Clear All Filters</a> -->
     </div>
     
     <!-- Status Filter -->
@@ -267,8 +267,8 @@ function getFilterLink($filters, $key, $value = null) {
 <div class="col-md-5">
     <!-- Sorting Options -->
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <div class="text-muted small" id="course-count">
-            <span class="course-total"><?= count($filteredCourses) ?></span> course<span class="course-plural"><?= count($filteredCourses) !== 1 ? 's' : '' ?></span> found
+        <div class="" id="course-count">
+            <span class="badge bg-primary course-total"><?= count($filteredCourses) ?></span> course<span class="course-plural"><?= count($filteredCourses) !== 1 ? 's' : '' ?></span> found
         </div>
         <div class="dropdown">
             <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="sortDropdown" data-bs-toggle="dropdown" aria-expanded="false">

@@ -87,6 +87,11 @@ usort($inactiveCourses, function($a, $b) {
                     <p class="mb-0"><?php echo htmlspecialchars($partner["employee_facing_contact"]); ?></p>
                 <?php endif; ?>
             </div>
+            <?php else: ?>
+            <div class="alert alert-warning">
+                <h6 class="alert-heading">⚠️ Missing Employee Support Contact</h6>
+                <p class="mb-0">This partner does not have an employee-facing contact configured. Employees will not know how to get support for courses from this partner.</p>
+            </div>
             <?php endif; ?>
             
             <div class="my-3">
