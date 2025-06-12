@@ -44,7 +44,7 @@ foreach ($datas as $course) {
     $createdDate = date("Y-m-d\TH:i:s", strtotime(str_replace('  ', ' ', $course['Requested'] ?? '')));
     $modifiedDate = date("Y-m-d\TH:i:s", strtotime(str_replace('  ', ' ', $course['Modified'] ?? '')));
 
-    if ($course['Status'] == 'Active' && !empty($course['LearningHubPartner'])  && $course['HUBInclude'] > 0) {
+    if ($course['Status'] == 'Active' && !empty($course['LearningHubPartner'])  && strtolower($course['HUBInclude']) === 'yes') {
         $json['items'][] = [
             "id" => $course['ItemCode'] ?? '',
             "title" => $course['CourseName'] ?? '',
@@ -67,9 +67,9 @@ foreach ($datas as $course) {
     }
 }
 
-// $jsonOutput = json_encode($json, JSON_PRETTY_PRINT);
-// $jsonFilename = 'data/bcps-corporate-learning-courses.json';
-// file_put_contents($jsonFilename, $jsonOutput);
+$jsonOutput = json_encode($json, JSON_PRETTY_PRINT);
+$jsonFilename = 'data/bcps-corporate-learning-courses.json';
+file_put_contents($jsonFilename, $jsonOutput);
 
 // $newfile = 'E:/WebSites/NonSSOLearning/learning-hub/bcps-corporate-learning-courses.json';
 // if (!copy($jsonFilename, $newfile)) {
