@@ -1,5 +1,13 @@
 <?php
 opcache_reset();
+
+require('../inc/lsapp.php');
+
+if (!canAccess()) {
+    header('Location: /lsapp/');
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     http_response_code(405);
     exit('Method Not Allowed');
