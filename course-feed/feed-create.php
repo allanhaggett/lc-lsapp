@@ -39,7 +39,7 @@ $json = [
 ];
 
 foreach ($datas as $course) {
-    $description = preg_replace("/\r|\n/", "", htmlentities($course['CourseDescription'] ?? ''));
+    $description = htmlentities($course['CourseDescription'] ?? '', ENT_QUOTES, 'UTF-8');
     $desc = iconv(mb_detect_encoding($description, mb_detect_order(), true), "UTF-8", $description);
     $createdDate = date("Y-m-d\TH:i:s", strtotime(str_replace('  ', ' ', $course['Requested'] ?? '')));
     $modifiedDate = date("Y-m-d\TH:i:s", strtotime(str_replace('  ', ' ', $course['Modified'] ?? '')));
