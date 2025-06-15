@@ -67,7 +67,7 @@ class SimpleHtmlToMarkdown {
 
 $converter = new SimpleHtmlToMarkdown();
 
-$xmlFile = '../data/learninghub.WordPress.2025-06-12.xml';
+$xmlFile = '../data/learninghub.WordPress.2025-06-15.xml';
 $csvFile = '../data/courses.csv';
 $logFile = '../data/added-courses-log-' . date('Ymd_His') . '.csv';
 
