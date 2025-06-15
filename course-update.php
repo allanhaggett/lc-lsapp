@@ -13,7 +13,7 @@ if(!isAdmin()) {
 // Handle form submission
 if($_POST) {
     // Validate and sanitize inputs
-    $courseid = filter_var($_POST['CourseID'], FILTER_VALIDATE_INT);
+    $courseid = filter_var($_POST['CourseID']);
     if(!$courseid) {
         die("Invalid course ID");
     }
