@@ -9,12 +9,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     // DELETE a Partner
     if (isset($_POST["delete_id"])) {
         $deleteId = intval($_POST["delete_id"]);
+        
+        // Create backup of partners.json before deletion
+        $backupDir = "../data/backups";
+        if (!file_exists($backupDir)) {
+            mkdir($backupDir, 0755, true);
+        }
+        $backupFile = $backupDir . "/partners_backup_" . date("Y-m-d_H-i-s") . ".json";
+        copy($partnersFile, $backupFile);
+        
         $existingData = array_filter($existingData, function ($partner) use ($deleteId) {
             return $partner["id"] !== $deleteId;
         });
 
         file_put_contents($partnersFile, json_encode(array_values($existingData), JSON_PRETTY_PRINT));
-        echo "Partner deleted successfully!";
+        echo "Partner deleted successfully! Backup created at: " . $backupFile;
         exit;
     }
 

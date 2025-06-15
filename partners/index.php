@@ -84,10 +84,14 @@ $partners = file_exists($partnersFile) ? json_decode(file_get_contents($partners
                                 </a>
                             </td>
                             <td>
-                                <?php if (!empty($partner["support_email"])): ?>
-                                    <a href="mailto:<?php echo htmlspecialchars($partner["support_email"]); ?>">
-                                        <?php echo htmlspecialchars($partner["support_email"]); ?>
-                                    </a>
+                                <?php if (!empty($partner["employee_facing_contact"])): ?>
+                                    <?php if ($partner["employee_facing_contact"] === "CRM"): ?>
+                                        <span class="badge badge-info">CRM</span>
+                                    <?php else: ?>
+                                        <a href="mailto:<?php echo htmlspecialchars($partner["employee_facing_contact"]); ?>">
+                                            <?php echo htmlspecialchars($partner["employee_facing_contact"]); ?>
+                                        </a>
+                                    <?php endif; ?>
                                 <?php else: ?>
                                     <span class="text-muted">Not specified</span>
                                 <?php endif; ?>
