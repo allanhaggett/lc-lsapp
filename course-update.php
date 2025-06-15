@@ -174,6 +174,9 @@ if(!$deets) {
     exit;
 }
 
+// Get current steward and developer from course-people.csv
+$stewsdevs = getCoursePeople($courseid);
+
 // Load partners and platforms from JSON files
 $partnersJson = file_get_contents('data/partners.json');
 $partners = json_decode($partnersJson, true);
@@ -421,11 +424,14 @@ $reportinglist = getReportingList();
         <div class="form-section-title">People</div>
         <div class="row">
             <div class="col-md-6 mb-3">
-                <label for="CourseOwner" class="form-label">Owner</label>
+                <label for="CourseOwner" class="form-label">Steward</label>
                 <small class="d-block text-muted">The manager responsible for delivery</small>
                 <select name="CourseOwner" id="CourseOwner" class="form-select" required>
                     <option value="">Select one</option>
-                    <?php getPeople($deets[10]) ?>
+                    <?php 
+                    $currentSteward = (!empty($stewsdevs['stewards'][0][2])) ? $stewsdevs['stewards'][0][2] : $deets[10];
+                    getPeople($currentSteward); 
+                    ?>
                 </select>
             </div>
             <div class="col-md-6 mb-3">
@@ -433,7 +439,10 @@ $reportinglist = getReportingList();
                 <small class="d-block text-muted">Responsible for materials creation/revisions</small>
                 <select name="Developer" id="Developer" class="form-select">
                     <option value="">Select one</option>
-                    <?php getPeople($deets[34]) ?>
+                    <?php 
+                    $currentDeveloper = (!empty($stewsdevs['developers'][0][2])) ? $stewsdevs['developers'][0][2] : $deets[34];
+                    getPeople($currentDeveloper); 
+                    ?>
                 </select>
             </div>
         </div>
