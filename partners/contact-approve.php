@@ -19,7 +19,9 @@ $contact = [
     'email' => $_POST['email'],
     'idir' => trim($_POST['idir']),
     'title' => $_POST['title'],
-    'role' => $_POST['role']
+    'role' => $_POST['role'],
+    'added_at' => date('Y-m-d H:i:s'),
+    'approved_by' => LOGGED_IN_IDIR
 ];
 
 // Load partner data

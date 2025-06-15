@@ -105,6 +105,10 @@ if (isset($_GET["id"])) {
                 }
             }
         }
+        
+        function confirmDelete() {
+            return confirm(`Are you absolutely sure you want to permanently delete this entire partner?\n\nThis will remove:\n• All partner information\n• All contacts and contact history\n• All associated course data\n• All integrations and links\n\nThis action CANNOT be undone and may have serious ramifications for active courses and employee registrations.\n\nOnly proceed if you fully understand the impact.`);
+        }
     </script>
 </head>
 <body>
@@ -306,7 +310,38 @@ if (isset($_GET["id"])) {
 
                     <br><br>
                     <button type="submit" class="btn btn-primary">Save Partner</button>
-                    <a href="list.php" class="btn btn-secondary">Cancel</a>
+                    <a href="index.php" class="btn btn-secondary">Cancel</a>
+                    
+                    <?php if ($partner["id"]): ?>
+                    <hr class="my-4">
+                    <div class="card border-danger">
+                        <div class="card-header bg-danger text-white">
+                            <h5 class="mb-0">⚠️ Danger Zone</h5>
+                        </div>
+                        <div class="card-body">
+                            <h6 class="text-danger">Delete Partner</h6>
+                            <p class="text-muted">
+                                <strong>Warning:</strong> Only delete this partner if you fully understand the ramifications. 
+                                This action will permanently remove all partner data, contacts, and history. This cannot be undone.
+                            </p>
+                            <p class="text-muted">
+                                Consider the impact on:
+                            </p>
+                            <ul class="text-muted">
+                                <li>Active courses associated with this partner</li>
+                                <li>Employee registrations and records</li>
+                                <li>Historical data and reporting</li>
+                                <li>External system integrations</li>
+                            </ul>
+                            <form action="process.php" method="POST" style="display:inline;" onsubmit="return confirmDelete()">
+                                <input type="hidden" name="delete_partner_id" value="<?php echo htmlspecialchars($partner['id']); ?>">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-trash"></i> Permanently Delete Partner
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    <?php endif; ?>
                 </form>
             </div>
         </div>

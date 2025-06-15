@@ -46,43 +46,64 @@ $partners = file_exists($partnersFile) ? json_decode(file_get_contents($partners
         
         <div id="partner-list">
             <input class="search form-control mb-3" placeholder="Search partners...">
-            <div class="list-group list">
-                <?php foreach ($partners as $partner): ?>
-                    <details class="list-group-item">
-                        <summary class="name">
-                            <?php echo htmlspecialchars($partner["name"]); ?>
-                        </summary>
-                        <p class="mt-2">
-                            <?php echo nl2br(htmlspecialchars($partner["description"])); ?>
-                        </p>
-
-                        <h6>Contacts:</h6>
-                        <ul class="list-unstyled">
-                            <?php foreach ($partner["contacts"] as $contact): ?>
-                                <li class="contact"><strong><?php echo htmlspecialchars($contact["name"]); ?></strong> 
-                                    (<?php echo htmlspecialchars($contact["email"]); ?>)</li>
-                            <?php endforeach; ?>
-                        </ul>
-
-                        <div class="d-flex gap-2 mt-2">
-                            <a href="/lsapp/partners/view.php?slug=<?php echo htmlspecialchars($partner["slug"]); ?>" class="">
-                                View courses
-                            </a> | 
-                            <a href="<?php echo htmlspecialchars($partner["link"]); ?>" class="" target="_blank">
-                                LearningHUB
-                            </a> | 
-                            <a href="https://gww.bcpublicservice.gov.bc.ca/learning/hub/partners/course-form.php?partnerslug=<?php echo urlencode(htmlspecialchars($partner["name"])); ?>" class="" target="_blank">
-                                Partner Admin Panel
-                            </a>
-                            <a href="form.php?id=<?php echo $partner['id']; ?>" class="btn btn-warning btn-sm">Edit</a>
-                            <form action="process.php" method="POST" style="display:inline;">
-                                <input type="hidden" name="delete_id" value="<?php echo $partner['id']; ?>">
-                                <button type="submit" class="btn btn-danger btn-sm" onclick="return confirm('Are you sure you want to delete this partner?')">Delete</button>
-                            </form>
-                        </div>
-                    </details>
-                <?php endforeach; ?>
-            </div>
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th class="sort" data-sort="status" style="cursor: pointer;">
+                            <a href="#" class="text-decoration-none">Status</a> 
+                            <i class="fas fa-sort" style="font-size: 0.7em; opacity: 0.6;"></i>
+                        </th>
+                        <th class="sort" data-sort="name" style="cursor: pointer;">
+                            <a href="#" class="text-decoration-none">Partner Name</a> 
+                            <i class="fas fa-sort" style="font-size: 0.7em; opacity: 0.6;"></i>
+                        </th>
+                        <th>Employee Support Contact</th>
+                        <th>Links</th>
+                    </tr>
+                </thead>
+                <tbody class="list">
+                    <?php foreach ($partners as $partner): ?>
+                        <tr>
+                            <td class="status">
+                                <?php 
+                                $status = $partner["status"] ?? 'Unknown';
+                                $badgeClass = 'badge-secondary';
+                                if ($status === 'Active') {
+                                    $badgeClass = 'badge-success';
+                                } elseif ($status === 'Inactive') {
+                                    $badgeClass = 'badge-danger';
+                                }
+                                ?>
+                                <span class="badge <?php echo $badgeClass; ?>">
+                                    <?php echo htmlspecialchars($status); ?>
+                                </span>
+                            </td>
+                            <td class="name">
+                                <a href="/lsapp/partners/view.php?slug=<?php echo htmlspecialchars($partner["slug"]); ?>">
+                                    <?php echo htmlspecialchars($partner["name"]); ?>
+                                </a>
+                            </td>
+                            <td>
+                                <?php if (!empty($partner["support_email"])): ?>
+                                    <a href="mailto:<?php echo htmlspecialchars($partner["support_email"]); ?>">
+                                        <?php echo htmlspecialchars($partner["support_email"]); ?>
+                                    </a>
+                                <?php else: ?>
+                                    <span class="text-muted">Not specified</span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <a href="<?php echo htmlspecialchars($partner["link"]); ?>" class="btn btn-sm btn-link" target="_blank">
+                                    LearningHUB
+                                </a>
+                                <a href="https://gww.bcpublicservice.gov.bc.ca/learning/hub/partners/course-form.php?partnerslug=<?php echo urlencode(htmlspecialchars($partner["name"])); ?>" class="btn btn-sm btn-link" target="_blank">
+                                    Admin Panel
+                                </a>
+                            </td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -91,7 +112,7 @@ $partners = file_exists($partnersFile) ? json_decode(file_get_contents($partners
 
 <script>
     var options = {
-        valueNames: ['name', 'contact']
+        valueNames: ['status', 'name', 'contact']
     };
     var partnerList = new List('partner-list', options);
 </script>
