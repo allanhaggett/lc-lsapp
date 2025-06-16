@@ -12,7 +12,7 @@
 <?php 
 $courses = getCourses();
 $filteredCourses = array_filter($courses, function($course) {
-    return $course[1] === 'Draft' || $course[1] === 'Requested';
+    return ($course[1] === 'Draft' || $course[1] === 'Requested') && $course[52] !== 'PSA Learning System';
 });
 
 // Load partner data
