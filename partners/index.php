@@ -100,11 +100,17 @@ $partners = file_exists($partnersFile) ? json_decode(file_get_contents($partners
                             <td class="contacts">
                                 <?php if (!empty($partner["contacts"]) && is_array($partner["contacts"])): ?>
                                     <?php foreach ($partner["contacts"] as $contact): ?>
+                                        <?php 
+                                        $nameDisplay = htmlspecialchars($contact["name"]);
+                                        if (!empty($contact["role"]) && $contact["role"] !== "Unknown") {
+                                            $nameDisplay .= ", " . htmlspecialchars($contact["role"]);
+                                        }
+                                        ?>
                                         <?php if ($contact["email"] === "unknown@gov.bc.ca"): ?>
-                                            <?php echo htmlspecialchars($contact["name"]); ?><br>
+                                            <?php echo $nameDisplay; ?><br>
                                         <?php else: ?>
                                             <a href="mailto:<?php echo htmlspecialchars($contact["email"]); ?>">
-                                                <?php echo htmlspecialchars($contact["name"]); ?>
+                                                <?php echo $nameDisplay; ?>
                                             </a><br>
                                         <?php endif; ?>
                                     <?php endforeach; ?>
