@@ -114,7 +114,21 @@ if (isset($_GET["id"])) {
 <body>
 <?php getNavigation() ?>
 
-    <div class="container mt-4">
+<div class="container-lg p-lg-5 p-4 bg-light-subtle">
+        <h1>Corporate Learning Partners</h1>
+
+        <ul class="nav nav-tabs mb-4">
+            <li class="nav-item">
+                <a class="nav-link" href="dashboard.php">Partner Admin Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="index.php">Partner List</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link active" href="form.php">Add New Partner</a>
+            </li>
+        </ul>
+
     <div class="row justify-content-md-center">
     <div class="col-md-6">
         <div class="card shadow-sm">
