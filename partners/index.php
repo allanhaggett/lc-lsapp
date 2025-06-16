@@ -97,7 +97,7 @@ $partners = file_exists($partnersFile) ? json_decode(file_get_contents($partners
                                     <span class="text-muted">Not specified</span>
                                 <?php endif; ?>
                             </td>
-                            <td>
+                            <td class="contacts">
                                 <?php if (!empty($partner["contacts"]) && is_array($partner["contacts"])): ?>
                                     <?php foreach ($partner["contacts"] as $contact): ?>
                                         <?php if ($contact["email"] === "unknown@gov.bc.ca"): ?>
@@ -132,7 +132,7 @@ $partners = file_exists($partnersFile) ? json_decode(file_get_contents($partners
 
 <script>
     var options = {
-        valueNames: ['status', 'name', 'contact']
+        valueNames: ['status', 'name', 'contact', 'contacts']
     };
     var partnerList = new List('partner-list', options);
 </script>
