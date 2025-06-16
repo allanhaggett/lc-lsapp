@@ -58,6 +58,7 @@ $partners = file_exists($partnersFile) ? json_decode(file_get_contents($partners
                             <i class="fas fa-sort" style="font-size: 0.7em; opacity: 0.6;"></i>
                         </th>
                         <th>Employee Support Contact</th>
+                        <th>Contacts</th>
                         <th>Links</th>
                     </tr>
                 </thead>
@@ -94,6 +95,21 @@ $partners = file_exists($partnersFile) ? json_decode(file_get_contents($partners
                                     <?php endif; ?>
                                 <?php else: ?>
                                     <span class="text-muted">Not specified</span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <?php if (!empty($partner["contacts"]) && is_array($partner["contacts"])): ?>
+                                    <?php foreach ($partner["contacts"] as $contact): ?>
+                                        <?php if ($contact["email"] === "unknown@gov.bc.ca"): ?>
+                                            <?php echo htmlspecialchars($contact["name"]); ?><br>
+                                        <?php else: ?>
+                                            <a href="mailto:<?php echo htmlspecialchars($contact["email"]); ?>">
+                                                <?php echo htmlspecialchars($contact["name"]); ?>
+                                            </a><br>
+                                        <?php endif; ?>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <span class="text-muted">No contacts</span>
                                 <?php endif; ?>
                             </td>
                             <td>
