@@ -30,8 +30,7 @@ function stripIDIR($idir) {
 	return strtolower($justuser[1]);
 	
 }
-// define('LOGGED_IN_IDIR', stripIDIR($_SERVER["REMOTE_USER"]));
-define('LOGGED_IN_IDIR', 'ahaggett');
+define('LOGGED_IN_IDIR', stripIDIR($_SERVER["REMOTE_USER"]));
 
 // Last synchronization message for everywhere
 $today = date('Y-m-d');
