@@ -38,18 +38,20 @@ foreach ($platforms as $platform) {
 
 <div class="card">
 <div class="card-header">
-    <div class="float-right">
-        <?php if(isAdmin()): ?>
-        <a href="platform-update.php?id=<?= urlencode($currentPlatform['id']) ?>" class="btn btn-secondary">Edit</a>
-        <?php endif ?>
-        <?php if(isSuper()): ?>
-        <form method="post" action="platform-delete.php" style="display: inline;">
-            <input type="hidden" name="id" value="<?= htmlspecialchars($currentPlatform['id']) ?>">
-            <input type="submit" value="Delete" class="btn btn-sm btn-danger del">
-        </form>
-        <?php endif ?>
+    <div class="d-flex justify-content-between align-items-center">
+        <h1 class="card-title mb-0"><?= htmlspecialchars($currentPlatform['name']) ?></h1>
+        <div>
+            <?php if(isAdmin()): ?>
+            <a href="platform-update.php?id=<?= urlencode($currentPlatform['id']) ?>" class="btn btn-secondary">Edit</a>
+            <?php endif ?>
+            <?php if(isSuper()): ?>
+            <form method="post" action="platform-delete.php" style="display: inline;">
+                <input type="hidden" name="id" value="<?= htmlspecialchars($currentPlatform['id']) ?>">
+                <input type="submit" value="Delete" class="btn btn-sm btn-danger del">
+            </form>
+            <?php endif ?>
+        </div>
     </div>
-    <h1 class="card-title"><?= htmlspecialchars($currentPlatform['name']) ?></h1>
 </div>
 <div class="card-body">
     <p class="lead"><?= htmlspecialchars($currentPlatform['description']) ?></p>
@@ -91,57 +93,74 @@ foreach ($platforms as $platform) {
     
     $totalCourses = count($activeCourses) + count($inactiveCourses);
     
+    // Count LearningHUB included courses
+    $hubCourses = 0;
+    $allCourses = array_merge($activeCourses, $inactiveCourses);
+    foreach ($allCourses as $course) {
+        if (isset($course[53]) && ($course[53] === 'Yes' || $course[53] === 'on' || $course[53] === '1')) {
+            $hubCourses++;
+        }
+    }
+    
     if ($totalCourses > 0):
     ?>
     
     <div id="courselist">
         <input class="search form-control mb-3" placeholder="Search all courses...">
         
-        <?php if (count($activeCourses) > 0): ?>
-        <h4 class="mt-3" id="active-header">Active Courses <span class="badge badge-success" id="active-count"><?= count($activeCourses) ?></span></h4>
-        <?php endif; ?>
+        <p class="text-muted mb-3">
+            Active: <span class="badge badge-success" id="active-count"><?= count($activeCourses) ?></span>
+            Inactive: <span class="badge badge-secondary" id="inactive-count"><?= count($inactiveCourses) ?></span>
+            LearningHUB: <span class="badge badge-info" id="hub-count"><?= $hubCourses ?></span>
+            Total: <span class="badge badge-primary"><?= $totalCourses ?></span>
+        </p>
         
-        <?php if (count($inactiveCourses) > 0): ?>
-        <h4 class="mt-3" id="inactive-header" style="display: none;">Inactive Courses <span class="badge badge-secondary" id="inactive-count"><?= count($inactiveCourses) ?></span></h4>
-        <?php endif; ?>
-        
-        <ul class="list-group list">
-            <?php 
-            $activeIndex = 0;
-            foreach ($activeCourses as $course): 
-            ?>
-            <li class="list-group-item course-item" data-status="active" data-course-type="active">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div class="name">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th class="sort" data-sort="status" style="cursor: pointer;">
+                        Status <i class="fas fa-sort" style="font-size: 0.7em; opacity: 0.6;"></i>
+                    </th>
+                    <th class="sort" data-sort="name" style="cursor: pointer;">
+                        Course Name <i class="fas fa-sort" style="font-size: 0.7em; opacity: 0.6;"></i>
+                    </th>
+                    <th class="sort" data-sort="hub" style="cursor: pointer;">
+                        LearningHUB <i class="fas fa-sort" style="font-size: 0.7em; opacity: 0.6;"></i>
+                    </th>
+                </tr>
+            </thead>
+            <tbody class="list">
+                <?php 
+                // Combine all courses and sort by status (Active first)
+                $allCourses = array_merge($activeCourses, $inactiveCourses);
+                foreach ($allCourses as $course): 
+                    $isActive = $course[1] === 'Active';
+                    $hubInclude = isset($course[53]) && ($course[53] === 'Yes' || $course[53] === 'on' || $course[53] === '1');
+                ?>
+                <tr>
+                    <td class="status">
+                        <?php if ($isActive): ?>
+                            <span class="badge badge-success">Active</span>
+                        <?php else: ?>
+                            <span class="badge badge-secondary">Inactive</span>
+                        <?php endif; ?>
+                    </td>
+                    <td class="name">
                         <a href="/lsapp/course.php?courseid=<?= urlencode($course[0]) ?>">
                             <?= htmlspecialchars($course[2]) ?>
                         </a>
-                    </div>
-                    <span class="badge badge-success">Active</span>
-                </div>
-            </li>
-            <?php 
-            $activeIndex++;
-            endforeach; 
-            
-            $inactiveIndex = 0;
-            foreach ($inactiveCourses as $course): 
-            ?>
-            <li class="list-group-item course-item <?= $inactiveIndex === 0 ? 'first-inactive' : '' ?>" data-status="inactive" data-course-type="inactive">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div class="name">
-                        <a href="/lsapp/course.php?courseid=<?= urlencode($course[0]) ?>">
-                            <?= htmlspecialchars($course[2]) ?>
-                        </a>
-                    </div>
-                    <span class="badge badge-secondary">Inactive</span>
-                </div>
-            </li>
-            <?php 
-            $inactiveIndex++;
-            endforeach; 
-            ?>
-        </ul>
+                    </td>
+                    <td class="hub">
+                        <?php if ($hubInclude): ?>
+                            <span class="badge badge-info">Learning<span class="fw-bold">HUB</span></span>
+                        <?php else: ?>
+                            <span class="text-muted">Not included</span>
+                        <?php endif; ?>
+                    </td>
+                </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
     </div>
     
     <?php else: ?>
@@ -176,7 +195,7 @@ foreach ($platforms as $platform) {
 $(document).ready(function(){
     <?php if($totalCourses > 0): ?>
     var options = {
-        valueNames: [ 'name' ]
+        valueNames: [ 'status', 'name', 'hub' ]
     };
     var courseList = new List('courselist', options);
     
@@ -184,70 +203,43 @@ $(document).ready(function(){
     var totalActive = <?= count($activeCourses) ?>;
     var totalInactive = <?= count($inactiveCourses) ?>;
     
-    // Function to manage display based on search
-    function updateDisplay() {
-        var searchValue = $('.search').val();
+    // Function to update counts based on search
+    function updateCounts() {
         var visibleActive = 0;
         var visibleInactive = 0;
-        var hasVisibleInactive = false;
+        var visibleHub = 0;
         
-        // Count visible courses
-        $('.course-item').each(function() {
+        // Count visible rows
+        $('#courselist tbody tr').each(function() {
             if ($(this).is(':visible')) {
-                if ($(this).data('course-type') === 'active') {
+                var statusText = $(this).find('.status .badge').text();
+                var hubText = $(this).find('.hub .badge').text();
+                
+                if (statusText === 'Active') {
                     visibleActive++;
-                } else if ($(this).data('course-type') === 'inactive') {
+                } else if (statusText === 'Inactive') {
                     visibleInactive++;
-                    hasVisibleInactive = true;
+                }
+                
+                if (hubText && hubText.includes('HUB')) {
+                    visibleHub++;
                 }
             }
         });
         
-        // Update counts
+        // Update count displays
         $('#active-count').text(visibleActive);
         $('#inactive-count').text(visibleInactive);
-        
-        // Show/hide headers based on visible items
-        if (visibleActive === 0 && searchValue !== '') {
-            $('#active-header').hide();
-        } else if (totalActive > 0) {
-            $('#active-header').show();
-        }
-        
-        if (visibleInactive === 0 && searchValue !== '') {
-            $('#inactive-header').hide();
-        } else if (totalInactive > 0 && hasVisibleInactive) {
-            $('#inactive-header').show();
-            // Position it before the first inactive course
-            if ($('.first-inactive:visible').length > 0) {
-                $('#inactive-header').insertBefore('.first-inactive:visible');
-            }
-        } else {
-            $('#inactive-header').hide();
-        }
-        
-        // Add spacing if we have visible inactive courses
-        if (hasVisibleInactive && visibleActive > 0) {
-            $('.first-inactive').addClass('mt-4');
-        } else {
-            $('.first-inactive').removeClass('mt-4');
-        }
+        $('#hub-count').text(visibleHub);
     }
     
-    // Initial positioning of inactive header
-    if ($('.first-inactive').length > 0) {
-        $('#inactive-header').insertBefore('.first-inactive');
-        $('#inactive-header').show();
-        $('.first-inactive').addClass('mt-4');
-    }
+    // Update counts on search
+    courseList.on('searchComplete', updateCounts);
+    courseList.on('filterComplete', updateCounts);
     
-    // Update on search events
-    courseList.on('searchComplete', updateDisplay);
-    courseList.on('filterComplete', updateDisplay);
-    
-    // Clear search handling
+    // Update counts on search input
     $('.search').on('keyup', function() {
-        setTimeout(updateDisplay, 10);
+        setTimeout(updateCounts, 10);
     });
     
     <?php endif; ?>

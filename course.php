@@ -142,13 +142,28 @@ if (file_exists($categoriesFile)) {
 <h1><?= $deets[2] ?></h1>
 <div class="col-12">DESCRIPTION</div>
 <div class=""><?= $Parsedown->text($deets[16]) ?></div>
-<details class="p-2">
-	<summary>Full Abstract</summary>
-	<div class="p-3 bg-light-subtle rounded-3">
-	
-	<?= $Parsedown->text($deets[17])  ?>
-	</div>
-</details>
+<div class="mt-3">
+	<?php if(!empty($deets[22])): ?>
+    <a href="<?= htmlspecialchars($deets[22]) ?>" target="_blank" class="btn btn-primary">
+        <i class="fas fa-external-link-alt"></i> Launch Course
+    </a>
+	<?php endif ?>
+    <?php if($deets[52] === 'PSA Learning System' && !empty($deets[50])): ?>
+    <a href="https://learning.gov.bc.ca/psc/CHIPSPLM/EMPLOYEE/ELM/c/LM_OD_EMPLOYEE_FL.LM_CRS_DTL_FL.GBL?Page=LM_CRS_DTL_FL&Action=U&ForceSearch=Y&LM_CI_ID=<?= htmlspecialchars($deets[50]) ?>" target="_blank" class="btn btn-secondary">
+        <i class="fas fa-user-plus"></i> ELM Registration
+    </a>
+    <?php endif ?>
+
+</div>
+<?php if(!empty($deets[17])): ?>
+	<details class="p-2">
+		<summary>Full Abstract</summary>
+		<div class="p-3 bg-light-subtle rounded-3">
+			
+			<?= $Parsedown->text($deets[17])  ?>
+		</div>
+	</details>
+<?php endif ?>
 </div>
 </div>
 <div class="row justify-content-md-center my-3">

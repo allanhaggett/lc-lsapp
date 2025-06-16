@@ -343,9 +343,8 @@ $reportinglist = getReportingList();
         
         <div class="mb-3">
             <label for="CourseDescription" class="form-label">Course Description</label>
-            <small class="d-block text-muted">Max 254 characters - Overall purpose in 2-3 sentences including: course duration, target learners, delivery method</small>
-            <textarea name="CourseDescription" id="CourseDescription" class="form-control" rows="3" required maxlength="254"><?= sanitize($deets[16]) ?></textarea>
-            <div class="form-text" id="cdescChar"></div>
+            <small class="d-block text-muted">Overall purpose in 2-3 sentences including: course duration, target learners, delivery method</small>
+            <textarea name="CourseDescription" id="CourseDescription" class="form-control" rows="5" required><?= sanitize($deets[16]) ?></textarea>
         </div>
         
         <div class="mb-3">
@@ -426,7 +425,7 @@ $reportinglist = getReportingList();
             <div class="col-md-6 mb-3">
                 <label for="CourseOwner" class="form-label">Steward</label>
                 <small class="d-block text-muted">The manager responsible for delivery</small>
-                <select name="CourseOwner" id="CourseOwner" class="form-select" required>
+                <select name="CourseOwner" id="CourseOwner" class="form-select">
                     <option value="">Select one</option>
                     <?php 
                     $currentSteward = (!empty($stewsdevs['stewards'][0][2])) ? $stewsdevs['stewards'][0][2] : $deets[10];
@@ -449,7 +448,7 @@ $reportinglist = getReportingList();
         <div class="mb-3">
             <label for="EffectiveDate" class="form-label">Effective Date</label>
             <small class="d-block text-muted">Date the course should be visible to learners</small>
-            <input type="date" name="EffectiveDate" id="EffectiveDate" class="form-control" value="<?= sanitize($deets[15]) ?>" required>
+            <input type="date" name="EffectiveDate" id="EffectiveDate" class="form-control" value="<?= sanitize($deets[15]) ?>">
         </div>
     </div>
     
@@ -705,24 +704,24 @@ $(document).ready(function(){
         }
     });
     
-    // Character count for Course Description
-    $('#CourseDescription').on('input', function() {
-        var max = 254;
-        var len = $(this).val().length;
-        var remaining = max - len;
-        var $feedback = $('#cdescChar');
-        
-        if (len >= max) {
-            $feedback.removeClass('text-success').addClass('text-danger')
-                .text('Character limit reached');
-        } else if (remaining <= 50) {
-            $feedback.removeClass('text-success').addClass('text-warning')
-                .text(remaining + ' characters remaining');
-        } else {
-            $feedback.removeClass('text-danger text-warning').addClass('text-success')
-                .text(remaining + ' characters remaining');
-        }
-    });
+    // Character count for Course Description - REMOVED per user request
+    // $('#CourseDescription').on('input', function() {
+    //     var max = 254;
+    //     var len = $(this).val().length;
+    //     var remaining = max - len;
+    //     var $feedback = $('#cdescChar');
+    //     
+    //     if (len >= max) {
+    //         $feedback.removeClass('text-success').addClass('text-danger')
+    //             .text('Character limit reached');
+    //     } else if (remaining <= 50) {
+    //         $feedback.removeClass('text-success').addClass('text-warning')
+    //             .text(remaining + ' characters remaining');
+    //     } else {
+    //         $feedback.removeClass('text-danger text-warning').addClass('text-success')
+    //             .text(remaining + ' characters remaining');
+    //     }
+    // });
     
     // Character count for Course Abstract
     $('#CourseAbstract').on('input', function() {
@@ -791,7 +790,7 @@ $(document).ready(function(){
     // Initialize character counters on page load
     $('#CourseName').trigger('input');
     $('#CourseShort').trigger('input');
-    $('#CourseDescription').trigger('input');
+    // $('#CourseDescription').trigger('input'); // Removed - no character limit
     $('#CourseAbstract').trigger('input');
 });
 </script>
