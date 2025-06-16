@@ -46,6 +46,12 @@ foreach ($datas as $course) {
     $createdDate = date("Y-m-d\TH:i:s", strtotime(str_replace('  ', ' ', $course['Requested'] ?? '')));
     $modifiedDate = date("Y-m-d\TH:i:s", strtotime(str_replace('  ', ' ', $course['Modified'] ?? '')));
 
+    if($course['Platform'] !== 'PSA Learning System') {
+        $registrationurl = $course['elearning'];
+    } else {
+        $registrationurl = "https://learning.gov.bc.ca/psc/CHIPSPLM/EMPLOYEE/ELM/c/LM_OD_EMPLOYEE_FL.LM_CRS_DTL_FL.GBL?Page=LM_CRS_DTL_FL&Action=U&ForceSearch=Y&LM_CI_ID=" . $course['ELMCourseID'];
+    }
+
     if ($course['Status'] == 'Active' && !empty($course['LearningHubPartner'])  && strtolower($course['HUBInclude']) === 'yes') {
         $json['items'][] = [
             "id" => $course['ItemCode'] ?? '',
@@ -64,7 +70,7 @@ foreach ($datas as $course) {
             "date_published" => $createdDate,
             "date_modified" => $modifiedDate,
             "tags" => rtrim(trim($course['Category'] ?? ''), ','),
-            "url" => "https://learning.gov.bc.ca/psc/CHIPSPLM/EMPLOYEE/ELM/c/LM_OD_EMPLOYEE_FL.LM_CRS_DTL_FL.GBL?Page=LM_CRS_DTL_FL&Action=U&ForceSearch=Y&LM_CI_ID=" . ($course['CourseID'] ?? '')
+            "url" => $registrationurl
         ];
     }
 }
