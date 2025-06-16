@@ -4,6 +4,10 @@ $path = '../inc/lsapp.php';
 require($path); 
 $partnersFile = "../data/partners.json";
 $partners = file_exists($partnersFile) ? json_decode(file_get_contents($partnersFile), true) : [];
+// Sort partners alphabetically by name
+usort($partners, function($a, $b) {
+    return strcasecmp($a['name'], $b['name']);
+});
 ?>
 
 <?php if(canACcess()): ?>
@@ -57,7 +61,10 @@ $partners = file_exists($partnersFile) ? json_decode(file_get_contents($partners
                             <a href="#" class="text-decoration-none">Partner Name</a> 
                             <i class="fas fa-sort" style="font-size: 0.7em; opacity: 0.6;"></i>
                         </th>
-                        <th>Employee Support Contact</th>
+                        <th class="sort" data-sort="contact" style="cursor: pointer;">
+                            <a href="#" class="text-decoration-none">Employee Support Contact</a> 
+                            <i class="fas fa-sort" style="font-size: 0.7em; opacity: 0.6;"></i>
+                        </th>
                         <th>Contacts</th>
                         <th>Links</th>
                     </tr>
@@ -84,7 +91,7 @@ $partners = file_exists($partnersFile) ? json_decode(file_get_contents($partners
                                     <?php echo htmlspecialchars($partner["name"]); ?>
                                 </a>
                             </td>
-                            <td>
+                            <td class="contact">
                                 <?php if (!empty($partner["employee_facing_contact"])): ?>
                                     <?php if ($partner["employee_facing_contact"] === "CRM"): ?>
                                         <span class="badge badge-info">CRM</span>
