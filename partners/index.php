@@ -36,7 +36,7 @@ $partners = file_exists($partnersFile) ? json_decode(file_get_contents($partners
 
 <div class="container-fluid">
 <div class="row justify-content-md-center">
-<div class="col-md-6">
+<div class="col-md-10">
 
         <h1>Corporate Learning Partners</h1>
 
