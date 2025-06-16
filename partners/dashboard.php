@@ -127,8 +127,8 @@ endif;
         foreach ($partnerData as $partner) {
             if (isset($partner['contacts']) && is_array($partner['contacts'])) {
                 foreach ($partner['contacts'] as $contact) {
-                    // Skip unassigned and unknown contacts
-                    if ($contact['idir'] !== 'unassigned' && $contact['idir'] !== 'unknown') {
+                    // Show contacts that have a meaningful name
+                    if (!empty($contact['name']) && $contact['name'] !== 'Unknown') {
                         $contact['partner_name'] = $partner['name'];
                         $contact['partner_slug'] = $partner['slug'];
                         $contact['employee_facing_contact'] = $partner['employee_facing_contact'] ?? '';
