@@ -168,7 +168,6 @@ endif;
                         <th>Title</th>
                         <th>Role</th>
                         <th>Partner</th>
-                        <th>Employee Contact</th>
                         <th>Added</th>
                     </tr>
                 </thead>
@@ -181,17 +180,6 @@ endif;
                         <td class="title"><?= htmlspecialchars($contact['title'] ?? '-') ?></td>
                         <td class="role"><?= htmlspecialchars($contact['role'] ?? '-') ?></td>
                         <td class="partner"><a href="view.php?slug=<?= urlencode($contact['partner_slug']) ?>"><?= htmlspecialchars($contact['partner_name']) ?></a></td>
-                        <td class="employee-contact">
-                            <?php 
-                            if ($contact['employee_facing_contact'] === 'CRM') {
-                                echo 'CRM';
-                            } elseif (filter_var($contact['employee_facing_contact'], FILTER_VALIDATE_EMAIL)) {
-                                echo 'Email';
-                            } else {
-                                echo 'Not Set';
-                            }
-                            ?>
-                        </td>
                         <td class="added"><?= isset($contact['added_at']) ? date('Y-m-d', strtotime($contact['added_at'])) : '-' ?></td>
                     </tr>
                     <?php endforeach; ?>
