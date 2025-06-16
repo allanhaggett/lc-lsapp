@@ -99,7 +99,7 @@ if (file_exists($persistentLogPath)) {
 }
 
 // Define the pattern to match files like course-sync-log-YYYYMMDDHHiiss.log
-$pattern = '/^course-sync-log-(\d{14})\.log$/';
+$pattern = '/^course-sync-log-(\d{14})\.txt$/';
 
 // Scan the ../data directory for files
 $files = scandir('../data');
