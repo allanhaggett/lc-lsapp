@@ -7,8 +7,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $existingData = file_exists($partnersFile) ? json_decode(file_get_contents($partnersFile), true) : [];
 
     // DELETE a Partner
-    if (isset($_POST["delete_id"])) {
-        $deleteId = intval($_POST["delete_id"]);
+    if (isset($_POST["delete_id"]) || isset($_POST["delete_partner_id"])) {
+        $deleteId = isset($_POST["delete_id"]) ? intval($_POST["delete_id"]) : intval($_POST["delete_partner_id"]);
         
         // Create backup of partners.json before deletion
         $backupDir = "../data/backups";
@@ -110,7 +110,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     // Generate slug from name if not set
-    $slug = !empty($_POST["slug"]) ? $_POST["slug"] : strtolower(preg_replace('/[^a-z0-9\s-]/', '', str_replace(' ', '-', $_POST["name"])));
+    $slug = !empty($_POST["slug"]) ? $_POST["slug"] : strtolower(str_replace(' ', '-', preg_replace('/[^a-zA-Z0-9\s-]/', '', $_POST["name"])));
 
     // Handle employee-facing contact based on type selection (required field)
     $employeeFacingContact = "";
