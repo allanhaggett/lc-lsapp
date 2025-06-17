@@ -151,6 +151,11 @@ endif;
                 }
             }
         }
+        
+        // Sort contacts by first name
+        usort($allContacts, function($a, $b) {
+            return strcasecmp($a['name'] ?? '', $b['name'] ?? '');
+        });
         ?>
         
         <?php if (count($allContacts) > 0): ?>
