@@ -23,7 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         });
 
         file_put_contents($partnersFile, json_encode(array_values($existingData), JSON_PRETTY_PRINT));
-        echo "Partner deleted successfully! Backup created at: " . $backupFile;
+        header('Location: /lsapp/partners/');
         exit;
     }
 
