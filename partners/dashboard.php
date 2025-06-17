@@ -56,7 +56,7 @@ if (!empty($pendingPartners)):
 <ul class="list-group mb-4">
     <?php foreach ($pendingPartners as $partner): ?>
         <li class="list-group-item">
-            <a href="partners/view.php?slug=<?php echo urlencode($partner['slug']); ?>"><?= htmlspecialchars($partner['name']) ?></a>
+            <a href="view.php?slug=<?php echo urlencode($partner['slug']); ?>"><?= htmlspecialchars($partner['name']) ?></a>
             <!-- <span class="badge bg-secondary"><?= htmlspecialchars($partner['status']) ?></span> -->
         </li>
     <?php endforeach; ?>
