@@ -59,11 +59,11 @@
 			</select>
 			<p>Next, choose the type of request.</p>
 			<div class="form-check m-3">
-				<input class="form-check-input" type="radio" name="categoryid" id="changeCourse" value="Course Change">
+				<input class="form-check-input" type="radio" name="categoryid" id="changeCourse" value="Course Change" required>
 				<label class="form-check-label" for="changeCourse">Change a Course</label>
 			</div>
 			<div class="form-check m-3">
-				<input class="form-check-input" type="radio" name="categoryid" id="newClass" value="New Class Date">
+				<input class="form-check-input" type="radio" name="categoryid" id="newClass" value="New Class Date" required>
 				<label class="form-check-label" for="newClass">New Class Offering</label>
 			</div>
 			<button class="btn btn-primary">Create Request</button>
