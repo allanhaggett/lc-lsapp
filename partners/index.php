@@ -81,11 +81,11 @@ usort($partners, function($a, $b) {
                             <td class="status">
                                 <?php 
                                 $status = $partner["status"] ?? 'Unknown';
-                                $badgeClass = 'badge-secondary';
+                                $badgeClass = 'bg-secondary-subtle text-secondary-emphasis';
                                 if ($status === 'Active') {
-                                    $badgeClass = 'badge-success';
+                                    $badgeClass = 'bg-success-subtle text-success-emphasis';
                                 } elseif ($status === 'Inactive') {
-                                    $badgeClass = 'badge-danger';
+                                    $badgeClass = 'bg-danger-subtle text-danger-emphasis';
                                 }
                                 ?>
                                 <span class="badge <?php echo $badgeClass; ?>">
@@ -100,7 +100,7 @@ usort($partners, function($a, $b) {
                             <td class="contact">
                                 <?php if (!empty($partner["employee_facing_contact"])): ?>
                                     <?php if ($partner["employee_facing_contact"] === "CRM"): ?>
-                                        <span class="badge badge-info">CRM</span>
+                                        <span class="badge bg-info-subtle text-info-emphasis">CRM</span>
                                     <?php else: ?>
                                         <a href="mailto:<?php echo htmlspecialchars($partner["employee_facing_contact"]); ?>">
                                             <?php echo htmlspecialchars($partner["employee_facing_contact"]); ?>

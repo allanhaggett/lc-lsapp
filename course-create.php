@@ -101,7 +101,10 @@ $newcourse = [
     sanitize($_POST['RegistrationLink'] ?? ''),     // 54: RegistrationLink
     $slug,                                          // 55: Slug
     sanitize($_POST['HubExpirationDate'] ?? ''),    // 56: HubExpirationDate
-    0                                               // 57: OpenAccessOptin (default false)
+    0,                                              // 57: OpenAccessOptin (default false)
+    'yes',                                          // 58: HubIncludeSync (default yes)
+    'no',                                           // 59: HubIncludePersist (default no)
+    'This course is no longer available for registration.' // 60: HubPersistMessage (default)
 ];
 
 // Write course to CSV file

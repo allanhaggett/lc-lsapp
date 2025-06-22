@@ -298,10 +298,10 @@ function getFilterLink($filters, $key, $value = null) {
     <?php foreach ($filteredCourses as $course): ?>
         <div class="mb-2 p-3 bg-light-subtle border border-secondary-subtle rounded-3">
             <div>
-                <div class="float-end pl-3 pb-3">
+                <!-- <div class="float-end pl-3 pb-3">
                     <?php $statusBg = ($course[1] === 'Inactive') ? 'secondary' : 'primary'; ?>
                     <span class="badge text-light-subtle bg-<?= $statusBg ?>"><?= $course[1] ?></span> 
-                </div>
+                </div> -->
                 
                 <a class="badge bg-body text-primary-emphasis" href="<?= getFilterLink($filters, 'delivery', $course[21]) ?>">
                     <?= $course[21] ?>
