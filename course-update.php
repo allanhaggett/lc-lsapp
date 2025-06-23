@@ -323,11 +323,7 @@ $reportinglist = getReportingList();
                     <small class="d-block text-muted">If not in Learning System, where to register?</small>
                     <input type="url" name="RegistrationLink" id="RegistrationLink" class="form-control" value="<?= sanitize($deets[54]) ?>">
                 </div>
-                <div class="col-md-6 mb-3">
-                    <label for="HubExpirationDate" class="form-label">Expiration Date</label>
-                    <small class="d-block text-muted">Date to remove from search results</small>
-                    <input type="date" name="HubExpirationDate" id="HubExpirationDate" class="form-control" value="<?= sanitize($deets[56]) ?>">
-                </div>
+
             </div>
         </div>
     </div>
@@ -533,11 +529,12 @@ $reportinglist = getReportingList();
         <div class="alert alert-info mb-4">
             <h6 class="alert-heading">Course Sync Behavior</h6>
             <p class="mb-2">These settings control how this course behaves in the Learning Hub synchronization process:</p>
-            <ul class="mb-0">
+            <ul class="">
                 <li><strong>Normal courses</strong>: Removed from catalog when no longer in ELM (default behavior)</li>
                 <li><strong>Always visible</strong>: Remain in catalog regardless of ELM status (HubIncludeSync = no)</li>
                 <li><strong>Persist with message</strong>: Stay in catalog but segregated with custom message (HubIncludePersist = yes)</li>
             </ul>
+            <p>Set an expiry date and your course will be removed from the catalog (or persist) after that date.</p>
         </div>
         
         <div class="row">
@@ -566,6 +563,13 @@ $reportinglist = getReportingList();
                 <label for="HubPersistMessage" class="form-label">Hub Persist Message</label>
                 <small class="d-block text-muted">Message to display when course persists but has no offerings</small>
                 <textarea name="HubPersistMessage" id="HubPersistMessage" class="form-control" rows="2"><?= sanitize(isset($deets[60]) ? $deets[60] : 'This course is no longer available for registration.') ?></textarea>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="HubExpirationDate" class="form-label">Expiration Date</label>
+                <small class="d-block text-muted">Date to remove from search results</small>
+                <input type="date" name="HubExpirationDate" id="HubExpirationDate" class="form-control" value="<?= sanitize($deets[56]) ?>">
             </div>
         </div>
     </div>
