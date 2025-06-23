@@ -48,19 +48,34 @@
     <summary class="mb-2">Approval guidance</summary>
     <dl>
         <dt>Pending Approval</dt>
+        <dd>Work has been completed or proposed and is awaiting approval from leadership or partner before proceeding. </dd>
+
         <dt>Denied</dt>
+        <dd>Proposed work has been reviewed but not approved. </dd>
+
         <dt>On Hold</dt>
+        <dd>Work has been temporarily paused. No further action is being taken until the issue is resolved or new instructions are provided. </dd>
+
         <dt>Approved</dt>
+        <dd>Work has been reviewed and approved. It is ready to move forward with implementation or publication. </dd>
     </dl>
     </details>
     <details id="progressguide">
     <summary class="mb-2">Progress guidance</summary>
     <dl>
-        <dt>Not Started</dt>
-        <dt>In Progress</dt>
-        <dt>In Review</dt>
-        <dt>Ready to Publish</dt>
-        <dt>Closed</dt>
+        <dt>Not started</dt>
+        <dd>Work has not yet begun. Tasks or changes are planned, but not yet initiated.  </dd>
+
+        <dt>In progress</dt>
+        <dd>Work is currently taking place but not yet complete.  </dd>
+
+        <dt>In review</dt>
+        <dd>Work has been completed and is under review. It may be examined for quality, accuracy, or approval before moving forward. </dd>
+
+        <dt>Ready to publish</dt>
+        <dd>Work has passed review and is finalized. It is now prepared for publication or release to the audience. </dd>
+
+        <dt>Closed = work has been fully implemented and finalized, and no further action is required. The course change process is considered complete. 
     </dl>
     </details>
 
