@@ -21,7 +21,7 @@
 
 <div class="container">
 <div class="row justify-content-md-center mb-3">
-<div class="col-md-12">
+<div class="col-md-8">
 
 	<h1>Snowplow Analytics</h1>
 	<p>More formally known as <abbr title="Government Digital Experience">G.D.X.</abbr> Dashboards, Snowplow Analytics
