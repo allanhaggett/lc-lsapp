@@ -62,9 +62,21 @@ function updateCourse($existingCourse, $newCourseData, &$logEntries) {
         $changes[] = "Updated Platform to 'PSA Learning System'";
     }
 
-    if (trim($existingCourse[53]) != 'Yes') {
+    // Check HubIncludeSync (index 58) before updating HUBInclude
+    $hubIncludeSync = isset($existingCourse[58]) ? $existingCourse[58] : 'yes';
+    $hubIncludePersist = isset($existingCourse[59]) ? $existingCourse[59] : 'no';
+    
+    if ($hubIncludeSync !== 'no' && trim($existingCourse[53]) != 'Yes') {
         $updatedCourse[53] = 'Yes';
         $changes[] = "Updated HUBInclude to 'Yes'";
+    } elseif ($hubIncludeSync === 'no' && trim($existingCourse[53]) != 'Yes') {
+        $changes[] = "Skipped updating HUBInclude to 'Yes' - HubIncludeSync is 'no'";
+    }
+    
+    // For persistent courses that are back in the feed, set state to 'active'
+    if ($hubIncludePersist === 'yes' && isset($existingCourse[61]) && $existingCourse[61] === 'inactive') {
+        $updatedCourse[61] = 'active';
+        $changes[] = "Updated HubIncludePersistState to 'active' - course is back in ELM feed";
     }
 
     if ($changes) {
@@ -80,7 +92,7 @@ $hubCoursesPath = build_path(BASE_DIR, 'course-feed', 'data', 'courses.csv');
 $timestamp = date('YmdHis');
 $isoDateTime = date('c'); // ISO 8601 date format for "elm_sync_log.txt"
 $logEntries = [];
-$logFilePath = build_path(BASE_DIR, 'data', "course-sync-log-$timestamp.log");
+$logFilePath = build_path(BASE_DIR, 'data', "course-sync-log-$timestamp.txt");
 $persistentLogPath = build_path(BASE_DIR, 'data', 'elm_sync_log.txt');
 
 $lsappCourses = getCoursesFromCSV($coursesPath, false, 4);
@@ -135,7 +147,11 @@ foreach ($hubCourses as $hcCode => $hc) {
             '',                     // RegistrationLink
             $slug,                  // CourseNameSlug
             '',                     // HubExpirationDate
-            0                      // OpenAccessOptin
+            0,                     // OpenAccessOptin
+            'yes',                 // HubIncludeSync (default: yes)
+            'no',                  // HubIncludePersist (default: no)
+            'This course is no longer available for registration.', // HubPersistMessage
+            'active'               // HubIncludePersistState (default: active)
         ];
         $itemCode = $newCourse[4];
         $updatedCourses[$itemCode] = $newCourse;
@@ -146,11 +162,42 @@ foreach ($hubCourses as $hcCode => $hc) {
 foreach ($lsappCourses as $lsappCode => $lsappCourse) {
     
     if ($lsappCourse[52] === 'PSA Learning System' && !isset($hubCourses[$lsappCode])) {
-        // Only set HUBInclude to 'No' if it isn't already 'No'
-        if ($lsappCourse[53] !== 'No') {
+        // Check if course has HubIncludeSync set to 'no' (index 58)
+        $hubIncludeSync = isset($lsappCourse[58]) ? $lsappCourse[58] : 'yes';
+        // Check if course has HubIncludePersist set to 'yes' (index 59)
+        $hubIncludePersist = isset($lsappCourse[59]) ? $lsappCourse[59] : 'no';
+        
+        // Only set HUBInclude to 'No' if:
+        // 1. HubIncludeSync is not 'no' (meaning it should sync)
+        // 2. HubIncludePersist is not 'yes' (meaning it should not persist)
+        // 3. It isn't already 'No'
+        if ($hubIncludeSync !== 'no' && $hubIncludePersist !== 'yes' && $lsappCourse[53] !== 'No') {
             $lsappCourse[53] = 'No';
             $updatedCourses[$lsappCode] = $lsappCourse;
             $logEntries[] = "Set HUBInclude to No for '{$lsappCourse[2]}' (Class code: $lsappCode)";
+        } elseif ($hubIncludeSync === 'no') {
+            $logEntries[] = "Skipped setting HUBInclude to No for '{$lsappCourse[2]}' (Class code: $lsappCode) - HubIncludeSync is 'no'";
+        } elseif ($hubIncludePersist === 'yes') {
+            // For persistent courses, set HubIncludePersistState to 'inactive' instead of removing from feed
+            if (!isset($lsappCourse[61]) || $lsappCourse[61] !== 'inactive') {
+                $lsappCourse[61] = 'inactive';
+                $updatedCourses[$lsappCode] = $lsappCourse;
+                $logEntries[] = "Set HubIncludePersistState to 'inactive' for '{$lsappCourse[2]}' (Class code: $lsappCode) - HubIncludePersist is 'yes'";
+            }
+        }
+    }
+}
+
+// Check for expired courses based on HubExpirationDate
+$currentDate = date('Y-m-d');
+foreach ($lsappCourses as $lsappCode => $lsappCourse) {
+    // Check if HubExpirationDate (index 56) is set and has passed
+    if (!empty($lsappCourse[56]) && $lsappCourse[56] < $currentDate) {
+        // Only update if HUBInclude is not already 'No'
+        if ($lsappCourse[53] !== 'No') {
+            $lsappCourse[53] = 'No';
+            $updatedCourses[$lsappCode] = $lsappCourse;
+            $logEntries[] = "Set HUBInclude to No for '{$lsappCourse[2]}' (Class code: $lsappCode) - Expired on {$lsappCourse[56]}";
         }
     }
 }
@@ -182,7 +229,8 @@ if ($fpTemp !== false) {
         'Topics', 'Audience', 'Levels', 'Reporting', 'PathLAN', 'PathStaging', 'PathLive',
         'PathNIK', 'PathTeams', 'isMoodle', 'TaxProcessed', 'TaxProcessedBy', 'ELMCourseID',
         'Modified', 'Platform', 'HUBInclude', 'RegistrationLink', 'CourseNameSlug', 
-        'HubExpirationDate', 'OpenAccessOptin'
+        'HubExpirationDate', 'OpenAccessOptin', 'HubIncludeSync', 'HubIncludePersist', 'HubPersistMessage',
+        'HubIncludePersistState'
     ]);
 
     if (($fpOriginal = fopen($coursesPath, 'r')) !== false) {

@@ -134,9 +134,19 @@ if (file_exists($categoriesFile)) {
         <?php endif ?>
     </span>
     <?php if($deets[53] == 'Yes' || $deets[53] == 1): ?>
-    <span class="badge bg-success text-white fs-6">Learning<strong>HUB</strong></span>
+    <a href="courses.php?hubonly=true&sort=dateadded" class="badge bg-dark-subtle text-white fs-6">Learning<strong>HUB</strong></a>
     <?php else: ?>
-    <span class="badge bg-light text-dark fs-6">Learning<strong>HUB</strong></span>
+	<a href="courses.php?hubonly=true&sort=dateadded" class="badge bg-dark-subtle text-white fs-6"><del>Learning<strong>HUB</strong></del></a>
+    <?php endif ?>
+    
+    <?php // Display sync behavior badges
+    $hubIncludeSync = isset($deets[58]) ? $deets[58] : 'yes';
+    $hubIncludePersist = isset($deets[59]) ? $deets[59] : 'no';
+    
+    if ($hubIncludeSync === 'no'): ?>
+        <span class="badge bg-info text-white fs-6" title="This course will always remain in the catalog">Always Visible</span>
+    <?php elseif ($hubIncludePersist === 'yes'): ?>
+        <span class="badge bg-warning text-dark fs-6" title="This course will persist with custom messaging when removed from ELM">Persist w/ Message</span>
     <?php endif ?>
 </div>
 <h1><?= $deets[2] ?></h1>

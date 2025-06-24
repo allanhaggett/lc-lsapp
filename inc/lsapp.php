@@ -710,15 +710,6 @@ function getCoursesClassesUpcoming($courseid) {
 
 
 
-function getPartnersNew() {
-
-	$path = build_path(BASE_DIR, 'data', 'learning_partners.json');
-	$p = file_get_contents($path);
-	$list = json_decode($p);
-	return $list;
-}
-
-
 
 
 
@@ -728,17 +719,9 @@ function getPartnersNew() {
 // a million functions in here.
 function getPartners() {
 	
-	$path = build_path(BASE_DIR, 'data', 'learning-hub-partners.csv');
-
-	$f = fopen($path, 'r');
-	
-	$list = array();
-	while ($row = fgetcsv($f)) {
-		
-		array_push($list,$row);
-		
-	}
-	fclose($f);
+	$path = build_path(BASE_DIR, 'data', 'learning_partners.json');
+	$p = file_get_contents($path);
+	$list = json_decode($p);
 	return $list;
 }
 //
@@ -747,18 +730,8 @@ function getPartners() {
 // a million functions in here.
 function getPartnerDetails($partnername) {
 	
-	$path = build_path(BASE_DIR, 'data', 'learning-hub-partners.csv');
-	$f = fopen($path, 'r');
+	return '#todo Details unimplemted.';
 	
-	$list = '';
-	while ($row = fgetcsv($f)) {
-		if($row[1] == $partnername) {
-			$list = $row;
-		}
-		
-	}
-	fclose($f);
-	return $list;
 }
 //
 // Return all courses that have a given Learning Hub Partner

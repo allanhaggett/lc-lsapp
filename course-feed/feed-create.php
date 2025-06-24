@@ -46,14 +46,20 @@ foreach ($datas as $course) {
     $createdDate = date("Y-m-d\TH:i:s", strtotime(str_replace('  ', ' ', $course['Requested'] ?? '')));
     $modifiedDate = date("Y-m-d\TH:i:s", strtotime(str_replace('  ', ' ', $course['Modified'] ?? '')));
 
-    if($course['Platform'] !== 'PSA Learning System') {
+    if($course['Platform'] !== 'PSA Learning System' || $course['HubIncludeSync'] == 'no') {
         $registrationurl = $course['elearning'];
     } else {
         $registrationurl = "https://learning.gov.bc.ca/psc/CHIPSPLM/EMPLOYEE/ELM/c/LM_OD_EMPLOYEE_FL.LM_CRS_DTL_FL.GBL?Page=LM_CRS_DTL_FL&Action=U&ForceSearch=Y&LM_CI_ID=" . $course['ELMCourseID'];
     }
 
     if ($course['Status'] == 'Active' && !empty($course['LearningHubPartner'])  && strtolower($course['HUBInclude']) === 'yes') {
-        $json['items'][] = [
+        // Determine persistent status
+        $persistent = 'no';
+        if (isset($course['HubIncludePersist']) && strtolower($course['HubIncludePersist']) === 'yes') {
+            $persistent = 'yes';
+        }
+        
+        $courseItem = [
             "id" => $course['ItemCode'] ?? '',
             "title" => $course['CourseName'] ?? '',
             "summary" => $desc,
@@ -66,12 +72,25 @@ foreach ($datas as $course) {
             "_slug" => $course['CourseNameSlug'] ?? '',
             "_learning_partner" => $course['LearningHubPartner'] ?? '',
             "_platform" => $course['Platform'] ?? '',
+            "_persistent" => $persistent,
             "author" => $course['LearningHubPartner'] ?? '',
             "date_published" => $createdDate,
             "date_modified" => $modifiedDate,
             "tags" => rtrim(trim($course['Category'] ?? ''), ','),
             "url" => $registrationurl
         ];
+        
+        // Add persist message if course is persistent
+        if ($persistent === 'yes' && !empty($course['HubPersistMessage'])) {
+            $courseItem['_persist_message'] = $course['HubPersistMessage'];
+        }
+        
+        // Add persist state if course is persistent
+        if ($persistent === 'yes' && isset($course['HubIncludePersistState'])) {
+            $courseItem['_persist_state'] = $course['HubIncludePersistState'];
+        }
+        
+        $json['items'][] = $courseItem;
     }
 }
 
@@ -79,11 +98,11 @@ $jsonOutput = json_encode($json, JSON_PRETTY_PRINT);
 $jsonFilename = 'data/bcps-corporate-learning-courses.json';
 file_put_contents($jsonFilename, $jsonOutput);
 
-$newfile = 'E:/WebSites/NonSSOLearning/learning-hub/bcps-corporate-learning-courses.json';
-if (!copy($jsonFilename, $newfile)) {
-    echo 'Failed to copy ' . $jsonFilename . '... contact Allan';
-    exit;
-}
+// $newfile = 'E:/WebSites/NonSSOLearning/learning-hub/bcps-corporate-learning-courses.json';
+// if (!copy($jsonFilename, $newfile)) {
+//     echo 'Failed to copy ' . $jsonFilename . '... contact Allan';
+//     exit;
+// }
 
 // header('Location: ' . $jsonFilename);
 header('Location: index.php?message=Success');

@@ -44,6 +44,11 @@ if($_POST) {
     $isMoodle = isset($_POST['isMoodle']) ? 'Yes' : 'No';
     $openAccessOptin = isset($_POST['OpenAccessOptin']) ? 'Yes' : 'No';
     
+    // Process new sync fields
+    $hubIncludeSync = sanitize($_POST['HubIncludeSync'] ?? 'yes');
+    $hubIncludePersist = sanitize($_POST['HubIncludePersist'] ?? 'no');
+    $hubPersistMessage = sanitize($_POST['HubPersistMessage'] ?? 'This course is no longer available for registration.');
+    
     // Combine times
     $combinedtimes = sanitize($_POST['StartTime']) . ' - ' . sanitize($_POST['EndTime']);
     
@@ -116,7 +121,10 @@ if($_POST) {
         sanitize($_POST['RegistrationLink']),
         $slug,
         sanitize($_POST['HubExpirationDate']),
-        $openAccessOptin
+        $openAccessOptin,
+        $hubIncludeSync,
+        $hubIncludePersist,
+        $hubPersistMessage
     ];
     
     // Update courses.csv
@@ -130,11 +138,20 @@ if($_POST) {
     // Process rows
     $coursesteward = '';
     $coursedeveloper = '';
+    $existingPersistState = 'active'; // default
     
     while (($data = fgetcsv($f)) !== FALSE) {
         if($data[0] == $courseid) {
             $coursesteward = $data[10];
             $coursedeveloper = $data[34];
+            // Preserve existing HubIncludePersistState if it exists
+            if (isset($data[61])) {
+                $existingPersistState = $data[61];
+            }
+            // Add persist state to course array if not already set
+            if (count($course) < 62) {
+                $course[] = $existingPersistState;
+            }
             fputcsv($temp_table, $course);
         } else {
             fputcsv($temp_table, $data);
@@ -240,6 +257,7 @@ $reportinglist = getReportingList();
     <input type="hidden" name="ServiceLine" value="<?= sanitize($deets[26]) ?>">
     <input type="hidden" name="STOB" value="<?= sanitize($deets[27]) ?>">
     <input type="hidden" name="Prerequisites" value="<?= sanitize($deets[18]) ?>">
+    <input type="hidden" name="Featured" value="0">
     
     <!-- Basic Information Section -->
     <div class="form-section">
@@ -314,11 +332,7 @@ $reportinglist = getReportingList();
                     <small class="d-block text-muted">If not in Learning System, where to register?</small>
                     <input type="url" name="RegistrationLink" id="RegistrationLink" class="form-control" value="<?= sanitize($deets[54]) ?>">
                 </div>
-                <div class="col-md-6 mb-3">
-                    <label for="HubExpirationDate" class="form-label">Expiration Date</label>
-                    <small class="d-block text-muted">Date to remove from search results</small>
-                    <input type="date" name="HubExpirationDate" id="HubExpirationDate" class="form-control" value="<?= sanitize($deets[56]) ?>">
-                </div>
+
             </div>
         </div>
     </div>
@@ -510,6 +524,82 @@ $reportinglist = getReportingList();
         </div>
     </div>
     
+    
+    <!-- Learning Hub Sync Options Section -->
+    <div class="form-section">
+        <div class="form-section-title">Learning Hub Sync Options</div>
+        <div class="alert alert-secondary">
+            <div class="form-check">
+                <input type="checkbox" class="form-check-input" name="HUBInclude" id="HUBInclude" 
+                        <?= ($deets[53] == 'Yes' || $deets[53] == 1) ? 'checked' : '' ?>>
+                <label class="form-check-label" for="HUBInclude">Include in LearningHUB?</label>
+            </div>
+        </div>
+        <div class="alert alert-info mb-4">
+            <h6 class="alert-heading">Course Sync Behavior</h6>
+            <p class="mb-2">These settings control how this course behaves in the Learning Hub synchronization process:</p>
+            <ul class="">
+                <li><strong>Normal courses</strong>: Removed from catalog when no longer in ELM (default behavior)</li>
+                <li><strong>Always visible</strong>: Remain in catalog regardless of ELM status (HubIncludeSync = no)</li>
+                <li><strong>Persist with message</strong>: Stay in catalog but segregated with custom message (HubIncludePersist = yes)</li>
+            </ul>
+            <p>Set an expiry date and your course will be removed from the catalog (or persist) after that date.</p>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="HubIncludeSync" class="form-label">Hub Include Sync</label>
+                <small class="d-block text-muted">Should this course participate in automatic sync removal?</small>
+                <select name="HubIncludeSync" id="HubIncludeSync" class="form-select">
+                    <?php $hubIncludeSync = isset($deets[58]) ? $deets[58] : 'yes'; ?>
+                    <option value="yes" <?= ($hubIncludeSync == 'yes') ? 'selected' : '' ?>>Yes - Normal sync behavior</option>
+                    <option value="no" <?= ($hubIncludeSync == 'no') ? 'selected' : '' ?>>No - Always keep in catalog</option>
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="HubIncludePersist" class="form-label">Hub Include Persist</label>
+                <small class="d-block text-muted">Should this course persist with special handling when removed from ELM?</small>
+                <select name="HubIncludePersist" id="HubIncludePersist" class="form-select">
+                    <?php $hubIncludePersist = isset($deets[59]) ? $deets[59] : 'no'; ?>
+                    <option value="no" <?= ($hubIncludePersist == 'no') ? 'selected' : '' ?>>No - Normal removal</option>
+                    <option value="yes" <?= ($hubIncludePersist == 'yes') ? 'selected' : '' ?>>Yes - Keep with custom message</option>
+                </select>
+                
+                <div id="persistStateInfo" class="mt-2" style="<?= ($hubIncludePersist == 'yes') ? '' : 'display: none;' ?>">
+                    <?php $hubIncludePersistState = isset($deets[61]) ? $deets[61] : 'active'; ?>
+                    <p class="text-body-secondary mb-0">
+                        <small>
+                            <strong>Current State:</strong>
+                            <?php if ($hubIncludePersistState === 'active'): ?>
+                                <span class="badge bg-success-subtle text-success-emphasis">Active</span>
+                                - Course is currently in ELM feed
+                            <?php else: ?>
+                                <span class="badge bg-warning-subtle text-warning-emphasis">Inactive</span>
+                                - Course is not in ELM feed but persists in catalog
+                            <?php endif; ?>
+                        </small>
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row" id="persistMessageRow" style="<?= ($hubIncludePersist == 'yes') ? '' : 'display: none;' ?>">
+            <div class="col-12 mb-3">
+                <label for="HubPersistMessage" class="form-label">Hub Persist Message</label>
+                <small class="d-block text-muted">Message to display when course persists but has no offerings</small>
+                <textarea name="HubPersistMessage" id="HubPersistMessage" class="form-control" rows="2"><?= sanitize(isset($deets[60]) ? $deets[60] : 'This course is no longer available for registration.') ?></textarea>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="HubExpirationDate" class="form-label">Expiration Date</label>
+                <small class="d-block text-muted">Date to remove from search results</small>
+                <input type="date" name="HubExpirationDate" id="HubExpirationDate" class="form-control" value="<?= sanitize($deets[56]) ?>">
+            </div>
+        </div>
+    </div>
+    
+
     <!-- Additional Options Section -->
     <div class="form-section">
         <div class="form-section-title">Additional Options</div>
@@ -520,8 +610,8 @@ $reportinglist = getReportingList();
                         <input type="checkbox" class="form-check-input" name="WeShip" id="WeShip" 
                                <?= ($deets[23] == 'Yes' || $deets[23] == 1) ? 'checked' : '' ?>>
                         <label class="form-check-label" for="WeShip">
-                            <strong>Learning Centre ships materials?</strong><br>
-                            <small>Check if Learning Centre manages &amp; ships course materials</small>
+                            <strong>Learning Centre ships materials?</strong>
+                            <div>Check if Learning Centre manages &amp; ships course materials</div>
                         </label>
                     </div>
                 </div>
@@ -532,48 +622,44 @@ $reportinglist = getReportingList();
                         <input type="checkbox" class="form-check-input" name="Alchemer" id="Alchemer" value="1"
                                <?= ($deets[37] == 'Yes' || $deets[37] == 1) ? 'checked' : '' ?>>
                         <label class="form-check-label" for="Alchemer">
-                            <strong>Uses Alchemer survey?</strong><br>
-                            <small>Check if this course uses an Alchemer survey</small>
+                            <strong>Uses Alchemer survey?</strong>
+                            <div>Check if this course uses an Alchemer survey</div>
                         </label>
                     </div>
                 </div>
             </div>
         </div>
         <div class="row mt-3">
-            <div class="col-md-4">
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input" name="HUBInclude" id="HUBInclude" 
-                           <?= ($deets[53] == 'Yes' || $deets[53] == 1) ? 'checked' : '' ?>>
-                    <label class="form-check-label" for="HUBInclude">Include in LearningHUB?</label>
+            <div class="col-md-6">
+                <div class="alert alert-secondary">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="OpenAccessOptin" id="OpenAccessOptin" 
+                            <?= ($deets[57] == 'Yes' || $deets[57] == 1) ? 'checked' : '' ?>
+                            <?= empty($deets[3]) ? 'disabled' : '' ?>>
+                        <label class="form-check-label" for="OpenAccessOptin">OpenAccess Publish?</label>
+                        <?php if (empty($deets[3])): ?>
+                            <div class="alert alert-warning">
+                                Add a course short name to enable this option.
+                            </div>
+                        <?php endif ?>
+                        <div>Publish this course's 
+                            <a href="/lsapp/courses.php?openaccess=true&sort=dateadded">OpenAccess public page</a>
+                         on "NIK".</div>
+                    </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input" name="OpenAccessOptin" id="OpenAccessOptin" 
-                           <?= ($deets[57] == 'Yes' || $deets[57] == 1) ? 'checked' : '' ?>
-                           <?= empty($deets[3]) ? 'disabled' : '' ?>>
-                    <label class="form-check-label" for="OpenAccessOptin">OpenAccess Publish?</label>
-                </div>
-            </div>
-            <div class="col-md-4">
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input" name="Featured" id="Featured" 
-                           <?= ($deets[33] == 'Yes' || $deets[33] == 1) ? 'checked' : '' ?>>
-                    <label class="form-check-label" for="Featured">Featured?</label>
-                </div>
-            </div>
-        </div>
-        <div class="row mt-3">
-            <div class="col-md-12">
-                <div class="form-check">
-                    <input type="checkbox" class="form-check-input" name="isMoodle" id="isMoodle" 
-                           <?= ($deets[47] == 'Yes' || $deets[47] == 1) ? 'checked' : '' ?>>
-                    <label class="form-check-label" for="isMoodle">Moodle Course?</label>
+            <div class="col-md-6">
+                <div class="alert alert-secondary">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" name="isMoodle" id="isMoodle" 
+                            <?= ($deets[47] == 'Yes' || $deets[47] == 1) ? 'checked' : '' ?>>
+                        <label class="form-check-label" for="isMoodle">PSA Moodle Course?</label>
+                        <div>Is this course hosted in our PSA Moodle installation?</div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    
     <!-- Print Details Section 
     <div class="form-section">
         <div class="form-section-title">Print Materials Operating Codes</div>
@@ -645,6 +731,17 @@ $(document).ready(function(){
             $('#notelm').addClass('d-none');
         } else {
             $('#notelm').removeClass('d-none');
+        }
+    });
+    
+    // Hub Persist options visibility
+    $('#HubIncludePersist').on('change', function() {
+        if($(this).val() === 'yes') {
+            $('#persistStateInfo').slideDown();
+            $('#persistMessageRow').slideDown();
+        } else {
+            $('#persistStateInfo').slideUp();
+            $('#persistMessageRow').slideUp();
         }
     });
     
