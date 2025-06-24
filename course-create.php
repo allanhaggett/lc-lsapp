@@ -104,7 +104,8 @@ $newcourse = [
     0,                                              // 57: OpenAccessOptin (default false)
     'yes',                                          // 58: HubIncludeSync (default yes)
     'no',                                           // 59: HubIncludePersist (default no)
-    'This course is no longer available for registration.' // 60: HubPersistMessage (default)
+    'This course is no longer available for registration.', // 60: HubPersistMessage (default)
+    'active'                                        // 61: HubIncludePersistState (default active)
 ];
 
 // Write course to CSV file

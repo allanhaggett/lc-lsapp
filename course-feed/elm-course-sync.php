@@ -64,12 +64,19 @@ function updateCourse($existingCourse, $newCourseData, &$logEntries) {
 
     // Check HubIncludeSync (index 58) before updating HUBInclude
     $hubIncludeSync = isset($existingCourse[58]) ? $existingCourse[58] : 'yes';
+    $hubIncludePersist = isset($existingCourse[59]) ? $existingCourse[59] : 'no';
     
     if ($hubIncludeSync !== 'no' && trim($existingCourse[53]) != 'Yes') {
         $updatedCourse[53] = 'Yes';
         $changes[] = "Updated HUBInclude to 'Yes'";
     } elseif ($hubIncludeSync === 'no' && trim($existingCourse[53]) != 'Yes') {
         $changes[] = "Skipped updating HUBInclude to 'Yes' - HubIncludeSync is 'no'";
+    }
+    
+    // For persistent courses that are back in the feed, set state to 'active'
+    if ($hubIncludePersist === 'yes' && isset($existingCourse[61]) && $existingCourse[61] === 'inactive') {
+        $updatedCourse[61] = 'active';
+        $changes[] = "Updated HubIncludePersistState to 'active' - course is back in ELM feed";
     }
 
     if ($changes) {
@@ -143,7 +150,8 @@ foreach ($hubCourses as $hcCode => $hc) {
             0,                     // OpenAccessOptin
             'yes',                 // HubIncludeSync (default: yes)
             'no',                  // HubIncludePersist (default: no)
-            'This course is no longer available for registration.' // HubPersistMessage
+            'This course is no longer available for registration.', // HubPersistMessage
+            'active'               // HubIncludePersistState (default: active)
         ];
         $itemCode = $newCourse[4];
         $updatedCourses[$itemCode] = $newCourse;
@@ -170,7 +178,12 @@ foreach ($lsappCourses as $lsappCode => $lsappCourse) {
         } elseif ($hubIncludeSync === 'no') {
             $logEntries[] = "Skipped setting HUBInclude to No for '{$lsappCourse[2]}' (Class code: $lsappCode) - HubIncludeSync is 'no'";
         } elseif ($hubIncludePersist === 'yes') {
-            $logEntries[] = "Skipped setting HUBInclude to No for '{$lsappCourse[2]}' (Class code: $lsappCode) - HubIncludePersist is 'yes'";
+            // For persistent courses, set HubIncludePersistState to 'inactive' instead of removing from feed
+            if (!isset($lsappCourse[61]) || $lsappCourse[61] !== 'inactive') {
+                $lsappCourse[61] = 'inactive';
+                $updatedCourses[$lsappCode] = $lsappCourse;
+                $logEntries[] = "Set HubIncludePersistState to 'inactive' for '{$lsappCourse[2]}' (Class code: $lsappCode) - HubIncludePersist is 'yes'";
+            }
         }
     }
 }
@@ -216,7 +229,8 @@ if ($fpTemp !== false) {
         'Topics', 'Audience', 'Levels', 'Reporting', 'PathLAN', 'PathStaging', 'PathLive',
         'PathNIK', 'PathTeams', 'isMoodle', 'TaxProcessed', 'TaxProcessedBy', 'ELMCourseID',
         'Modified', 'Platform', 'HUBInclude', 'RegistrationLink', 'CourseNameSlug', 
-        'HubExpirationDate', 'OpenAccessOptin', 'HubIncludeSync', 'HubIncludePersist', 'HubPersistMessage'
+        'HubExpirationDate', 'OpenAccessOptin', 'HubIncludeSync', 'HubIncludePersist', 'HubPersistMessage',
+        'HubIncludePersistState'
     ]);
 
     if (($fpOriginal = fopen($coursesPath, 'r')) !== false) {

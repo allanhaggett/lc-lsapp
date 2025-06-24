@@ -85,6 +85,11 @@ foreach ($datas as $course) {
             $courseItem['_persist_message'] = $course['HubPersistMessage'];
         }
         
+        // Add persist state if course is persistent
+        if ($persistent === 'yes' && isset($course['HubIncludePersistState'])) {
+            $courseItem['_persist_state'] = $course['HubIncludePersistState'];
+        }
+        
         $json['items'][] = $courseItem;
     }
 }

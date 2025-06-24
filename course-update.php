@@ -138,11 +138,20 @@ if($_POST) {
     // Process rows
     $coursesteward = '';
     $coursedeveloper = '';
+    $existingPersistState = 'active'; // default
     
     while (($data = fgetcsv($f)) !== FALSE) {
         if($data[0] == $courseid) {
             $coursesteward = $data[10];
             $coursedeveloper = $data[34];
+            // Preserve existing HubIncludePersistState if it exists
+            if (isset($data[61])) {
+                $existingPersistState = $data[61];
+            }
+            // Add persist state to course array if not already set
+            if (count($course) < 62) {
+                $course[] = $existingPersistState;
+            }
             fputcsv($temp_table, $course);
         } else {
             fputcsv($temp_table, $data);
@@ -555,6 +564,22 @@ $reportinglist = getReportingList();
                     <option value="no" <?= ($hubIncludePersist == 'no') ? 'selected' : '' ?>>No - Normal removal</option>
                     <option value="yes" <?= ($hubIncludePersist == 'yes') ? 'selected' : '' ?>>Yes - Keep with custom message</option>
                 </select>
+                
+                <div id="persistStateInfo" class="mt-2" style="<?= ($hubIncludePersist == 'yes') ? '' : 'display: none;' ?>">
+                    <?php $hubIncludePersistState = isset($deets[61]) ? $deets[61] : 'active'; ?>
+                    <p class="text-body-secondary mb-0">
+                        <small>
+                            <strong>Current State:</strong>
+                            <?php if ($hubIncludePersistState === 'active'): ?>
+                                <span class="badge bg-success-subtle text-success-emphasis">Active</span>
+                                - Course is currently in ELM feed
+                            <?php else: ?>
+                                <span class="badge bg-warning-subtle text-warning-emphasis">Inactive</span>
+                                - Course is not in ELM feed but persists in catalog
+                            <?php endif; ?>
+                        </small>
+                    </p>
+                </div>
             </div>
         </div>
         
@@ -709,11 +734,13 @@ $(document).ready(function(){
         }
     });
     
-    // Hub Persist Message visibility
+    // Hub Persist options visibility
     $('#HubIncludePersist').on('change', function() {
         if($(this).val() === 'yes') {
+            $('#persistStateInfo').slideDown();
             $('#persistMessageRow').slideDown();
         } else {
+            $('#persistStateInfo').slideUp();
             $('#persistMessageRow').slideUp();
         }
     });
