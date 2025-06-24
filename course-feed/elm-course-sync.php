@@ -62,15 +62,18 @@ function updateCourse($existingCourse, $newCourseData, &$logEntries) {
         $changes[] = "Updated Platform to 'PSA Learning System'";
     }
 
-    // Check HubIncludeSync (index 58) before updating HUBInclude
-    $hubIncludeSync = isset($existingCourse[58]) ? $existingCourse[58] : 'yes';
+    // If course is found in ELM feed, always set HUBInclude to 'Yes' regardless of current state
     $hubIncludePersist = isset($existingCourse[59]) ? $existingCourse[59] : 'no';
+    $currentHubInclude = trim($existingCourse[53]);
     
-    if ($hubIncludeSync !== 'no' && trim($existingCourse[53]) != 'Yes') {
+    // Always ensure HUBInclude is 'Yes' for courses in ELM feed
+    if ($currentHubInclude !== 'Yes') {
         $updatedCourse[53] = 'Yes';
-        $changes[] = "Updated HUBInclude to 'Yes'";
-    } elseif ($hubIncludeSync === 'no' && trim($existingCourse[53]) != 'Yes') {
-        $changes[] = "Skipped updating HUBInclude to 'Yes' - HubIncludeSync is 'no'";
+        if ($currentHubInclude === 'No') {
+            $changes[] = "Restored HUBInclude to 'Yes' - course found in ELM feed (was previously 'No')";
+        } else {
+            $changes[] = "Updated HUBInclude to 'Yes' - course found in ELM feed";
+        }
     }
     
     // For persistent courses that are back in the feed, set state to 'active'
