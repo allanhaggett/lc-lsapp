@@ -325,6 +325,7 @@ if (isset($_GET["id"])) {
                     <br><br>
                     <button type="submit" class="btn btn-primary">Save Partner</button>
                     <a href="index.php" class="btn btn-secondary">Cancel</a>
+                </form>
                     
                     <?php if ($partner["id"]): ?>
                     <hr class="my-4">
@@ -356,7 +357,6 @@ if (isset($_GET["id"])) {
                         </div>
                     </div>
                     <?php endif; ?>
-                </form>
             </div>
         </div>
     </div>
