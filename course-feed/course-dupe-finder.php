@@ -2,13 +2,7 @@
 opcache_reset();
 require('../inc/lsapp.php');
 
-// Handle delete action
-if (isset($_POST['delete_course']) && isset($_POST['course_id'])) {
-    $courseIdToDelete = $_POST['course_id'];
-    deleteCourse($courseIdToDelete);
-    header('Location: ' . $_SERVER['PHP_SELF'] . '?deleted=1');
-    exit;
-}
+
 
 // Path to the CSV file
 $csvFile = '../data/courses.csv';
@@ -54,28 +48,7 @@ if (($handle = fopen($csvFile, 'r')) !== false) {
     exit;
 }
 
-function deleteCourse($courseId) {
-    $csvFile = '../data/courses.csv';
-    $tempFile = '../data/courses_temp.csv';
-    
-    if (($readHandle = fopen($csvFile, 'r')) !== false && ($writeHandle = fopen($tempFile, 'w')) !== false) {
-        $headers = fgetcsv($readHandle);
-        fputcsv($writeHandle, $headers);
-        
-        $courseIdIndex = array_search('CourseID', $headers);
-        
-        while (($row = fgetcsv($readHandle)) !== false) {
-            if ($row[$courseIdIndex] !== $courseId) {
-                fputcsv($writeHandle, $row);
-            }
-        }
-        
-        fclose($readHandle);
-        fclose($writeHandle);
-        
-        rename($tempFile, $csvFile);
-    }
-}
+
 
 function highlightDifferences($text1, $text2) {
     if ($text1 === $text2) {
@@ -139,11 +112,8 @@ function getImportantFields() {
 <body>
 <div class="container-fluid">
     <h1 class="mt-4 mb-4">Course Duplicate Finder</h1>
-    
-    <?php if (isset($_GET['deleted'])): ?>
-        <div class="alert alert-success">Course deleted successfully!</div>
-    <?php endif; ?>
-    
+
+
     <?php if (empty($duplicateGroups)): ?>
         <div class="alert alert-success">
             <h4>No duplicates found!</h4>
@@ -196,13 +166,7 @@ function getImportantFields() {
                                 <?php endforeach; ?>
                                 
                                 <div class="mt-3">
-                                    <form method="post" style="display: inline;" 
-                                          onsubmit="return confirm('Are you sure you want to delete this course? This action cannot be undone.');">
-                                        <input type="hidden" name="course_id" value="<?= htmlspecialchars($course['CourseID']) ?>">
-                                        <button type="submit" name="delete_course" class="btn btn-delete btn-sm">
-                                            🗑️ Delete This Course
-                                        </button>
-                                    </form>
+                                    
                                     <a href="../course.php?courseid=<?= htmlspecialchars($course['CourseID']) ?>" 
                                        class="btn btn-outline-primary btn-sm" target="_blank">
                                         👁️ View Details
