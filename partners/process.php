@@ -7,24 +7,27 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $existingData = file_exists($partnersFile) ? json_decode(file_get_contents($partnersFile), true) : [];
 
     // DELETE a Partner
-    if (isset($_POST["delete_id"]) || isset($_POST["delete_partner_id"])) {
-        $deleteId = isset($_POST["delete_id"]) ? intval($_POST["delete_id"]) : intval($_POST["delete_partner_id"]);
+    if ((isset($_POST["delete_id"]) && $_POST["delete_id"] !== '') || (isset($_POST["delete_partner_id"]) && $_POST["delete_partner_id"] !== '')) {
+        $deleteId = isset($_POST["delete_id"]) && $_POST["delete_id"] !== '' ? intval($_POST["delete_id"]) : intval($_POST["delete_partner_id"]);
         
-        // Create backup of partners.json before deletion
-        $backupDir = "../data/backups";
-        if (!file_exists($backupDir)) {
-            mkdir($backupDir, 0755, true);
-        }
-        $backupFile = $backupDir . "/partners_backup_" . date("Y-m-d_H-i-s") . ".json";
-        copy($partnersFile, $backupFile);
-        
-        $existingData = array_filter($existingData, function ($partner) use ($deleteId) {
-            return $partner["id"] !== $deleteId;
-        });
+        // Only proceed with deletion if we have a valid ID greater than 0
+        if ($deleteId > 0) {
+            // Create backup of partners.json before deletion
+            $backupDir = "../data/backups";
+            if (!file_exists($backupDir)) {
+                mkdir($backupDir, 0755, true);
+            }
+            $backupFile = $backupDir . "/partners_backup_" . date("Y-m-d_H-i-s") . ".json";
+            copy($partnersFile, $backupFile);
+            
+            $existingData = array_filter($existingData, function ($partner) use ($deleteId) {
+                return $partner["id"] !== $deleteId;
+            });
 
-        file_put_contents($partnersFile, json_encode(array_values($existingData), JSON_PRETTY_PRINT));
-        header('Location: /lsapp/partners/');
-        exit;
+            file_put_contents($partnersFile, json_encode(array_values($existingData), JSON_PRETTY_PRINT));
+            header('Location: /lsapp/partners/');
+            exit;
+        }
     }
 
     // ADD or EDIT a Partner
