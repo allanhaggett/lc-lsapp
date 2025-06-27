@@ -142,26 +142,26 @@ while (($course = fgetcsv($csvFile)) !== false) {
 }
 
 // Cleanup unpublished courses
-$existingFiles = glob($directory . '/*.php');
-foreach ($existingFiles as $file) {
-    $filename = basename($file, '.php');
-    $match = false;
-    foreach ($allCourseIds as $id) {
-        $courseData = getCourse($id);
-        if ($courseData && isset($courseData[3])) {
-            $short = str_replace(' ', '-', strtolower($courseData[3]));
-            if ($short === $filename) {
-                if (isset($courseData[57]) && (strtolower(trim($courseData[57])) === 'true' || strtolower(trim($courseData[57])) === 'on')) {
-                    $match = true;
-                    break;
-                }
-            }
-        }
-    }
-    if (!$match) {
-        unlink($file);
-    }
-}
+// $existingFiles = glob($directory . '/*.php');
+// foreach ($existingFiles as $file) {
+//     $filename = basename($file, '.php');
+//     $match = false;
+//     foreach ($allCourseIds as $id) {
+//         $courseData = getCourse($id);
+//         if ($courseData && isset($courseData[3])) {
+//             $short = str_replace(' ', '-', strtolower($courseData[3]));
+//             if ($short === $filename) {
+//                 if (isset($courseData[57]) && (strtolower(trim($courseData[57])) === 'true' || strtolower(trim($courseData[57])) === 'on')) {
+//                     $match = true;
+//                     break;
+//                 }
+//             }
+//         }
+//     }
+//     if (!$match) {
+//         unlink($file);
+//     }
+// }
 
 fclose($csvFile);
 // exit;
