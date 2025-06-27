@@ -139,6 +139,7 @@ function mapPartnerCode($code) {
         'Priorities & Innovation' => 'Leadership, Engagement and Priority Initiatives',
         'CIRMO' => 'Corporate Information and Records Management Office',
         'DWCS' => 'Digital Workplace and Collaboration Services Branch',
+        'Procurement Strategy Gov' => 'Procurement Strategy and Governance Branch',
         // Add other mappings as needed
     ];
     return $partners[$code] ?? $code;
