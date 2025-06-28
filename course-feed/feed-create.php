@@ -47,7 +47,7 @@ foreach ($datas as $course) {
     $modifiedDate = date("Y-m-d\TH:i:s", strtotime(str_replace('  ', ' ', $course['Modified'] ?? '')));
 
     if($course['Platform'] !== 'PSA Learning System' || $course['HubIncludeSync'] == 'no') {
-        $registrationurl = $course['elearning'];
+        $registrationurl = $course['RegistrationLink'];
     } else {
         $registrationurl = "https://learning.gov.bc.ca/psc/CHIPSPLM/EMPLOYEE/ELM/c/LM_OD_EMPLOYEE_FL.LM_CRS_DTL_FL.GBL?Page=LM_CRS_DTL_FL&Action=U&ForceSearch=Y&LM_CI_ID=" . $course['ELMCourseID'];
     }
@@ -98,11 +98,11 @@ $jsonOutput = json_encode($json, JSON_PRETTY_PRINT);
 $jsonFilename = 'data/bcps-corporate-learning-courses.json';
 file_put_contents($jsonFilename, $jsonOutput);
 
-$newfile = 'E:/WebSites/NonSSOLearning/learning-hub/bcps-corporate-learning-courses.json';
-if (!copy($jsonFilename, $newfile)) {
-    echo 'Failed to copy ' . $jsonFilename . '... contact Allan';
-    exit;
-}
+// $newfile = 'E:/WebSites/NonSSOLearning/learning-hub/bcps-corporate-learning-courses.json';
+// if (!copy($jsonFilename, $newfile)) {
+//     echo 'Failed to copy ' . $jsonFilename . '... contact Allan';
+//     exit;
+// }
 
 // header('Location: ' . $jsonFilename);
 header('Location: course-openaccess-publish.php');

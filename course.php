@@ -153,9 +153,14 @@ if (file_exists($categoriesFile)) {
 <div class="col-12">DESCRIPTION</div>
 <div class=""><?= $Parsedown->text($deets[16]) ?></div>
 <div class="mt-3">
+	<?php if(!empty($deets[54])): ?>
+    <a href="<?= htmlspecialchars($deets[54]) ?>" target="_blank" class="btn btn-primary">
+        <i class="fas fa-external-link-alt"></i> Registration Link
+    </a>
+	<?php endif ?>
 	<?php if(!empty($deets[22])): ?>
     <a href="<?= htmlspecialchars($deets[22]) ?>" target="_blank" class="btn btn-primary">
-        <i class="fas fa-external-link-alt"></i> Launch Course
+        <i class="fas fa-external-link-alt"></i> eLearning Link
     </a>
 	<?php endif ?>
     <?php if($deets[52] === 'PSA Learning System' && !empty($deets[50])): ?>

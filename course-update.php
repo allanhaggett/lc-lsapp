@@ -178,7 +178,14 @@ if($_POST) {
     
     fclose($peoplefp);
     
-    header('Location: course.php?courseid=' . $courseid);
+    // Check if this is from partner portal
+    if (!empty($_POST['partner_redirect'])) {
+        // Redirect back to partner portal with the updated course selected
+        $partnerSlug = urlencode($_POST['LearningHubPartner']);
+        header("Location: /learning/hub/partners/course-form.php?partnerslug={$partnerSlug}&courseid={$courseid}");
+    } else {
+        header('Location: course.php?courseid=' . $courseid);
+    }
     exit;
 }
 
