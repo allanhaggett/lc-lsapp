@@ -98,11 +98,11 @@ $jsonOutput = json_encode($json, JSON_PRETTY_PRINT);
 $jsonFilename = 'data/bcps-corporate-learning-courses.json';
 file_put_contents($jsonFilename, $jsonOutput);
 
-// $newfile = 'E:/WebSites/NonSSOLearning/learning-hub/bcps-corporate-learning-courses.json';
-// if (!copy($jsonFilename, $newfile)) {
-//     echo 'Failed to copy ' . $jsonFilename . '... contact Allan';
-//     exit;
-// }
+$newfile = 'E:/WebSites/NonSSOLearning/learning-hub/bcps-corporate-learning-courses.json';
+if (!copy($jsonFilename, $newfile)) {
+    echo 'Failed to copy ' . $jsonFilename . '... contact Allan';
+    exit;
+}
 
 // header('Location: ' . $jsonFilename);
 header('Location: course-openaccess-publish.php');
