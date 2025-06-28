@@ -95,8 +95,8 @@ $hubCoursesPath = build_path(BASE_DIR, 'course-feed', 'data', 'courses.csv');
 $timestamp = date('YmdHis');
 $isoDateTime = date('c'); // ISO 8601 date format for "elm_sync_log.txt"
 $logEntries = [];
-$logFilePath = build_path(BASE_DIR, 'data', "course-sync-log-$timestamp.txt");
-$persistentLogPath = build_path(BASE_DIR, 'data', 'elm_sync_log.txt');
+$logFilePath = build_path(BASE_DIR, 'data', 'course-sync-logs', "course-sync-log-$timestamp.txt");
+$persistentLogPath = build_path(BASE_DIR, 'data', 'course-sync-logs', 'elm_sync_log.txt');
 
 $lsappCourses = getCoursesFromCSV($coursesPath, false, 4);
 $hubCourses = getCoursesFromCSV($hubCoursesPath, false, 0);

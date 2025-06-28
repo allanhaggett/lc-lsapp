@@ -87,7 +87,7 @@ Upload both of those CSV files here:<br>
 <div class="col-md-3">
 <?php
 // Path to the persistent sync log
-$persistentLogPath = '../data/elm_sync_log.txt';
+$persistentLogPath = '../data/course-sync-logs/elm_sync_log.txt';
 
 // Check if the persistent log file exists and get the last sync time from the first line
 $lastSyncMessage = "No sync history found.";
@@ -102,7 +102,7 @@ if (file_exists($persistentLogPath)) {
 $pattern = '/^course-sync-log-(\d{14})\.txt$/';
 
 // Scan the ../data directory for files
-$files = scandir('../data');
+$files = scandir('../data/course-sync-logs');
 
 // Filter files that match the pattern
 $logFiles = array_filter($files, function($file) use ($pattern) {
@@ -124,7 +124,7 @@ if (!empty($logFiles)) {
     echo "<h3>Course Sync Logs:</h3><ul class='list-group'>";
     foreach ($logFiles as $logFile) {
         // Check if the file has substantive content (more than just whitespace or newline)
-        $filePath = "../data/$logFile";
+        $filePath = "../data/course-sync-logs/$logFile";
         $content = trim(file_get_contents($filePath)); // Trim whitespace and newlines
 
         if (!empty($content)) { // Only proceed if there's actual content
@@ -140,7 +140,7 @@ if (!empty($logFiles)) {
 
                 // Display the link with the formatted date, triggering the modal
                 echo "<li class='list-group-item'>
-                        <a href='#' data-bs-toggle='modal' data-bs-target='#logModal' onclick='loadLogContent(\"$logFile\")'>$formattedDate</a>
+                        <a href=\"#$filePath\" data-bs-toggle='modal' data-bs-target='#logModal' onclick='loadLogContent(\"$filePath\")'>$formattedDate</a>
                       </li>";
             }
         }
