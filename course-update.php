@@ -420,7 +420,7 @@ $reportinglist = getReportingList();
         <div class="row">
             <div class="col-md-6 mb-3">
                 <label for="Levels" class="form-label">Group</label>
-                <select name="Levels" id="Levels" class="form-select" required>
+                <select name="Levels" id="Levels" class="form-select">
                     <option value="" disabled <?= empty($deets[40]) ? 'selected' : '' ?>>Select one</option>
                     <?php foreach($levels as $l): ?>
                         <option value="<?= $l ?>" <?= ($deets[40] == $l) ? 'selected' : '' ?>><?= $l ?></option>
