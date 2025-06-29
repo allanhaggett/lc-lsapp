@@ -23,7 +23,7 @@ require($path);
     and then generate a new "feed" for the LearningHUB to consume.</p>
 
 <div class="btn-group mb-3">
-    <a href="https://learn.bcpublicservice.gov.bc.ca/learning-hub/learning-partner-courses.json"
+    <a href="https://learn.bcpublicservice.gov.bc.ca/learning-hub/bcps-corporate-learning-courses.json"
         target="_blank"
         rel="noopener"
         class="btn btn-light">
@@ -121,31 +121,54 @@ echo "<p><strong>Last time synced:</strong> $lastSyncMessage</p>";
 
 // Display the list of log files if there are any
 if (!empty($logFiles)) {
-    echo "<h3>Course Sync Logs:</h3><ul class='list-group'>";
+    echo "<h3>Course Sync Logs:</h3><ul class='list-group' id='logFilesList'>";
+    $displayedCount = 0;
+    $maxInitialDisplay = 12;
+    $validLogFiles = [];
+    
+    // First, filter out empty log files and prepare data for display
     foreach ($logFiles as $logFile) {
-        // Check if the file has substantive content (more than just whitespace or newline)
         $filePath = "../data/course-sync-logs/$logFile";
-        $content = trim(file_get_contents($filePath)); // Trim whitespace and newlines
-
-        if (!empty($content)) { // Only proceed if there's actual content
-            // Extract the date portion (YYYYMMDDHHiiss) from the filename
-            if (preg_match($pattern, $logFile, $matches)) {
-                $dateStr = $matches[1]; // Extracted timestamp
-
-                // Create a DateTime object from the extracted timestamp
-                $date = DateTime::createFromFormat('YmdHis', $dateStr);
-
-                // Format the date nicely
-                $formattedDate = $date->format('F j, Y, g:i:s A');
-
-                // Display the link with the formatted date, triggering the modal
-                echo "<li class='list-group-item'>
-                        <a href=\"#$filePath\" data-bs-toggle='modal' data-bs-target='#logModal' onclick='loadLogContent(\"$filePath\")'>$formattedDate</a>
-                      </li>";
-            }
+        $content = trim(file_get_contents($filePath));
+        
+        if (!empty($content) && preg_match($pattern, $logFile, $matches)) {
+            $dateStr = $matches[1];
+            $date = DateTime::createFromFormat('YmdHis', $dateStr);
+            $formattedDate = $date->format('F j, Y, g:i:s A');
+            
+            $validLogFiles[] = [
+                'file' => $logFile,
+                'path' => $filePath,
+                'date' => $formattedDate
+            ];
         }
     }
+    
+    // Display first 12 log files
+    foreach ($validLogFiles as $index => $logData) {
+        if ($displayedCount < $maxInitialDisplay) {
+            echo "<li class='list-group-item log-file-item'>
+                    <a href=\"#{$logData['path']}\" data-bs-toggle='modal' data-bs-target='#logModal' onclick='loadLogContent(\"{$logData['path']}\")'>{$logData['date']}</a>
+                  </li>";
+            $displayedCount++;
+        } else {
+            break;
+        }
+    }
+    
     echo "</ul>";
+    
+    // Add Load More button if there are more files to display
+    if (count($validLogFiles) > $maxInitialDisplay) {
+        echo "<button class='btn btn-primary mt-3' id='loadMoreBtn' onclick='loadMoreLogs()'>Load More</button>";
+    }
+    
+    // Pass all log files data to JavaScript for pagination
+    echo "<script>
+    var allLogFiles = " . json_encode($validLogFiles) . ";
+    var currentIndex = $maxInitialDisplay;
+    var itemsPerPage = 12;
+    </script>";
 } else {
     echo "<p>No course sync log files found.</p>";
 }
@@ -181,6 +204,28 @@ function loadLogContent(logFile) {
             document.getElementById('logContent').textContent = "Failed to load log content.";
             console.error("Error loading log content:", error);
         });
+}
+
+function loadMoreLogs() {
+    var logList = document.getElementById('logFilesList');
+    var loadMoreBtn = document.getElementById('loadMoreBtn');
+    var endIndex = Math.min(currentIndex + itemsPerPage, allLogFiles.length);
+    
+    // Add the next batch of log files
+    for (var i = currentIndex; i < endIndex; i++) {
+        var logData = allLogFiles[i];
+        var li = document.createElement('li');
+        li.className = 'list-group-item log-file-item';
+        li.innerHTML = '<a href="#' + logData.path + '" data-bs-toggle="modal" data-bs-target="#logModal" onclick=\'loadLogContent("' + logData.path + '")\'>' + logData.date + '</a>';
+        logList.appendChild(li);
+    }
+    
+    currentIndex = endIndex;
+    
+    // Hide the Load More button if all files are displayed
+    if (currentIndex >= allLogFiles.length) {
+        loadMoreBtn.style.display = 'none';
+    }
 }
 </script>
 
