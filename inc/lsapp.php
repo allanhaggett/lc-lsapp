@@ -2186,29 +2186,16 @@ function getAllTopics () {
 
 function getAllPlatforms () {
 
-	return [
-		'PSA Learning System',
-		'Acumen Academy',
-		'Alluvial',
-		'Apolitical',
-		'Canada School of Public Service',
-		'Eventbrite',
-		'General Assembly',
-		'InnovateUS',
-		'LifeSpeak',
-		'MS Teams',
-		'OCIO\'s Information Security Branch',
-		'OpenSchoolBC',
-		'PSA Learning Curator',
-		'PSA SharePoint',
-		'Public Service Pension Plan Website',
-		'Scrum Alliance',
-		'UBC Learning System',
-		'UK National Institute for Health Research',
-		'Your Digital Workplace',
-		'YouTube',
-		'Vimeo'
-	];
+	$path = build_path(BASE_DIR, 'data', 'platforms.json');
+	$jsonData = file_get_contents($path);
+	$platforms = json_decode($jsonData, true);
+	
+	$platformNames = array();
+	foreach ($platforms as $platform) {
+		array_push($platformNames, $platform['name']);
+	}
+	
+	return $platformNames;
 
 }
 
