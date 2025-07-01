@@ -147,7 +147,7 @@ if(!empty($_POST['CourseOwner']) || !empty($_POST['Developer'])) {
 if (!empty($_POST['partner_redirect'])) {
     // Redirect back to partner portal with the new course selected
     $partnerSlug = urlencode($_POST['LearningHubPartner']);
-    header("Location: /learning/hub/partners/course-form.php?partnerslug={$partnerSlug}&courseid={$courseid}");
+    header("Location: /learning/hub/partners/course-form.php?partnerslug={$partnerSlug}&courseid={$courseid}&message=Created");
 } else {
     // Redirect to the new course page
     header("Location: /lsapp/course.php?courseid={$courseid}");
