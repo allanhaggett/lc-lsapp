@@ -32,13 +32,54 @@ array_shift($courses);
 $sortField = 2; // Course name by default
 $sortDir = SORT_ASC;
 if ($filters['sort'] === 'dateadded') {
-    $sortField = 13;
+    $sortField = 13; // Requested field contains the actual date added
     $sortDir = SORT_DESC;
+}
+
+// Helper function to normalize different date formats
+function normalizeDate($dateStr) {
+    if (empty($dateStr) || $dateStr === '1900-01-01') {
+        return '1900-01-01 00:00:00';
+    }
+    
+    // Handle YYYYMMDDHHMMSS format (e.g., "20250614223927")
+    if (preg_match('/^(\d{4})(\d{2})(\d{2})(\d{2})(\d{2})(\d{2})$/', $dateStr, $matches)) {
+        return $matches[1] . '-' . $matches[2] . '-' . $matches[3] . ' ' . 
+               $matches[4] . ':' . $matches[5] . ':' . $matches[6];
+    }
+    
+    // Handle YYYY-MM-DD format
+    if (preg_match('/^\d{4}-\d{2}-\d{2}$/', $dateStr)) {
+        return $dateStr . ' 00:00:00';
+    }
+    
+    // Handle YYYY-MM-DD HH:MM:SS format
+    if (preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $dateStr)) {
+        return $dateStr;
+    }
+    
+    // Default fallback
+    return $dateStr;
 }
 
 // Sort function
 function sortCourses($a, $b) {
     global $sortDir, $sortField;
+    
+    // Special handling for date sorting - treat empty dates as very old
+    if ($sortField == 13) { // Requested field
+        $aDateRaw = empty($a[$sortField]) ? '1900-01-01' : trim($a[$sortField], '"');
+        $bDateRaw = empty($b[$sortField]) ? '1900-01-01' : trim($b[$sortField], '"');
+        
+        // Normalize different date formats for comparison
+        $aDate = normalizeDate($aDateRaw);
+        $bDate = normalizeDate($bDateRaw);
+        
+        return $sortDir == SORT_ASC 
+            ? strcmp($aDate, $bDate)
+            : strcmp($bDate, $aDate);
+    }
+    
     return $sortDir == SORT_ASC 
         ? strcmp($a[$sortField], $b[$sortField])
         : strcmp($b[$sortField], $a[$sortField]);
