@@ -182,7 +182,7 @@ if($_POST) {
     if (!empty($_POST['partner_redirect'])) {
         // Redirect back to partner portal with the updated course selected
         $partnerSlug = urlencode($_POST['LearningHubPartner']);
-        header("Location: /learning/hub/partners/course-form.php?partnerslug={$partnerSlug}&courseid={$courseid}");
+        header("Location: /learning/hub/partners/course-form.php?partnerslug={$partnerSlug}&courseid={$courseid}&message=Updated");
     } else {
         header('Location: course.php?courseid=' . $courseid);
     }
