@@ -62,22 +62,10 @@
 </ul>
 </div>
 <div class="col-md-3">
-<?php $coursechanges = getPendingCourseChanges() ?>
-<h3>Pending Course Changes <span class="badge text-bg-dark"><?= count($coursechanges) ?></span></h3>
-<ul class="list-group">
-<?php foreach($coursechanges as $change): ?>
-<!-- 0-creqID,1-CourseID,2-CourseName,3-DateRequested,4-RequestedBy,5-Status,
-6-CompletedBy,7-CompletedDate,8-Request -->
-<li class="list-group-item">
-<a href="course.php?courseid=<?= $change[1] ?>"><?= $change[2] ?></a>
-<div class="alert alert-secondary mb-0 p-0 pl-2">
-	<small><?php echo goodDateShort($change[3]) ?> <a href="person.php?idir=<?= $change[4] ?>"><?= $change[4] ?></a> requests:</small><br>
-	<?= $change[8] ?>
-</div>
-</li>
 
-<?php endforeach ?>
-</table>
+<h3>Pending Course Changes <span class="badge text-bg-dark"><?= count($coursechanges) ?></span></h3>
+<p>Temporarily disabled.</p>
+
 </div>
 <div class="col-md-6">
 <?php $courses = getCourses() ?>

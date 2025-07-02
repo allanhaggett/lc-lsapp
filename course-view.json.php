@@ -79,7 +79,11 @@ $response = [
     'HUBInclude'             => $courseDetails[53],
     'RegistrationLink'       => $courseDetails[54],
     'CourseNameSlug'         => $courseDetails[55],
-    'HubExpirationDate'      => $courseDetails[56]
+    'HubExpirationDate'      => $courseDetails[56],
+    'OpenAccessOptin'        => $courseDetails[57],
+    'HubIncludeSync'         => $courseDetails[58],
+    'HubIncludePersist'      => $courseDetails[59],
+    'HubPersistMessage'      => $courseDetails[60],
 ];
 
 // Return JSON response
