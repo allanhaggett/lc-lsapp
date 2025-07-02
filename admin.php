@@ -63,7 +63,7 @@
 </div>
 <div class="col-md-3">
 
-<h3>Pending Course Changes <span class="badge text-bg-dark"><?= count($coursechanges) ?></span></h3>
+<h3>Pending Course Changes</h3>
 <p>Temporarily disabled.</p>
 
 </div>
