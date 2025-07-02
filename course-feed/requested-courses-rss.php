@@ -35,9 +35,9 @@ if (($handle = fopen("../data/courses.csv", "r")) !== false) {
 $rss = '<?xml version="1.0" encoding="UTF-8" ?>' . "\n";
 $rss .= '<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">' . "\n";
 $rss .= '<channel>' . "\n";
-$rss .= '<title>BC Gov Learning - Requested Courses</title>' . "\n";
-$rss .= '<link>https://learningcentre.gww.gov.bc.ca/</link>' . "\n";
-$rss .= '<description>New course requests from BC Government Learning Partners awaiting approval</description>' . "\n";
+$rss .= '<title>Review Courses for LearningHUB</title>' . "\n";
+$rss .= '<link>https://corporatelearning.gww.gov.bc.ca/learninghub/</link>' . "\n";
+$rss .= '<description>New course requests from BC Government Learning Partners awaiting review</description>' . "\n";
 $rss .= '<language>en-us</language>' . "\n";
 $rss .= '<lastBuildDate>' . date(DATE_RSS) . '</lastBuildDate>' . "\n";
 $rss .= '<atom:link href="https://learn.bcpublicservice.gov.bc.ca/learning-hub/requested-courses.xml" rel="self" type="application/rss+xml" />' . "\n";
@@ -68,7 +68,7 @@ foreach ($datas as $course) {
         }
         
         // Build the course URL (using the course ID)
-        $courseUrl = 'https://learn.bcpublicservice.gov.bc.ca/lsapp/course.php?courseid=' . urlencode($course['CourseID']);
+        $courseUrl = 'https://gww.bcpublicservice.gov.bc.ca/lsapp/course.php?courseid=' . urlencode($course['CourseID']);
         
         // Create a more detailed description including metadata
         $fullDescription = $description;
@@ -109,11 +109,11 @@ $rss .= '</channel>' . "\n";
 $rss .= '</rss>';
 
 // Write the RSS feed to a file
-$rssFilename = 'data/requested-courses.xml';
+$rssFilename = 'data/learninghub-courses-for-review.xml';
 file_put_contents($rssFilename, $rss);
 
 // Copy to the web-accessible location
-$targetFile = 'E:/WebSites/NonSSOLearning/learning-hub/requested-courses.xml';
+$targetFile = 'E:/WebSites/NonSSOLearning/learning-hub/learninghub-courses-for-review.xml';
 if (!copy($rssFilename, $targetFile)) {
     echo 'Failed to copy ' . $rssFilename . ' to ' . $targetFile;
     exit;
@@ -121,4 +121,3 @@ if (!copy($rssFilename, $targetFile)) {
 
 // Redirect to the next step or back to index
 header('Location: index.php?message=Success');
-?>
