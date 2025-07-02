@@ -164,5 +164,5 @@ while (($course = fgetcsv($csvFile)) !== false) {
 // }
 
 fclose($csvFile);
-// exit;
-header('Location: index.php?message=Success');
+// Redirect to the requested courses RSS feed generation
+header('Location: requested-courses-rss.php');
