@@ -97,7 +97,7 @@ foreach ($courses as $course) {
     // If "requested" is specified, only show requested courses
     if (!$filters['status']) {
         // Default: only show active courses
-        if ($course[1] === 'Inactive') continue;
+        if ($course[1] !== 'Active') continue;
     } elseif ($filters['status'] === 'active') {
         if ($course[1] !== 'Active') continue;
     } elseif ($filters['status'] === 'inactive') {
