@@ -180,9 +180,9 @@ if($_POST) {
     
     // Check if this is from partner portal
     if (!empty($_POST['partner_redirect'])) {
-        // Redirect back to partner portal with the updated course selected
+        // Redirect back to partner portal dashboard
         $partnerSlug = urlencode($_POST['LearningHubPartner']);
-        header("Location: /learning/hub/partners/course-form.php?partnerslug={$partnerSlug}&courseid={$courseid}&message=Updated");
+        header("Location: /learning/hub/partners/dashboard.php?partnerslug={$partnerSlug}&message=CourseUpdated");
     } else {
         header('Location: course.php?courseid=' . $courseid);
     }

@@ -31,7 +31,15 @@ $now = date('Y-m-d\TH:i:s');
 // Process checkboxes with proper defaults
 $weship = isset($_POST['WeShip']) ? 'Yes' : 'No';
 $alchemer = isset($_POST['Alchemer']) ? 'Yes' : 'No';
-$hubInclude = 'No';
+
+// Handle HUBInclude - default to 'Yes' for partner form submissions
+if (!empty($_POST['partner_redirect'])) {
+    // From partner form - use form value, default to 'Yes' if not set
+    $hubInclude = (isset($_POST['HUBInclude']) && $_POST['HUBInclude'] == '1') ? 'Yes' : 'No';
+} else {
+    // From regular form - use form value if set, otherwise 'No'
+    $hubInclude = isset($_POST['HUBInclude']) ? 'Yes' : 'No';
+}
 
 // Combine start and end times (if provided)
 $combinedtimes = '';
@@ -145,9 +153,9 @@ if(!empty($_POST['CourseOwner']) || !empty($_POST['Developer'])) {
 
 // Check if this is from partner portal
 if (!empty($_POST['partner_redirect'])) {
-    // Redirect back to partner portal with the new course selected
+    // Redirect back to partner portal dashboard
     $partnerSlug = urlencode($_POST['LearningHubPartner']);
-    header("Location: /learning/hub/partners/course-form.php?partnerslug={$partnerSlug}&courseid={$courseid}&message=Created");
+    header("Location: /learning/hub/partners/dashboard.php?partnerslug={$partnerSlug}&message=CourseCreated");
 } else {
     // Redirect to the new course page
     header("Location: /lsapp/course.php?courseid={$courseid}");
