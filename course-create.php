@@ -53,7 +53,7 @@ $slug = createSlug($_POST['CourseName']);
 // Build course data array with proper sanitization
 $newcourse = [
     $courseid,                                      // 0: CourseID
-    'Requested',                                    // 1: Status
+    sanitize($_POST['Status']),                     // 2: Status
     sanitize($_POST['CourseName']),                 // 2: CourseName
     sanitize($_POST['CourseShort'] ?? ''),          // 3: CourseShort
     '',                                             // 4: ItemCode (empty for new requests)

@@ -63,6 +63,7 @@ $reportinglist = getReportingList();
     <input type="hidden" name="Requested" value="<?= date('Y-m-d') ?>">
     <input type="hidden" name="RequestedBy" value="<?= sanitize($user) ?>">
     <input type="hidden" name="HUBInclude" value="No">
+    <input type="hidden" name="Status" value="Requested">
     
     <!-- Basic Information Section -->
     <div class="form-section">
