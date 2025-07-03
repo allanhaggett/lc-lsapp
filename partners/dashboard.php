@@ -101,7 +101,12 @@ endif;
 ?>
 </div>
 <div class="col-m-12">
-            <h2>Course Requests</h2>
+<h2>
+    Course Requests
+    <div class="float-end">
+        <a href="https://learn.bcpublicservice.gov.bc.ca/learning-hub/learninghub-courses-for-review.xml" title="Subscribe to the RSS feed of requested courses.">RSS Feed</a>
+    </div>
+</h2>
 <p>Courses submitted by learning partners for review and publishing on the 
     LearningHUB.</p>
 <table class="table table-striped">

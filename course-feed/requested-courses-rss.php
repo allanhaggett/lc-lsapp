@@ -119,5 +119,5 @@ if (!copy($rssFilename, $targetFile)) {
     exit;
 }
 
-// Redirect to the next step or back to index
-header('Location: index.php?message=Success');
+// Redirect to the course changes RSS feed generation
+header('Location: course-changes-rss.php');
