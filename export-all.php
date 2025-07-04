@@ -6,9 +6,14 @@ require('inc/lsapp.php');
 // Get real path for our folder
 $rootPath = realpath('data');
 
+// Create ZIP file in the data folder with a unique name
+$zipFile = $rootPath . '/LSApp-All-Data-' . time() . '.zip';
+
 // Initialize archive object
 $zip = new ZipArchive();
-$zip->open('LSApp-All-Data.zip', ZipArchive::CREATE | ZipArchive::OVERWRITE);
+if ($zip->open($zipFile, ZipArchive::CREATE | ZipArchive::OVERWRITE) !== TRUE) {
+    die("Cannot open ZIP file for writing");
+}
 
 // Create recursive directory iterator
 /** @var SplFileInfo[] $files */
@@ -34,4 +39,16 @@ foreach ($files as $name => $file)
 // Zip archive will be created only after closing object
 $zip->close();
 
-header('Location: LSApp-All-Data.zip');
+// Set headers for file download
+header('Content-Type: application/zip');
+header('Content-Disposition: attachment; filename="LSApp-All-Data.zip"');
+header('Content-Length: ' . filesize($zipFile));
+header('Cache-Control: no-cache, no-store, must-revalidate');
+header('Pragma: no-cache');
+header('Expires: 0');
+
+// Output the file
+readfile($zipFile);
+
+// Clean up temporary file
+unlink($zipFile);
