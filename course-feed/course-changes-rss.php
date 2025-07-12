@@ -155,5 +155,4 @@ if (!copy($rssFilename, $targetFile)) {
 }
 
 // Redirect to the next step
-header('Location: index.php?message=Success');
-?>
+header('Location: course-changes-rss.php');
