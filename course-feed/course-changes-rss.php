@@ -155,4 +155,4 @@ if (!copy($rssFilename, $targetFile)) {
 }
 
 // Redirect to the next step
-header('Location: course-changes-rss.php');
+header('Location: partner-requests-rss.php');
