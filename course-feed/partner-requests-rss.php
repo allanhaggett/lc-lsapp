@@ -2,6 +2,9 @@
 opcache_reset();
 require('../inc/lsapp.php');
 
+// Set UTF-8 encoding for the script
+mb_internal_encoding('UTF-8');
+
 // Read the partners data file
 $partnersFile = "../data/partners.json";
 $partnersData = json_decode(file_get_contents($partnersFile), true);
@@ -142,8 +145,10 @@ foreach ($partnerRequests as $request) {
 $rss .= '</channel>' . "\n";
 $rss .= '</rss>';
 
-// Write the RSS feed to a file
+// Write the RSS feed to a file with UTF-8 encoding
 $rssFilename = 'data/partner-requests.xml';
+// Ensure the content is UTF-8 encoded
+$rss = mb_convert_encoding($rss, 'UTF-8', 'UTF-8');
 file_put_contents($rssFilename, $rss);
 
 // Copy to the web-accessible location

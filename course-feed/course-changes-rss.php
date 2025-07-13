@@ -2,6 +2,9 @@
 opcache_reset();
 require('../inc/lsapp.php');
 
+// Set UTF-8 encoding for the script
+mb_internal_encoding('UTF-8');
+
 // Directory containing the change request JSON files
 $directory = "../course-change/requests";
 
@@ -143,8 +146,10 @@ foreach ($changeRequests as $change) {
 $rss .= '</channel>' . "\n";
 $rss .= '</rss>';
 
-// Write the RSS feed to a file
+// Write the RSS feed to a file with UTF-8 encoding
 $rssFilename = 'data/course-change-requests.xml';
+// Ensure the content is UTF-8 encoded
+$rss = mb_convert_encoding($rss, 'UTF-8', 'UTF-8');
 file_put_contents($rssFilename, $rss);
 
 // Copy to the web-accessible location
