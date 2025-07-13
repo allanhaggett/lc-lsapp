@@ -67,43 +67,43 @@ $rss .= '<atom:link href="https://learn.bcpublicservice.gov.bc.ca/learning-hub/c
 // Add change requests to the RSS feed
 foreach ($changeRequests as $change) {
     // Build title
-    $title = htmlspecialchars($change['courseName']) . ' - ' . htmlspecialchars($change['category']);
+    $title = htmlspecialchars($change['courseName'], ENT_XML1, 'UTF-8') . ' - ' . htmlspecialchars($change['category'], ENT_XML1, 'UTF-8');
     if ($change['urgent']) {
         $title = '[URGENT] ' . $title;
     }
     
     // Build description
-    $description = htmlspecialchars($change['description'] ?? '');
+    $description = htmlspecialchars($change['description'] ?? '', ENT_XML1, 'UTF-8');
     
     // Add metadata to description
     $fullDescription = $description;
     
     if (!empty($change['partner'])) {
-        $fullDescription .= "\n\nLearning Partner: " . htmlspecialchars($change['partner']);
+        $fullDescription .= "\n\nLearning Partner: " . htmlspecialchars($change['partner'], ENT_XML1, 'UTF-8');
     }
     
     if (!empty($change['category'])) {
-        $fullDescription .= "\nCategory: " . htmlspecialchars($change['category']);
+        $fullDescription .= "\nCategory: " . htmlspecialchars($change['category'], ENT_XML1, 'UTF-8');
     }
     
     if (!empty($change['scope'])) {
-        $fullDescription .= "\nScope: " . htmlspecialchars($change['scope']);
+        $fullDescription .= "\nScope: " . htmlspecialchars($change['scope'], ENT_XML1, 'UTF-8');
     }
     
     if (isset($change['progress'])) {
-        $fullDescription .= "\nProgress: " . htmlspecialchars($change['progress']) . "%";
+        $fullDescription .= "\nProgress: " . htmlspecialchars($change['progress'], ENT_XML1, 'UTF-8') . "%";
     }
     
     if (!empty($change['assign_to'])) {
-        $fullDescription .= "\nAssigned to: " . htmlspecialchars($change['assign_to']);
+        $fullDescription .= "\nAssigned to: " . htmlspecialchars($change['assign_to'], ENT_XML1, 'UTF-8');
     }
     
     if (!empty($change['created_by'])) {
-        $fullDescription .= "\nRequested by: " . htmlspecialchars($change['created_by']);
+        $fullDescription .= "\nRequested by: " . htmlspecialchars($change['created_by'], ENT_XML1, 'UTF-8');
     }
     
     if (!empty($change['crm_ticket_reference'])) {
-        $fullDescription .= "\nCRM Ticket: " . htmlspecialchars($change['crm_ticket_reference']);
+        $fullDescription .= "\nCRM Ticket: " . htmlspecialchars($change['crm_ticket_reference'], ENT_XML1, 'UTF-8');
     }
     
     // Format dates
@@ -112,7 +112,7 @@ foreach ($changeRequests as $change) {
     
     // Build the change request URL
     $changeUrl = 'https://gww.bcpublicservice.gov.bc.ca/lsapp/course-change/view.php?courseid=' . 
-                 urlencode($change['courseid']) . '&changeid=' . urlencode($change['changeid']);
+                 urlencode($change['courseid']) . '&amp;changeid=' . urlencode($change['changeid']);
     
     // Add the item to the RSS feed
     $rss .= '<item>' . "\n";
@@ -124,7 +124,7 @@ foreach ($changeRequests as $change) {
     
     // Add category tags
     if (!empty($change['category'])) {
-        $rss .= '<category>' . htmlspecialchars($change['category']) . '</category>' . "\n";
+        $rss .= '<category>' . htmlspecialchars($change['category'], ENT_XML1, 'UTF-8') . '</category>' . "\n";
     }
     
     if ($change['urgent']) {

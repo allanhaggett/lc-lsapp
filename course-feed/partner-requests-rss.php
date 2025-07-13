@@ -67,9 +67,9 @@ $rss .= '<atom:link href="https://learn.bcpublicservice.gov.bc.ca/learning-hub/p
 foreach ($partnerRequests as $request) {
     // Build title
     if ($request['status'] === 'contact_request') {
-        $title = htmlspecialchars($request['name']);
+        $title = htmlspecialchars($request['name'], ENT_XML1, 'UTF-8');
     } else {
-        $title = 'New Partner Request: ' . htmlspecialchars($request['name']);
+        $title = 'New Partner Request: ' . htmlspecialchars($request['name'], ENT_XML1, 'UTF-8');
     }
     
     // Build description
