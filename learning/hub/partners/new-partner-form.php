@@ -44,8 +44,26 @@ if (isset($_GET["id"])) {
 <?php include('../templates/header.php') ?>
 
     <script>
-        function setCRM() {
-            document.getElementById('employee_facing_contact').value = 'CRM';
+        function toggleContactInput(type) {
+            const emailInput = document.getElementById('employee_contact_email');
+            const crmNotice = document.getElementById('crm_notice');
+            
+            if (type === 'email') {
+                emailInput.style.display = 'block';
+                emailInput.required = true;
+                crmNotice.style.display = 'none';
+            } else if (type === 'crm') {
+                emailInput.style.display = 'none';
+                emailInput.required = false;
+                emailInput.value = '';
+                crmNotice.style.display = 'block';
+            } else {
+                // For the placeholder option, hide both
+                emailInput.style.display = 'none';
+                emailInput.required = false;
+                emailInput.value = '';
+                crmNotice.style.display = 'none';
+            }
         }
         
         function addContactField() {
@@ -96,8 +114,10 @@ if (isset($_GET["id"])) {
 
     <div class="container my-5">
     <?php if ($hasRequestedPartner): ?>
-    <div class="alert alert-primary" role="alert">
-        Thank you for your request. We'll process it as soon as possible.
+    <div class="col-md-12">
+        <div class="alert alert-primary" role="alert">
+            Thank you for your request. We'll process it as soon as possible.
+        </div>
     </div>
     <?php endif; ?>
     <div class="row justify-content-md-center">
@@ -144,15 +164,30 @@ if (isset($_GET["id"])) {
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label">Employee Facing Contact</label>
-                        <div class="input-group">
-                            <input type="text" name="employee_facing_contact" class="form-control" 
-                                   placeholder="Enter email address or 'CRM'" 
-                                   value="<?php echo htmlspecialchars($partner["employee_facing_contact"] ?? ''); ?>"
-                                   id="employee_facing_contact">
-                            <button class="btn btn-outline-secondary" type="button" onclick="setCRM()">Set to CRM</button>
+                        <label class="form-label">Employee-facing Contact <small class="text-muted">(Contact information displayed to employees)</small></label>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <select name="employee_contact_type" class="form-select" required onchange="toggleContactInput(this.value)">
+                                    <?php 
+                                    $isEmail = isset($partner["employee_facing_contact"]) && filter_var($partner["employee_facing_contact"], FILTER_VALIDATE_EMAIL);
+                                    $isCRM = isset($partner["employee_facing_contact"]) && $partner["employee_facing_contact"] === "CRM";
+                                    $defaultToEmail = !$isEmail && !$isCRM; // Default to email for new entries
+                                    ?>
+                                    <option value="email" <?php echo ($isEmail || $defaultToEmail) ? "selected" : ""; ?>>Email Address</option>
+                                    <option value="crm" <?php echo $isCRM ? "selected" : ""; ?>>CRM System</option>
+                                </select>
+                            </div>
+                            <div class="col-md-8">
+                                <input type="email" name="employee_facing_contact" id="employee_contact_email" class="form-control" placeholder="Enter email address" 
+                                       value="<?php echo ($isEmail) ? htmlspecialchars($partner["employee_facing_contact"]) : ""; ?>"
+                                       style="display: <?php echo ($isEmail || $defaultToEmail) ? "block" : "none"; ?>;" 
+                                       <?php echo ($isEmail || $defaultToEmail) ? "required" : ""; ?>>
+                                <div id="crm_notice" class="alert alert-info mb-0" style="display: <?php echo $isCRM ? "block" : "none"; ?>;">
+                                    Employees will be directed to use the CRM system for support.
+                                </div>
+                            </div>
                         </div>
-                        <small class="text-muted">Enter an email address or select 'CRM' for CRM-based contact</small>
+                        <div class="form-text">This contact information will be shown to employees who need support with courses from this partner. <strong>Required field.</strong></div>
                     </div>
 
                     <h4>Contacts</h4>
