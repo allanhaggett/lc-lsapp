@@ -290,9 +290,11 @@ a:hover {
       <ul class="list-group mb-4">
         <?php foreach($courses as $pc): ?>
           <li class="list-group-item d-flex justify-content-between align-items-center">
-            <a href="course-form.php?partnerslug=<?= urlencode($pc[36]) ?>&courseid=<?= htmlspecialchars($pc[0]) ?>">
-              <?= htmlspecialchars($pc[2]) ?>
-            </a>
+            <span><?= htmlspecialchars($pc[2]) ?></span>
+            <div>
+              <a href="course-form.php?partnerslug=<?= urlencode($pc[36]) ?>&courseid=<?= htmlspecialchars($pc[0]) ?>" class="btn btn-sm btn-outline-primary me-1">Edit</a>
+              <a href="https://corporatelearning.gww.gov.bc.ca/learninghub/course/<?= htmlspecialchars($pc[55]) ?>" class="btn btn-sm btn-outline-secondary" target="_blank">View</a>
+            </div>
           </li>
         <?php endforeach ?>
       </ul>
@@ -307,9 +309,11 @@ a:hover {
       <ul class="list-group mb-4">
         <?php foreach($courses as $pc): ?>
           <li class="list-group-item d-flex justify-content-between align-items-center">
-            <a href="course-form.php?partnerslug=<?= urlencode($pc[36]) ?>&courseid=<?= htmlspecialchars($pc[0]) ?>">
-              <?= htmlspecialchars($pc[2]) ?>
-            </a>
+            <span><?= htmlspecialchars($pc[2]) ?></span>
+            <div>
+              <a href="course-form.php?partnerslug=<?= urlencode($pc[36]) ?>&courseid=<?= htmlspecialchars($pc[0]) ?>" class="btn btn-sm btn-outline-primary me-1">Edit</a>
+              <a href="https://corporatelearning.gww.gov.bc.ca/learninghub/course/<?= htmlspecialchars($pc[55]) ?>" class="btn btn-sm btn-outline-secondary" target="_blank">View</a>
+            </div>
           </li>
         <?php endforeach ?>
       </ul>
@@ -339,10 +343,11 @@ a:hover {
       <ul class="list-group mb-4">
         <?php foreach($elmcourses as $pc): ?>
           <li class="list-group-item d-flex justify-content-between align-items-center">
-            <a href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/LM_COURSESTRUCTURE.LM_CI_LA_CMP.GBL?LM_CI_ID=<?= htmlspecialchars($pc[50]) ?>"
-                target="_blank">
-              <?= htmlspecialchars($pc[2]) ?>
-            </a>
+            <span><?= htmlspecialchars($pc[2]) ?></span>
+            <div>
+              <a href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/LM_COURSESTRUCTURE.LM_CI_LA_CMP.GBL?LM_CI_ID=<?= htmlspecialchars($pc[50]) ?>" class="btn btn-sm btn-outline-primary me-1" target="_blank">Edit</a>
+              <a href="https://corporatelearning.gww.gov.bc.ca/learninghub/course/<?= htmlspecialchars($pc[55]) ?>" class="btn btn-sm btn-outline-secondary" target="_blank">View</a>
+            </div>
           </li>
         <?php endforeach ?>
       </ul>
