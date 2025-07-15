@@ -60,7 +60,7 @@ foreach ($datas as $course) {
         }
         
         $courseItem = [
-            "id" => $course['ItemCode'] ?? '',
+            "id" => !empty($course['ItemCode']) ? $course['ItemCode'] : ($course['CourseID'] ?? ''),
             "title" => $course['CourseName'] ?? '',
             "summary" => $desc,
             "content_text" => $course['CourseName'] ?? '',
