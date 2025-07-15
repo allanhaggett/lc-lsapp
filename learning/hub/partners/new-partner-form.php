@@ -2,7 +2,7 @@
 opcache_reset();
 date_default_timezone_set('America/Vancouver');
 $path = '../../../lsapp/inc/lsapp.php';
-require($path); 
+require($path);
 $partnersFile = "../../../lsapp/data/partners.json";
 $partners = file_exists($partnersFile) ? json_decode(file_get_contents($partnersFile), true) : [];
 $partner = ["id" => "", "name" => "", "slug" => "", "description" => "", "link" => "", "employee_facing_contact" => "", "contacts" => [], "status" => "inactive"];
@@ -114,10 +114,12 @@ if (isset($_GET["id"])) {
 
     <div class="container my-5">
     <?php if ($hasRequestedPartner): ?>
-    <div class="col-md-12">
+    <div class="row justify-content-md-center mb-5">
+    <div class="col-md-10">
         <div class="alert alert-primary" role="alert">
             Thank you for your request. We'll process it as soon as possible.
         </div>
+    </div>
     </div>
     <?php endif; ?>
     <div class="row justify-content-md-center">
