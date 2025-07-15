@@ -1,0 +1,523 @@
+/**
+ * Theme Name:        LearningHUB
+ * Theme URI:         https://learningcentre.gwww.gov.bc.ca/learninghub/
+ * Description:       A simple classic custom theme for LearningHUB. 
+ * Version:           1.0.0
+ * Author:            Nori Sinclair (primarily) & Allan Haggett
+ * Author URI:        https://learningcentre.gwww.gov.bc.ca/
+ * Text Domain:       learninghub
+ * Tested up to:      6.4
+ * Requires at least: 6.2
+ * License:           Apache
+ */
+
+ :root {
+    --gov-primary-blue: #234075;
+    --gov-primary-yellow: #e3a82b;
+    --gov-secondary-orange: #E87722;
+    --gov-secondary-green: #007864;
+    --gov-secondary-red: #971B2F;
+    --gov-secondary-blue: #4698cb;
+    --gov-secondary-brown: #866D48;
+    --gov-secondary-purple: #5F2167;
+    /* --cover--height: calc(12 * var(--global--spacing-vertical)); */
+
+    /* Customized bootstrap root variables */
+    --bs-font-sans-serif: "BCSans", "Noto Sans", Verdana, Arial, sans-serif;
+    --bs-body-font-size: 1.25rem;
+    /* font-size base is now 20px instead of 16px/1rem (WP default) */
+
+    --bs-primary: var(--gov-primary-blue);
+    /* changed primary colours to gov-primary blue */
+    --bs-primary-rgb: 35, 64, 117;
+
+    --bs-primary-bg-subtle: #cfe2ff;
+    /* subtle bg is 80% tint */
+
+    --bs-primary-border-subtle: #d3d9e3;
+    /* subtle border is 60% tint */
+
+    --bs-link-color: var(--gov-primary-blue);
+    --bs-link-color-rgb: 35, 64, 117;
+    --bs-link-decoration: underline;
+
+    --bs-link-hover-color: #4f6691;
+    /* link hover is 20% tint (original was 20% shade) */
+    --bs-link-hover-color-rgb: 79, 102, 145;
+    --gov-secondary-green-50: #80bcb2;
+    /* 50% tint */
+}
+
+[data-bs-theme=dark] {
+    --bs-primary: var(--gov-primary-yellow);
+    /* changed primary colours to gov-primary yellow for dark mode */
+    --bs-primary-rgb: 227, 168, 43;
+    --bs-primary-text: var(--bs-gray-900);
+
+    /* --bs-primary-text-emphasis: #f4dcaa; */
+    /* text emphasis is 60% tint */
+
+    --bs-primary-bg-subtle: #f9eed5;
+    /* subtle bg is 80% tint */
+
+    --bs-primary-border-subtle: #f4dcaa;
+    /* subtle border is 60% tint */
+    --gov-secondary-blue-50: #90c1e0;
+    --bs-link-color: var(--gov-secondary-blue-50);
+    --bs-link-color-rgb: 144, 193, 224;
+    --bs-link-decoration: underline;
+
+    --bs-link-hover-color: #b68622;
+    /* link hover is  20% shade */
+    --bs-link-hover-color-rgb: 182, 134, 34;
+}
+
+@font-face {
+    src: url(fonts/bc-sans/BCSans-Regular.woff2) format("woff2"),
+        url(fonts/bc-sans/BCSans-Regular.woff) format("woff");
+    font-weight: 400;
+    font-style: normal;
+    font-family: "BCSans";
+    font-display: swap;
+}
+
+
+/* Custom colours */
+.bg-gov-blue {
+    background-color: var(--gov-primary-blue) !important;
+    color: white !important;
+}
+
+.border-gov-blue,
+[data-bs-theme=dark] .border-gov-blue {
+    border-color: var(--gov-primary-blue) !important;
+}
+
+.bg-gov-green {
+    background-color: var(--gov-secondary-green) !important;
+    color: white !important;
+}
+
+.bg-gov-purple {
+    background-color: var(--gov-secondary-purple) !important;
+    color: white !important;
+}
+
+.bg-gov-ltblue {
+    background-color: var(--gov-secondary-blue) !important;
+    color: black !important;
+}
+
+.gov-green {
+    color: var(--gov-secondary-green) !important;
+}
+
+[data-bs-theme=dark] .gov-green {
+    color: var(--gov-secondary-green-50) !important;
+}
+
+.gov-yellow {
+    color: var(--gov-primary-yellow) !important;
+}
+
+.bg-gov-yellow {
+    background-color: var(--gov-primary-yellow) !important;
+}
+
+/* Preserve dark backgrounds for accordion headers rather than doing yellow */
+[data-bs-theme=dark] .accordion .text-bg-primary {
+    background-color: var(--gov-primary-blue) !important;
+    color: #fff !important;
+}
+
+[data-bs-theme=dark] .accordion .bg-gov-green {
+    background-color: var(--gov-secondary-green) !important;
+    color: #fff !important;
+}
+
+.accordion-button.text-bg-primary::after,
+.accordion-button.bg-gov-green::after,
+[data-bs-theme=dark] .accordion-button.bg-gov-green::after {
+    --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='white'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+    --bs-accordion-btn-active-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='white'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+}
+
+
+[data-bs-theme=dark] .text-bg-primary {
+    color: var(--bs-gray-900) !important;
+}
+
+/* Images and icons */
+img,
+iframe {
+    height: auto;
+    max-width: 100%;
+}
+
+.icon {
+    width: 2rem;
+    height: 100%;
+    margin: 0;
+}
+
+.icon-square {
+    width: 2.75rem;
+    height: 3rem;
+}
+
+.icon-svg {
+    display: inline-flex;
+    align-self: center;
+}
+
+.icon-svg.baseline-svg svg {
+    top: .125em;
+    position: relative;
+    overflow: visible;
+}
+
+.icon-svg svg {
+    height: 1em;
+    width: 1em;
+    margin-right: 0.5rem;
+}
+
+.green-flag {
+    fill: var(--gov-secondary-green);
+}
+
+[data-bs-theme=dark] .green-flag {
+    fill: var(--gov-secondary-green-50);
+}
+
+.search-toggler-icon {
+    display: inline-block;
+    width: 1.5em;
+    height: 1.5em;
+    vertical-align: middle;
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><!--!Font Awesome Free 6.5.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.--><path fill="rgba(255, 255, 255, 0.9)" d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100%;
+}
+
+.navbar {
+    font-size: 1.125rem;
+}
+
+.navbar[data-bs-theme=dark] {
+    --bs-navbar-color: rgba(255, 255, 255, 0.9);
+    --bs-navbar-hover-color: rgba(255, 255, 255, 0.75);
+    --bs-navbar-disabled-color: rgba(255, 255, 255, 0.25);
+    --bs-navbar-active-color: #fff;
+    --bs-navbar-brand-color: #fff;
+    --bs-navbar-brand-hover-color: #fff;
+    --bs-navbar-toggler-border-color: rgba(255, 255, 255, 0.1);
+    --bs-navbar-toggler-icon-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+[data-bs-theme=dark] .navbar-toggler-icon {
+    --bs-navbar-toggler-icon-bg: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba%28255, 255, 255, 0.9%29' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+.wordmark {
+    color: #FFF;
+    display: block;
+    font-size: 1.5em;
+    padding: .5em 0;
+    text-decoration: none;
+    white-space: nowrap;
+}
+
+.wordmark span {
+    display: inline-block;
+    letter-spacing: -.1em;
+}
+
+/* Cards */
+
+.topic-card {
+    background-color: #fcf6ea;
+    /* gov primary yellow 90% tint*/
+}
+
+a:hover .topic-card {
+    background-color: #f1d495;
+    color: var(--bs-primary)
+        /* gov primary yellow 50% tint*/
+        /* leave text colour unchanged on hover */
+}
+
+[data-bs-theme=dark] .topic-card {
+    background-color: unset;
+    /* gov primary yellow 50% tint*/
+    color: var(--bs-body-color);
+    border: var(--bs-border-width) var(--bs-border-style) var(--bs-border-color) !important;
+}
+
+[data-bs-theme=dark] a:hover .topic-card {
+    background-color: var(--gov-primary-blue);
+    color: var(--bs-body-color);
+}
+
+[data-bs-theme=dark] .topic-card a:hover:not(.btn) {
+    color: var(--bs-primary);
+}
+
+[data-bs-theme=dark] .topic-card a:not(.btn) {
+    color: var(--bs-body-color);
+}
+
+
+
+.screen-reader-text {
+    border: 0;
+    clip: rect(1px, 1px, 1px, 1px);
+    -webkit-clip-path: inset(50%);
+    clip-path: inset(50%);
+    height: 1px;
+    margin: -1px;
+    overflow: hidden;
+    padding: 0;
+    position: absolute !important;
+    width: 1px;
+    word-wrap: normal !important;
+    word-break: normal;
+}
+
+.skip-link:focus {
+    background-color: #f1f1f1;
+    border-radius: 3px;
+    box-shadow: 0 0 2px 2px rgba(0, 0, 0, 0.6);
+    clip: auto !important;
+    -webkit-clip-path: none;
+    clip-path: none;
+    color: #21759b;
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 700;
+    height: auto;
+    left: 5px;
+    line-height: normal;
+    padding: 15px 23px 14px;
+    text-decoration: none;
+    top: 5px;
+    width: auto;
+    z-index: 100000;
+}
+
+/* Do not show the outline on the skip link target. */
+#content[tabindex="-1"]:focus {
+    outline: 0;
+}
+
+.s {
+    border-radius: 5px !important;
+    border: 0 !important;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+h1.title {
+    font-size: calc(1.75rem + 1.5vw);
+    font-weight: 400;
+}
+
+h1,
+h2,
+h3,
+h4 {
+    color: var(--bs-primary);
+    font-weight: 400;
+}
+
+h5 {
+    color: var(--gov-secondary-green);
+    font-weight: 600;
+}
+
+[data-bs-theme=dark] h5 {
+    color: var(--bs-primary);
+}
+
+
+.btn-primary {
+    --bs-btn-color: #fff;
+    --bs-btn-bg: var(--bs-primary);
+    --bs-btn-border-color: var(--bs-primary);
+    --bs-btn-hover-color: #fff;
+    --bs-btn-hover-bg: var(--bs-link-hover-color);
+    --bs-btn-hover-border-color: #1c335e;
+    --bs-btn-focus-shadow-rgb: 49, 132, 253;
+    --bs-btn-active-color: #fff;
+    --bs-btn-active-bg: var(--bs-link-hover-color);
+    --bs-btn-active-border-color: #1c335e;
+    --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    --bs-btn-disabled-color: #fff;
+    --bs-btn-disabled-bg: var(--bs-primary);
+    --bs-btn-disabled-border-color: var(--bs-primary);
+}
+
+[data-bs-theme=dark] .btn-primary {
+    --bs-btn-color: #000000;
+    --bs-btn-bg: var(--bs-primary);
+    --bs-btn-border-color: var(--bs-primary);
+    --bs-btn-hover-color: #000;
+    --bs-btn-hover-bg: var(--bs-link-hover-color);
+    --bs-btn-hover-border-color: #b68622;
+    --bs-btn-focus-shadow-rgb: 49, 132, 253;
+    --bs-btn-active-color: #000;
+    --bs-btn-active-bg: var(--bs-link-hover-color);
+    --bs-btn-active-border-color: #b68622;
+    --bs-btn-active-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
+    --bs-btn-disabled-color: #000;
+    --bs-btn-disabled-bg: var(--bs-primary);
+    --bs-btn-disabled-border-color: var(--bs-primary);
+}
+
+
+.site-footer,
+.site-footer a {
+    font-size: 1rem;
+    color: #fff !important;
+}
+
+[data-bs-theme=dark] #feedback a:hover {
+    color: var(--bs-primary);
+}
+
+[data-bs-theme=dark] #feedback a {
+    color: var(--bs-body-color);
+}
+
+[data-bs-theme=light] .form-check-input {
+    border-color: var(--bs-secondary-color);
+}
+
+a[rel=tag] {
+    text-decoration: none;
+}
+
+[data-bs-theme=dark] .accordion-button:not(.collapsed) {
+    color: var(--bs-gray-900);
+}
+
+/* adds ellipsis on long text */
+
+.ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* hack summary details so that it works on Safari */
+summary::-webkit-details-marker {
+    display: none;
+}
+
+summary:not(.unstyled) {
+    list-style: none;
+    position: relative;
+
+    &::before {
+        content: '';
+        position: absolute;
+        border-top: 8px solid transparent;
+        border-left: 12px solid var(--bs-primary);
+        border-bottom: 8px solid transparent;
+        top: 0.3em;
+        left: -1rem;
+    }
+}
+
+details[open]>summary:not(.unstyled):before {
+    transform: rotate(90deg);
+    left: -1.1rem;
+}
+
+/* single course listing version with stretched link */
+
+span.summary {
+    list-style: none;
+    position: relative;
+    margin-left: 1rem;
+
+    &::before {
+        content: '';
+        position: absolute;
+        border-top: 8px solid transparent;
+        border-left: 12px solid var(--bs-primary);
+        border-bottom: 8px solid transparent;
+        top: 0.3em;
+        left: -1rem;
+    }
+}
+
+a[aria-expanded="true"] span.summary::before {
+    transform: rotate(90deg);
+    left: -1.1rem;
+}
+
+/* Text in a circle code from https://codepen.io/thebabydino/pen/vPddeq */
+
+
+p.circle-text>[aria-hidden='true'] {
+    display: contents;
+
+    &:before,
+    &:after {
+        float: left;
+        width: 50%;
+        height: 100%;
+        --bite: radial-gradient(farthest-side at var(--pos-x, 100%),
+                transparent 100%, red);
+        -webkit-shape-outside: var(--bite);
+        shape-outside: var(--bite);
+        content: '';
+    }
+
+    &:after {
+        float: right;
+        --pos-x: 0
+    }
+}
+
+p.circle-text {
+    overflow: hidden;
+    padding: 40px 20px;
+    /* set width and height for diameter */
+    width: 20em;
+    height: 20em;
+    border-radius: 50%;
+    background: lightblue;
+    text-align: center;
+    font-size: 20px;
+}
+
+[data-bs-theme=dark] p.circle-text {
+    color: black !important;
+}
+
+@media (max-width: 767.98px) {
+    :root {
+        --bs-body-font-size: 1rem;
+        /* font-size base is returned to WP default 16px/1rem for smaller screens*/
+    }
+
+    p.circle-text {
+        overflow: hidden;
+        padding: 18px 9px 16px 4px;
+        /* set width and height for diameter */
+        width: 18em;
+        height: 18em;
+        border-radius: 50%;
+        background: lightblue;
+        text-align: center;
+        font-size: 18px;
+    }
+
+    #CLFstructure {
+        font-size: .75em !important;
+        font-weight: normal !important;
+    }
+}

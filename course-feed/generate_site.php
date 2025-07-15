@@ -25,6 +25,8 @@ $footer = file_get_contents($footerTemplate);
 
 // Directory for generated course HTML files
 $outputDir = 'courses';
+$outputDir = '../../learning/hub/courses/';
+
 if (!is_dir($outputDir)) {
     mkdir($outputDir, 0755, true);
 }

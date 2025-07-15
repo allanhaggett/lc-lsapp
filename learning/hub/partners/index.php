@@ -1,0 +1,1 @@
+<?php header('Location: https://learningcentre.gww.gov.bc.ca/learninghub/corporate-learning-partners/'); ?>

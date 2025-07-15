@@ -1,0 +1,330 @@
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.3/font/bootstrap-icons.css">
+    <script src="https://code.jquery.com/jquery-3.5.0.js"></script>
+    <title>LC Coursework Page Mockup</title>
+    <style>
+        .bg-psa {
+            background-color: #003366;
+        }
+
+        .nav-tabs .nav-link.active,
+        .accordion-button:not(.collapsed) {
+            background-color: #003366;
+            color: white;
+            border-color: #003366;
+        }
+
+        .nav-tabs .nav-link:hover {
+            border-color: #003366;
+            background-color: white;
+            color: #003366;
+            font-weight: 500;
+            border-width: 2px 2px 0px 2px;
+        }
+
+        .nav-tabs .nav-link,
+        .accordion-button {
+            background-color: #6c757d;
+            border-color: #6c757d;
+            color: white;
+        }
+
+        .tab-content {
+            border: #003366 2px solid;
+            border-radius: 0 .25rem .25rem .25rem;
+        }
+
+        a.definition {
+            color: #414042;
+            text-decoration-line: underline;
+            text-decoration-style: dotted;
+            font-weight: bold;
+            text-underline-position: under;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .icon-ul {
+            list-style-type: none;
+            margin-left: var(--icon-li-margin, 2em);
+            padding-left: 0;
+        }
+
+        .icon-ul>li {
+            position: relative;
+        }
+
+        .icon-li {
+            left: calc(var(--icon-li-width, 1.5em)*-1);
+            top: 3.5;
+            position: absolute;
+            text-align: left;
+            line-height: inherit;
+        }
+
+        .wordmark {
+            display: block;
+            font-size: 2em;
+            text-decoration: none;
+        }
+
+        .accordion-button:not(.collapsed)::after {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+            transform: rotate(-180deg);
+        }
+
+        .accordion-button.collapsed::after {
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23ffffff'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+        }
+    </style>
+</head>
+<body class="min-vh-100 flex-column d-flex">
+    <!-- navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-xxl px-4">
+            <a href="https://learningcentre.gww.gov.bc.ca/learninghub/" target="_blank" rel="noopener" class="wordmark navbar-brand"> Learning<span style="color: #ebba44; font-weight: bold;">HUB</span>
+            </a>
+            <!-- <a href="https://learningcentre.gww.gov.bc.ca/" target="_blank" rel="noopener" class="navbar-brand py-2">
+                <img alt="Brought to you by the Learning Centre" height="50" src="https://learn.bcpublicservice.gov.bc.ca/common-components/text-only.svg">
+            </a> -->
+            <!-- <a href="https://learningcentre.gww.gov.bc.ca/" target="_blank" rel="noopener" class="navbar-brand">
+                <img alt="Brought to you by the Learning Centre" height="80" src="https://learn.bcpublicservice.gov.bc.ca/common-components/learning-centre-logo-wordmark.svg">
+            </a> -->
+            <!-- TODO should this be learning centre or Learning hub as home? -->
+            <!-- toggle button for mobile nav -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#main-nav" aria-controls="main-nav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <!-- navbar links -->
+            <div class="collapse navbar-collapse justify-content-end align-center px-lg-0 px-2" id="main-nav">
+                <ul class="navbar-nav">
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">PSA Learning System</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">Learning<strong>HUB</strong></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link">Help (AskMyHR)</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link disabled">LSApp</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        </div>
+    </nav>
+    <!-- header -->
+    <header class="bg-psa text-white p-lg-3 p-2">
+        <section id="header">
+            <div class="container-lg">
+                <h1>
+                    <div class="display-2">Applied Project Management</div>
+                    <div class="display-5">PM-200</div>
+                </h1>
+            </div>
+        </section>
+    </header>
+    <!-- intro, course description and at a glance -->
+    <div class="container-lg py-5">
+        <section id="intro">
+            <div class="row">
+                <div class="col-lg-4 mb-3 my-lg-0">
+                    <div class="card border-rounded bg-light">
+                        <div class="card-header bg-psa text-white h6">At a Glance</div>
+                        <div class="card-body py-3">
+                            <div class="card-title">
+                                <h3 class="fw-light">PM-200</h3>
+                            </div>
+                            <ul class="icon-ul">
+                                <li><span class="icon-li"><i class="bi bi-clock-history"></i></span><strong>Time Commitment</strong>: 20 hours (5 modules of 4 hours each)</li>
+                                <li><span class="icon-li"><i class="bi bi-calendar-week"></i></span><strong>Scheduling</strong>: 2 hours self-directed study, plus optional 2-hour webinar per module</li>
+                                <li><span class="icon-li"><i class="bi bi-pencil-square"></i></span><strong>Pre/Post Session Work Required</strong>: Yes</li>
+                                <li><span class="icon-li"><i class="bi bi-check2-square"></i></span><strong>Prerequisites</strong>: PM-101</li>
+                                <li><span class="icon-li"><i class="bi bi-person-video3"></i></span><strong>Delivery Method</strong>: <a tabindex="0" class="definition" role="button" data-bs-toggle="popover" data-bs-trigger="focus" title="Blended format" data-bs-content="An offering with any combination of self-paced learning plus live virtual or classroom sessions.">Blended Format</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <h3>Upcoming sessions</h3>
+                    </div>
+                </div>
+                <div class="col-lg-8">
+                    <h2>Course description</h2>
+                    <p class="lead">Five self-directed modules in Moodle (approx 2 hrs each) with a live webinar for each (approx 2hrs each): Starting a Project, Planning Project Work, Engaging Interested Parties, Managing Risk and Change & Completing a Project.</p>
+                    <h3>Abstract</h3>
+                    <p>Applied Project Management 200 focuses on the essential skills needed to perform on a project team in the BC Public Service. In this course, you'll build the knowledge and skills to:</p>
+                    <ul>
+                        <li>Select appropriate tools to ease project planning and execution</li>
+                        <li>Identify tasks required to complete project deliverables</li>
+                        <li>Prepare appropriate project documentation throughout the project</li>
+                        <li>Participate dynamically in a project as a project team member</li>
+                        <li>Identify and analyze and monitor risk using a risk register</li>
+                        <li>Identify and analyze the impact of change to scope, time, cost and resources</li>
+                    </ul>
+                    <p>The new Applied learning provides a high-level consideration of different PM approaches which include the spectrum from waterfall to agile. Change management and benefits realization are two other skills that are highlighted as necessary for the applied level learner in Project Management. All modules include realistic case studies from the BC Public Service context across a range of sectors.</p>
+                    <p> In addition, live webinars are available to supplement the online course. Practice performing on a project team in these 2-2.5 hour sessions (one per module).</p>
+                    <div class="my-4">
+                        <a class="btn btn-success" href="#" target="_blank" title="Search for this course code in the PSA Learning System"> View in PSA Learning System </a>
+                        <a class="btn btn-secondary" href="#" target="_blank" title="Launch LSApp course page"> View in LSApp </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <!-- session details tabs/accordions -->
+        <section id="details">
+            <div class="d-none d-md-block mt-3">
+                <!-- Nav tabs -->
+                <ul class="nav nav-tabs" id="detailsTabs" role="tablist">
+                    <li class="nav-item me-1" role="presentation">
+                        <button class="nav-link active" id="before-tab" data-bs-toggle="tab" data-bs-target="#before" type="button" role="tab" aria-controls="before" aria-selected="true">Before the Session</button>
+                    </li>
+                    <li class="nav-item me-1" role="presentation">
+                        <button class="nav-link" id="during-tab" data-bs-toggle="tab" data-bs-target="#during" type="button" role="tab" aria-controls="during" aria-selected="false">During the Session</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="after-tab" data-bs-toggle="tab" data-bs-target="#after" type="button" role="tab" aria-controls="after" aria-selected="false">After the Session</button>
+                    </li>
+                </ul>
+                <!-- Tab panes -->
+                <div class="tab-content p-3">
+                    <div class="tab-pane active" id="before" role="tabpanel" aria-labelledby="before-tab">
+                        <h2>Before the Session</h2>
+                        <div class="row">
+                            <div class="col-lg-8">
+                                <h3>Prerequisites</h3>
+                                <p>To prepare for this course, please complete the following before you enrol in PM-200.</p>
+                                <ul>
+                                    <li><a href="https://learning.gov.bc.ca/psc/CHIPSPLM/EMPLOYEE/ELM/c/LM_OD_EMPLOYEE_FL.LM_FND_LRN_FL.GBL?Page=LM_FND_LRN_RSLT_FL&Action=U&KWRD=ITEM-416" target="_blank">PM 101: Project Foundations (eLearning)</a>:  Please review the course prior to our first session. We will be building on core project management concepts and processes introduced in this eLearning module.</li>
+                                        </ul>
+                                    
+                                <h3>Preparation</h3>
+                                <ul>
+                                    <li> Required work (with time needed to complete) </li>
+                                    <li> Document links/embedded videos etc. </li>
+                                    <li> instructions </li>
+                                    <li>Optional work/resource</li>
+                                    <li>Add to calendar instructions</li>
+                                </ul>
+                                <h3>Webinar Readiness/Virtual Etiquette</h3>
+                                <ul>
+                                    <li>Tech info/tips</li>
+                                    <li>Tech requirements - camera, audio, multiple screens, mobile device etc.</li>
+                                    <li>Online learning expectations (also during session category?)</li>
+                                    <li>What to bring</li>
+                                    <li>Accommodations/questions </li>
+                                    <li>What to expect in the session: format</li>
+                                </ul>
+                            </div>
+                            <div class="col-lg-4 mt-3 mt-lg-0">
+                                <div class="card bg-success text-white">
+                                    <div class="card-body">
+                                        <h3 class="card-title">Accommodation</h3>
+                                        <p>Please let us know if you require course materials in alternate formats and/or if you require other accommodation supports to successfully attend a course.</p>
+                                        <p><a href="#" class="text-white fw-bold">Request accommodation</a></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane" id="during" role="tabpanel" aria-labelledby="during-tab">
+                        <h2>During the Session</h2>
+                        <h3>How to launch the session</h3>
+                        <h3>Online learning expectations reminder</h3>
+                        <h3>Course Materials</h3>
+                        <h3>Help during the session</h3>
+                        <h3>Self-care</h3>
+                    </div>
+                    <div class="tab-pane" id="after" role="tabpanel" aria-labelledby="after-tab">
+                        <h2>After the Session</h2>
+                        <h3>Completion requirements</h3>
+                        <h3>Homework/Practice</h3>
+                        <h3>Next Steps</h3>
+                        <ul>
+                            <li>Courses</li>
+                            <li>CoP</li>
+                            <li>Other resources</li>
+                        </ul>
+                        <h3>Feedback/Assistance</h3>
+                        <ul>
+                            <li>Feedback survey/other ways to give feedback</li>
+                            <li>Care/support/assistance needed?</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="accordion d-block d-md-none mt-3" id="detailsAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingBefore">
+                        <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBefore" aria-expanded="true" aria-controls="collapseOne"> Before the Session </button>
+                    </h2>
+                    <div id="collapseBefore" class="accordion-collapse collapse show" aria-labelledby="headingBefore" data-bs-parent="#detailsAccordion">
+                        <div class="accordion-body" id="beforeText">
+                            <!-- Data copies what is in the tabs -->
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingDuring">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDuring" aria-expanded="false" aria-controls="collapseDuring"> During the Session </button>
+                    </h2>
+                    <div id="collapseDuring" class="accordion-collapse collapse" aria-labelledby="headingDuring" data-bs-parent="#detailsAccordion">
+                        <div class="accordion-body" id="duringText">
+                            <!-- Data copies what is in the tabs -->
+                        </div>
+                    </div>
+                </div>
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="headingAfter">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAfter" aria-expanded="false" aria-controls="collapseAfter"> After the Session </button>
+                    </h2>
+                    <div id="collapseAfter" class="accordion-collapse collapse" aria-labelledby="headingAfter" data-bs-parent="#detailsAccordion">
+                        <div class="accordion-body" id="afterText">
+                            <!-- Data copies what is in the tabs -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+    </section>
+    <!-- footer -->
+    <footer class="footer bg-psa text-white p-lg-3 p-5 mt-auto flex justify-center">
+        <div class="container-lg">
+            <p class="lead m-0">We acknowledge with respect that the Learning Hub operates throughout B.C. on the traditional lands of Indigenous peoples.</p>
+        </div>
+    </footer>
+    <footer class="footer bg-success text-white p-lg-3 p-5 mt-auto flex justify-center">
+        <div class="container-lg">
+            <img alt="Where Ideas Work logo" class="d-none d-md-block mx-auto" src="https://learn.bcpublicservice.gov.bc.ca/common-components/where-ideas-work-whitetext.svg" width="300">
+            <p class="small text-center">Your personal information is collected by the Public Service Agency under the Freedom of Information and Protection of Privacy Act section 26(c) for the purpose of managing and administering employee development and training.<br /> If you have any questions, please contact Manager, Technology Solutions, 810 Blanshard Street, Victoria BC V8W 2H2, or (250) 952-6000.</p>
+        </div>
+    </footer>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+    <script>
+        var popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'))
+        var popoverList = popoverTriggerList.map(function (popoverTriggerEl) {
+            return new bootstrap.Popover(popoverTriggerEl)
+        })
+        var popover = new bootstrap.Popover(document.querySelector('.popover-dismiss'), {
+            trigger: 'focus'
+        })
+    </script>
+    <script>
+        $(function () {
+            var beforeString = $('#before').html();
+            $('div#beforeText').html(beforeString);
+            var duringString = $('#during').html();
+            $('div#duringText').html(duringString);
+            var afterString = $('#after').html();
+            $('div#afterText').html(afterString);
+        });
+    </script>
+</body>
+</html>
