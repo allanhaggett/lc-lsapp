@@ -104,7 +104,11 @@ endif;
 <h2>
     Course Requests
     <div class="float-end">
-        <a href="https://learn.bcpublicservice.gov.bc.ca/learning-hub/learninghub-courses-for-review.xml" title="Subscribe to the RSS feed of requested courses.">RSS Feed</a>
+        <a href="https://learn.bcpublicservice.gov.bc.ca/learning-hub/learninghub-courses-for-review.xml" 
+            title="Subscribe to the RSS feed of requested courses."
+            class="btn btn-sm btn-outline-secondary" target="_blank">
+                RSS Feed
+        </a>
     </div>
 </h2>
 <p>Courses submitted by learning partners for review and publishing on the 
