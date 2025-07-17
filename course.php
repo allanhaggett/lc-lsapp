@@ -448,9 +448,6 @@ $openAccessCode = $accessCodeData[0]['code'] ?? '';
 
 
 	
-	<?php if($deets[35]): ?>
-	<div class=mb-3">Evaluations link: <?= $deets[35] ?></div>
-	<?php endif ?>
 	
 	
 	<div>
