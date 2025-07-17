@@ -64,12 +64,15 @@ img {
 	height: auto;
 	max-width: 100%;
 }
-.cancelled {
-	color: #999;
+.cancelled,
+.cancelled td,
+.cancelled a {
+	color: #999999;
 	text-decoration: line-through;
 }
-.cancelled a {
-	color: #999;
+
+.cancelled a:hover {
+	color: #b1b1b1ff;
 }
 
 .fc-time{
