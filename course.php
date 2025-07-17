@@ -94,9 +94,14 @@ if (file_exists($categoriesFile)) {
 	<div class="col-6 col-md-3"><strong>Short name:</strong><br> <?= $deets[3] ?></div>
 	<div class="col-6 col-md-3">
 		<strong>ELM Code:</strong><br> 
-		<?= $deets[4] ?>
-		<span style="font-size:10px">
-		(<a target="_blank" href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/LM_COURSESTRUCTURE.LM_CI_LA_CMP.GBL?LM_CI_ID=<?= h($deets[50]) ?>"><?= $deets[50] ?></a>)</span>
+		<table>
+			<tr>
+				<td><?= $deets[4] ?></td>
+				<td><span style="font-size:10px">
+				(<a target="_blank" href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/LM_COURSESTRUCTURE.LM_CI_LA_CMP.GBL?LM_CI_ID=<?= h($deets[50]) ?>"><?= $deets[50] ?></a>)</span>
+				</td>
+			</tr>
+		</table>
 	</div>
 </div>
 
@@ -443,9 +448,6 @@ $openAccessCode = $accessCodeData[0]['code'] ?? '';
 
 
 	
-	<?php if($deets[35]): ?>
-	<div class=mb-3">Evaluations link: <?= $deets[35] ?></div>
-	<?php endif ?>
 	
 	
 	<div>
@@ -492,45 +494,46 @@ $finalcount = $upcount - $inactive - $closed;
 	<div class="mb-3 shadow-sm">
 		<h3><span class="classcount"><?= $finalcount ?></span>  Current Offering<?php if($finalcount > 1) echo 's' ?></h3>
 	</div>
+
 <table class="table table-sm mb-5">
-<tbody class="list">
-<?php foreach($classes as $class): ?>
-<?php
-// We only wish to see classes which have an end date greater than today
-$today = date('Y-m-d');
-if($class[9] < $today && $class[45] !== 'eLearning') continue;
-// elseif($class[45] == 'eLearning' && $class[1] == 'Closed') continue; // Only show the current active eLearning
-?>
-<?php if($class[1] == 'Inactive'): ?>
-<tr class="cancelled">
-<?php else: ?>
-<tr>
-<?php endif ?>
-	<td>
-		<?php if($class[4] == 'Dedicated'): ?>
-		<span class="badge bg-light-subtle ">Dedicated</span>
+	<tbody class="list">
+		<?php foreach($classes as $class): ?>
+		<?php
+		// We only wish to see classes which have an end date greater than today
+		$today = date('Y-m-d');
+		if($class[9] < $today && $class[45] !== 'eLearning') continue;
+		// elseif($class[45] == 'eLearning' && $class[1] == 'Closed') continue; // Only show the current active eLearning
+		?>
+		<?php if($class[1] == 'Inactive'): ?>
+		<tr class="cancelled">
+		<?php else: ?>
+		<tr>
 		<?php endif ?>
-		<small><?= $class[7] ?></small>
-		
-	</td>
-	<td>
-		<a href="/lsapp/class.php?classid=<?= $class[0] ?>">
-		<?php echo goodDateShort($class[8],$class[9]) ?>
-		</a>
-		<div class="classdate" style="display:none"><?= $class[8] ?></div>
-	</td>
-	<td class="Venue">
-        <a href="Venue.php?name=<?= $class[25] ?>"><?= $class[25] ?></a>
-        <?php if(!$class[25]): ?>
-        <?= h($class[45]) ?>
-        <?php endif ?>
-    </td>
-    <td class="status">
-		<?= $class[1] ?>
-	</td>
-</tr>
-<?php endforeach ?>
-</tbody>
+			<td>
+				<?php if($class[4] == 'Dedicated'): ?>
+				<span class="badge bg-light-subtle text-primary-emphasis">Dedicated</span>
+				<?php endif ?>
+				<small><?= $class[7] ?></small>
+				
+			</td>
+			<td>
+				<a href="/lsapp/class.php?classid=<?= $class[0] ?>">
+				<?php echo goodDateShort($class[8],$class[9]) ?>
+				</a>
+				<div class="classdate" style="display:none"><?= $class[8] ?></div>
+			</td>
+			<td class="Venue">
+				<a href="Venue.php?name=<?= $class[25] ?>"><?= $class[25] ?></a>
+				<?php if(!$class[25]): ?>
+				<?= h($class[45]) ?>
+				<?php endif ?>
+			</td>
+			<td class="status">
+				<?= $class[1] ?>
+			</td>
+		</tr>
+		<?php endforeach ?>
+	</tbody>
 </table>
 </div>
 <?php endif; //finalcount ?>
@@ -675,7 +678,11 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
 
 </div>
 <div class="col-12">
-<div class="p-3 my-3 bg-light-subtle rounded-3">Created on <?php echo goodDateLong($deets[13]) ?> by <a href="person.php?idir=<?= $deets[14] ?>"><?= $deets[14] ?></a></div>
+	<div class="p-3 my-3 bg-light-subtle rounded-3">
+	<?php if(!empty($deets[13])): ?>
+		Created on <?php echo goodDateLong($deets[13]) ?> by <a href="person.php?idir=<?= $deets[14] ?>"><?= $deets[14] ?></a>
+	<?php endif; ?>
+	</div>
 </div>
 </div>
 
