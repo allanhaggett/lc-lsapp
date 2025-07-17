@@ -678,7 +678,11 @@ $finalcount = $upcount - $inactive - $closed;
 
 </div>
 <div class="col-12">
-<div class="p-3 my-3 bg-light-subtle rounded-3">Created on <?php echo goodDateLong($deets[13]) ?> by <a href="person.php?idir=<?= $deets[14] ?>"><?= $deets[14] ?></a></div>
+	<div class="p-3 my-3 bg-light-subtle rounded-3">
+	<?php if(!empty($deets[13])): ?>
+		Created on <?php echo goodDateLong($deets[13]) ?> by <a href="person.php?idir=<?= $deets[14] ?>"><?= $deets[14] ?></a>
+	<?php endif; ?>
+	</div>
 </div>
 </div>
 
