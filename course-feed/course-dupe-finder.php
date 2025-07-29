@@ -26,10 +26,12 @@ if (($handle = fopen($csvFile, 'r')) !== false) {
     }
     fclose($handle);
     
-    // Group duplicates by lowercase course name + item code
+    // Group duplicates by normalized lowercase course name
     $courseGroups = [];
     foreach ($allCourses as $course) {
-        $uniqueKey = strtolower($course['CourseName']) . '_' . strtolower($course['ItemCode']);
+        // Normalize whitespace: replace multiple spaces with single space and trim
+        $normalizedName = preg_replace('/\s+/', ' ', trim($course['CourseName']));
+        $uniqueKey = strtolower($normalizedName);
         if (!isset($courseGroups[$uniqueKey])) {
             $courseGroups[$uniqueKey] = [];
         }
@@ -117,12 +119,12 @@ function getImportantFields() {
     <?php if (empty($duplicateGroups)): ?>
         <div class="alert alert-success">
             <h4>No duplicates found!</h4>
-            <p>All courses have unique combinations of course name and item code (case-insensitive).</p>
+            <p>All courses have unique course names (after normalizing whitespace and case).</p>
         </div>
     <?php else: ?>
         <div class="alert alert-warning">
             <h4><?= count($duplicateGroups) ?> duplicate group(s) found</h4>
-            <p>The following courses have the same name and item code (case-insensitive):</p>
+            <p>The following courses have the same name (after normalizing whitespace and case):</p>
         </div>
         
         <?php foreach ($duplicateGroups as $groupKey => $group): ?>
