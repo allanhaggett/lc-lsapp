@@ -94,14 +94,10 @@ if (file_exists($categoriesFile)) {
 	<div class="col-6 col-md-3"><strong>Short name:</strong><br> <?= $deets[3] ?></div>
 	<div class="col-6 col-md-3">
 		<strong>ELM Code:</strong><br> 
-		<table>
-			<tr>
-				<td><?= $deets[4] ?></td>
-				<td><span style="font-size:10px">
-				(<a target="_blank" href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/LM_COURSESTRUCTURE.LM_CI_LA_CMP.GBL?LM_CI_ID=<?= h($deets[50]) ?>"><?= $deets[50] ?></a>)</span>
-				</td>
-			</tr>
-		</table>
+		<div class="d-flex align-items-center">
+			<div class="pe-1"><?= $deets[4] ?></div>
+			<div style="font-size:10px">(<a target="_blank" href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/LM_COURSESTRUCTURE.LM_CI_LA_CMP.GBL?LM_CI_ID=<?= h($deets[50]) ?>"><?= $deets[50] ?></a>)</div>
+		</div>
 	</div>
 </div>
 
