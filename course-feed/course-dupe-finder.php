@@ -29,8 +29,26 @@ if (($handle = fopen($csvFile, 'r')) !== false) {
     // Group duplicates by normalized lowercase course name
     $courseGroups = [];
     foreach ($allCourses as $course) {
-        // Normalize whitespace: replace multiple spaces with single space and trim
-        $normalizedName = preg_replace('/\s+/', ' ', trim($course['CourseName']));
+        // Normalize the course name:
+        $normalizedName = $course['CourseName'];
+        
+        // 1. Replace multiple spaces with single space and trim
+        $normalizedName = preg_replace('/\s+/', ' ', trim($normalizedName));
+        
+        // 2. Normalize dashes: em dash (—), en dash (–), and other dash variants to hyphen
+        $normalizedName = str_replace(['—', '–', '‒', '―', '⁃'], '-', $normalizedName);
+        
+        // 3. Normalize Microsoft special characters
+        // Smart quotes to regular quotes (using Unicode escape sequences)
+        $normalizedName = str_replace(["\u{201C}", "\u{201D}", "\u{201E}"], '"', $normalizedName);
+        $normalizedName = str_replace(["\u{2018}", "\u{2019}", "\u{201A}"], "'", $normalizedName);
+        
+        // Ellipsis
+        $normalizedName = str_replace("\u{2026}", '...', $normalizedName);
+        
+        // Non-breaking spaces to regular spaces
+        $normalizedName = str_replace("\xC2\xA0", ' ', $normalizedName);
+        
         $uniqueKey = strtolower($normalizedName);
         if (!isset($courseGroups[$uniqueKey])) {
             $courseGroups[$uniqueKey] = [];
