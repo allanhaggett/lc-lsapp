@@ -551,15 +551,7 @@ $finalcount = $upcount - $inactive - $closed;
 		<ul class="list-group mb-4">
 			<?php foreach ($files as $file): 
 				$request = json_decode(file_get_contents($file), true);
-				if ($request['progress'] != 'Closed'):
-					$filenameParts = explode('-change-', basename($file, '.json')); 
-					if (count($filenameParts) === 2):
-						$courseidParts = explode('course-', $filenameParts[0]);
-						$chid = $filenameParts[1];
-					else:
-						die("Error: Invalid file name format.");
-					endif; ?>
-
+				if ($request['progress'] != 'Closed'): ?>
 					<li class="list-group-item">
 					<div class="">
 						<?php if ($request['urgent']): ?>
@@ -570,7 +562,7 @@ $finalcount = $upcount - $inactive - $closed;
 						<span class="badge bg-success"><?= htmlspecialchars($request['approval_status'] ?? 'Unknown') ?></span>
 						</div>
 						<h4 class="my-1 fs-5">
-							<a href="course-change/view.php?courseid=<?= htmlspecialchars($courseidParts[1]) ?>&changeid=<?= htmlspecialchars($chid) ?>">
+							<a href="course-change/view.php?courseid=<?= htmlspecialchars($request['courseid']) ?>&changeid=<?= htmlspecialchars($request['changeid']) ?>">
 								<?= htmlspecialchars($request['category']) ?> Request <small><?= $request['changeid'] ?? '' ?></small>
 							</a>
 						</h4>
@@ -616,10 +608,7 @@ $finalcount = $upcount - $inactive - $closed;
                 echo '<ul class="list-group mb-4">';
                 foreach ($files as $file) {
                     $request = json_decode(file_get_contents($file), true);
-                    if ($request['progress'] == 'Closed') {
-                        $filenameParts = explode('-', basename($file, '.json')); // Parse file name
-                        $chid = $filenameParts[3]; // Extract change ID (second part of the name)
-                        ?>
+                    if ($request['progress'] == 'Closed') { ?>
                         <li class="list-group-item">
                             <div class="mb-2">
                                 <?php if ($request['urgent']): ?>
@@ -630,7 +619,7 @@ $finalcount = $upcount - $inactive - $closed;
                                 <span class="badge bg-success">Approval: <?= htmlspecialchars($request['approval_status']) ?></span>
                             </div>
                             <h4 class="my-1 fs-5">
-                                <a href="course-change/view.php?courseid=<?= htmlspecialchars($courseid) ?>&changeid=<?= htmlspecialchars($chid) ?>">
+                                <a href="course-change/view.php?courseid=<?= htmlspecialchars($request['courseid']) ?>&changeid=<?= htmlspecialchars($request['changeid']) ?>">
                                     <?= htmlspecialchars($request['category']) ?> Request <small><?= $request['changeid'] ?? '' ?></small>
                                 </a>
                             </h4>
