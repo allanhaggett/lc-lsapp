@@ -94,9 +94,10 @@ if (file_exists($categoriesFile)) {
 	<div class="col-6 col-md-3"><strong>Short name:</strong><br> <?= $deets[3] ?></div>
 	<div class="col-6 col-md-3">
 		<strong>ELM Code:</strong><br> 
-		<?= $deets[4] ?>
-		<span style="font-size:10px">
-		(<a target="_blank" href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/LM_COURSESTRUCTURE.LM_CI_LA_CMP.GBL?LM_CI_ID=<?= h($deets[50]) ?>"><?= $deets[50] ?></a>)</span>
+		<div class="d-flex align-items-center">
+			<div class="pe-1"><?= $deets[4] ?></div>
+			<div style="font-size:10px">(<a target="_blank" href="https://learning.gov.bc.ca/psp/CHIPSPLM/EMPLOYEE/ELM/c/LM_COURSESTRUCTURE.LM_CI_LA_CMP.GBL?LM_CI_ID=<?= h($deets[50]) ?>"><?= $deets[50] ?></a>)</div>
+		</div>
 	</div>
 </div>
 
@@ -443,9 +444,6 @@ $openAccessCode = $accessCodeData[0]['code'] ?? '';
 
 
 	
-	<?php if($deets[35]): ?>
-	<div class=mb-3">Evaluations link: <?= $deets[35] ?></div>
-	<?php endif ?>
 	
 	
 	<div>
@@ -492,45 +490,46 @@ $finalcount = $upcount - $inactive - $closed;
 	<div class="mb-3 shadow-sm">
 		<h3><span class="classcount"><?= $finalcount ?></span>  Current Offering<?php if($finalcount > 1) echo 's' ?></h3>
 	</div>
+
 <table class="table table-sm mb-5">
-<tbody class="list">
-<?php foreach($classes as $class): ?>
-<?php
-// We only wish to see classes which have an end date greater than today
-$today = date('Y-m-d');
-if($class[9] < $today && $class[45] !== 'eLearning') continue;
-// elseif($class[45] == 'eLearning' && $class[1] == 'Closed') continue; // Only show the current active eLearning
-?>
-<?php if($class[1] == 'Inactive'): ?>
-<tr class="cancelled">
-<?php else: ?>
-<tr>
-<?php endif ?>
-	<td>
-		<?php if($class[4] == 'Dedicated'): ?>
-		<span class="badge bg-light-subtle ">Dedicated</span>
+	<tbody class="list">
+		<?php foreach($classes as $class): ?>
+		<?php
+		// We only wish to see classes which have an end date greater than today
+		$today = date('Y-m-d');
+		if($class[9] < $today && $class[45] !== 'eLearning') continue;
+		// elseif($class[45] == 'eLearning' && $class[1] == 'Closed') continue; // Only show the current active eLearning
+		?>
+		<?php if($class[1] == 'Inactive'): ?>
+		<tr class="cancelled">
+		<?php else: ?>
+		<tr>
 		<?php endif ?>
-		<small><?= $class[7] ?></small>
-		
-	</td>
-	<td>
-		<a href="/lsapp/class.php?classid=<?= $class[0] ?>">
-		<?php echo goodDateShort($class[8],$class[9]) ?>
-		</a>
-		<div class="classdate" style="display:none"><?= $class[8] ?></div>
-	</td>
-	<td class="Venue">
-        <a href="Venue.php?name=<?= $class[25] ?>"><?= $class[25] ?></a>
-        <?php if(!$class[25]): ?>
-        <?= h($class[45]) ?>
-        <?php endif ?>
-    </td>
-    <td class="status">
-		<?= $class[1] ?>
-	</td>
-</tr>
-<?php endforeach ?>
-</tbody>
+			<td>
+				<?php if($class[4] == 'Dedicated'): ?>
+				<span class="badge bg-light-subtle text-primary-emphasis">Dedicated</span>
+				<?php endif ?>
+				<small><?= $class[7] ?></small>
+				
+			</td>
+			<td>
+				<a href="/lsapp/class.php?classid=<?= $class[0] ?>">
+				<?php echo goodDateShort($class[8],$class[9]) ?>
+				</a>
+				<div class="classdate" style="display:none"><?= $class[8] ?></div>
+			</td>
+			<td class="Venue">
+				<a href="Venue.php?name=<?= $class[25] ?>"><?= $class[25] ?></a>
+				<?php if(!$class[25]): ?>
+				<?= h($class[45]) ?>
+				<?php endif ?>
+			</td>
+			<td class="status">
+				<?= $class[1] ?>
+			</td>
+		</tr>
+		<?php endforeach ?>
+	</tbody>
 </table>
 </div>
 <?php endif; //finalcount ?>
@@ -552,15 +551,7 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
 		<ul class="list-group mb-4">
 			<?php foreach ($files as $file): 
 				$request = json_decode(file_get_contents($file), true);
-				if ($request['progress'] != 'Closed'):
-					$filenameParts = explode('-change-', basename($file, '.json')); 
-					if (count($filenameParts) === 2):
-						$courseidParts = explode('course-', $filenameParts[0]);
-						$chid = $filenameParts[1];
-					else:
-						die("Error: Invalid file name format.");
-					endif; ?>
-
+				if ($request['progress'] != 'Closed'): ?>
 					<li class="list-group-item">
 					<div class="">
 						<?php if ($request['urgent']): ?>
@@ -571,7 +562,7 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
 						<span class="badge bg-success"><?= htmlspecialchars($request['approval_status'] ?? 'Unknown') ?></span>
 						</div>
 						<h4 class="my-1 fs-5">
-							<a href="course-change/view.php?courseid=<?= htmlspecialchars($courseidParts[1]) ?>&changeid=<?= htmlspecialchars($chid) ?>">
+							<a href="course-change/view.php?courseid=<?= htmlspecialchars($request['courseid']) ?>&changeid=<?= htmlspecialchars($request['changeid']) ?>">
 								<?= htmlspecialchars($request['category']) ?> Request <small><?= $request['changeid'] ?? '' ?></small>
 							</a>
 						</h4>
@@ -617,10 +608,7 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
                 echo '<ul class="list-group mb-4">';
                 foreach ($files as $file) {
                     $request = json_decode(file_get_contents($file), true);
-                    if ($request['progress'] == 'Closed') {
-                        $filenameParts = explode('-', basename($file, '.json')); // Parse file name
-                        $chid = $filenameParts[3]; // Extract change ID (second part of the name)
-                        ?>
+                    if ($request['progress'] == 'Closed') { ?>
                         <li class="list-group-item">
                             <div class="mb-2">
                                 <?php if ($request['urgent']): ?>
@@ -631,7 +619,7 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
                                 <span class="badge bg-success">Approval: <?= htmlspecialchars($request['approval_status']) ?></span>
                             </div>
                             <h4 class="my-1 fs-5">
-                                <a href="course-change/view.php?courseid=<?= htmlspecialchars($courseid) ?>&changeid=<?= htmlspecialchars($chid) ?>">
+                                <a href="course-change/view.php?courseid=<?= htmlspecialchars($request['courseid']) ?>&changeid=<?= htmlspecialchars($request['changeid']) ?>">
                                     <?= htmlspecialchars($request['category']) ?> Request <small><?= $request['changeid'] ?? '' ?></small>
                                 </a>
                             </h4>
@@ -675,7 +663,11 @@ if($class[9] < $today && $class[45] !== 'eLearning') continue;
 
 </div>
 <div class="col-12">
-<div class="p-3 my-3 bg-light-subtle rounded-3">Created on <?php echo goodDateLong($deets[13]) ?> by <a href="person.php?idir=<?= $deets[14] ?>"><?= $deets[14] ?></a></div>
+	<div class="p-3 my-3 bg-light-subtle rounded-3">
+	<?php if(!empty($deets[13])): ?>
+		Created on <?php echo goodDateLong($deets[13]) ?> by <a href="person.php?idir=<?= $deets[14] ?>"><?= $deets[14] ?></a>
+	<?php endif; ?>
+	</div>
 </div>
 </div>
 
