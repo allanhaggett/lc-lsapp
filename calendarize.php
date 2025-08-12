@@ -145,11 +145,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 // Create directory path
                 $calendarDir = 'E:\\WebSites\\NonSSOLearning\\calendars\\' . $slug;
+                $calendarRootDir = 'E:\\WebSites\\NonSSOLearning\\calendars';
                 // $calendarDir = 'calendars/' . $slug;
                 
                 // Create directory if it doesn't exist
                 if (!file_exists($calendarDir)) {
                     mkdir($calendarDir, 0777, true);
+                }
+                
+                // Copy webcal.php to the calendars root if it doesn't exist
+                $webcalTarget = $calendarRootDir . '\\webcal.php';
+                if (!file_exists($webcalTarget)) {
+                    copy('webcal-publish.php', $webcalTarget);
                 }
                 
                 // Generate iCal content
@@ -161,6 +168,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $ical .= "X-WR-CALNAME:" . $targetCalendar['name'] . "\r\n";
                 $ical .= "X-WR-CALDESC:" . str_replace("\n", "\\n", $targetCalendar['description']) . "\r\n";
                 $ical .= "X-WR-TIMEZONE:America/Los_Angeles\r\n";
+                // Add refresh interval hint for Outlook (in minutes)
+                $ical .= "X-PUBLISHED-TTL:PT15M\r\n";
+                $ical .= "REFRESH-INTERVAL;VALUE=DURATION:PT15M\r\n";
                 
                 // Add timezone definition
                 $ical .= "BEGIN:VTIMEZONE\r\n";
@@ -187,32 +197,65 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $ical .= "BEGIN:VEVENT\r\n";
                         $ical .= "UID:" . $event['id'] . "@lsapp.gov.bc.ca\r\n";
                         
-                        // Convert datetime format
-                        $startDateTime = str_replace(['T', '-', ':'], '', $event['start_date']);
-                        $ical .= "DTSTART;TZID=America/Los_Angeles:" . $startDateTime . "\r\n";
+                        // Add DTSTAMP (current timestamp when event is created/modified)
+                        $ical .= "DTSTAMP:" . gmdate('Ymd\THis\Z') . "\r\n";
                         
-                        if (!empty($event['end_date'])) {
-                            $endDateTime = str_replace(['T', '-', ':'], '', $event['end_date']);
-                            $ical .= "DTEND;TZID=America/Los_Angeles:" . $endDateTime . "\r\n";
+                        // Convert datetime format properly
+                        // Input format: 2025-10-13T09:15
+                        $startDT = DateTime::createFromFormat('Y-m-d\TH:i', $event['start_date']);
+                        if ($startDT) {
+                            $ical .= "DTSTART;TZID=America/Los_Angeles:" . $startDT->format('Ymd\THis') . "\r\n";
+                        } else {
+                            // Fallback for date-only format
+                            $startDT = DateTime::createFromFormat('Y-m-d', $event['start_date']);
+                            if ($startDT) {
+                                $ical .= "DTSTART;VALUE=DATE:" . $startDT->format('Ymd') . "\r\n";
+                            }
                         }
                         
-                        $ical .= "SUMMARY:" . $event['title'] . "\r\n";
+                        if (!empty($event['end_date'])) {
+                            $endDT = DateTime::createFromFormat('Y-m-d\TH:i', $event['end_date']);
+                            if ($endDT) {
+                                $ical .= "DTEND;TZID=America/Los_Angeles:" . $endDT->format('Ymd\THis') . "\r\n";
+                            } else {
+                                // Fallback for date-only format
+                                $endDT = DateTime::createFromFormat('Y-m-d', $event['end_date']);
+                                if ($endDT) {
+                                    $ical .= "DTEND;VALUE=DATE:" . $endDT->format('Ymd') . "\r\n";
+                                }
+                            }
+                        } else {
+                            // If no end date, make it 1 hour after start
+                            if ($startDT) {
+                                $endDT = clone $startDT;
+                                $endDT->add(new DateInterval('PT1H'));
+                                $ical .= "DTEND;TZID=America/Los_Angeles:" . $endDT->format('Ymd\THis') . "\r\n";
+                            }
+                        }
+                        
+                        // Escape special characters in text fields
+                        $summary = str_replace([',', ';', '\\', "\n"], ['\,', '\;', '\\\\', '\\n'], $event['title']);
+                        $ical .= "SUMMARY:" . $summary . "\r\n";
                         
                         if (!empty($event['description'])) {
-                            $ical .= "DESCRIPTION:" . str_replace("\n", "\\n", $event['description']) . "\r\n";
+                            $description = str_replace([',', ';', '\\', "\n"], ['\,', '\;', '\\\\', '\\n'], $event['description']);
+                            $ical .= "DESCRIPTION:" . $description . "\r\n";
                         }
                         
                         if (!empty($event['location'])) {
-                            $ical .= "LOCATION:" . $event['location'] . "\r\n";
+                            $location = str_replace([',', ';', '\\', "\n"], ['\,', '\;', '\\\\', '\\n'], $event['location']);
+                            $ical .= "LOCATION:" . $location . "\r\n";
                         }
                         
                         $ical .= "STATUS:CONFIRMED\r\n";
                         $ical .= "TRANSP:OPAQUE\r\n";
                         
                         // Add creation/modification timestamps
-                        $createdAt = date('Ymd\THis\Z', strtotime($event['created_at']));
-                        $ical .= "CREATED:" . $createdAt . "\r\n";
-                        $ical .= "LAST-MODIFIED:" . $createdAt . "\r\n";
+                        if (!empty($event['created_at'])) {
+                            $createdAt = gmdate('Ymd\THis\Z', strtotime($event['created_at']));
+                            $ical .= "CREATED:" . $createdAt . "\r\n";
+                            $ical .= "LAST-MODIFIED:" . $createdAt . "\r\n";
+                        }
                         
                         $ical .= "END:VEVENT\r\n";
                     }
@@ -224,13 +267,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $filename = $calendarDir . '\\calendar.ics';
                 file_put_contents($filename, $ical);
                 
+                // Also write a JSON version of just this calendar
+                $jsonFilename = $calendarDir . '\\calendar.json';
+                file_put_contents($jsonFilename, json_encode($targetCalendar, JSON_PRETTY_PRINT));
+                
                 // Store publish info in calendar data
                 foreach ($calendars as &$calendar) {
                     if ($calendar['id'] === $calendarId) {
                         $calendar['published'] = [
                             'slug' => $slug,
                             'path' => $filename,
-                            'url' => 'https://learningcentre.gww.gov.bc.ca/calendars/' . $slug . '/calendar.ics',
+                            'url' => 'https://learn.bcpublicservice.gov.bc.ca/calendars/' . $slug . '/calendar.ics',
                             'published_at' => date('Y-m-d H:i:s'),
                             'published_by' => LOGGED_IN_IDIR
                         ];
@@ -304,8 +351,11 @@ $message = $_GET['success'] ?? '';
                         <?php if(isset($calendar['published'])): ?>
                         <div class="alert alert-info">
                             <strong>Published:</strong> This calendar is available at:<br>
-                            <code><?= htmlspecialchars($calendar['published']['url']) ?></code>
-                            <button class="btn btn-sm btn-outline-secondary ms-2" onclick="navigator.clipboard.writeText('<?= htmlspecialchars($calendar['published']['url']) ?>')">Copy URL</button>
+                            <strong>Static URL:</strong> <code><?= htmlspecialchars($calendar['published']['url']) ?></code>
+                            <button class="btn btn-sm btn-outline-secondary ms-2" onclick="navigator.clipboard.writeText('<?= htmlspecialchars($calendar['published']['url']) ?>')">Copy</button>
+                            <br>
+                            <strong>Dynamic URL (recommended for Outlook):</strong> <code>https://learn.bcpublicservice.gov.bc.ca/calendars/webcal.php?calendar=<?= htmlspecialchars($calendar['published']['slug']) ?></code>
+                            <button class="btn btn-sm btn-outline-secondary ms-2" onclick="navigator.clipboard.writeText('https://learn.bcpublicservice.gov.bc.ca/calendars/webcal.php?calendar=<?= htmlspecialchars($calendar['published']['slug']) ?>')">Copy</button>
                             <br>
                             <small class="text-muted">Last published: <?= $calendar['published']['published_at'] ?> by <?= $calendar['published']['published_by'] ?></small>
                         </div>
@@ -538,7 +588,15 @@ $message = $_GET['success'] ?? '';
                                     $previewSlug = preg_replace('/-+/', '-', $previewSlug);
                                     $previewSlug = trim($previewSlug, '-');
                                     ?>
-                                    <code>https://learningcentre.gww.gov.bc.ca/calendars/<?= $previewSlug ?>/calendar.ics</code>
+                                    <p><strong>Static file:</strong><br>
+                                    <code>https://learn.bcpublicservice.gov.bc.ca/calendars/<?= $previewSlug ?>/calendar.ics</code></p>
+                                    
+                                    <p><strong>Dynamic URL (recommended for Outlook):</strong><br>
+                                    <code>https://learn.bcpublicservice.gov.bc.ca/calendars/webcal.php?calendar=<?= $previewSlug ?></code></p>
+                                    
+                                    <div class="alert alert-warning">
+                                        <strong>Note for Outlook users:</strong> Use the dynamic URL for better refresh behavior. Outlook may cache the static file and not update it regularly.
+                                    </div>
                                 </div>
                                 <div class="modal-footer">
                                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
