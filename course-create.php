@@ -130,28 +130,28 @@ if(fputcsv($fp, $newcourse) === false) {
 fclose($fp);
 
 // Send email notification for new course
-try {
-    $chesClient = new CHESClient();
-    $courseNotificationData = [
-        'id' => $courseid,
-        'name' => $_POST['CourseName'],
-        'description' => $_POST['CourseDescription'],
-        'owner' => $_POST['CourseOwner'],
-        'partner' => $_POST['LearningHubPartner'],
-        'platform' => $_POST['Platform'],
-        'method' => $_POST['Method'],
-        'effectiveDate' => $_POST['EffectiveDate'],
-        'created' => $now
-    ];
+// try {
+//     $chesClient = new CHESClient();
+//     $courseNotificationData = [
+//         'id' => $courseid,
+//         'name' => $_POST['CourseName'],
+//         'description' => $_POST['CourseDescription'],
+//         'owner' => $_POST['CourseOwner'],
+//         'partner' => $_POST['LearningHubPartner'],
+//         'platform' => $_POST['Platform'],
+//         'method' => $_POST['Method'],
+//         'effectiveDate' => $_POST['EffectiveDate'],
+//         'created' => $now
+//     ];
     
-    $emailResult = $chesClient->sendCourseCreationNotification($courseNotificationData);
+//     $emailResult = $chesClient->sendCourseCreationNotification($courseNotificationData);
     
-    if (!$emailResult) {
-        error_log("Warning: Failed to send course creation notification for course ID: {$courseid}");
-    }
-} catch (Exception $e) {
-    error_log("CHES Email Exception: " . $e->getMessage());
-}
+//     if (!$emailResult) {
+//         error_log("Warning: Failed to send course creation notification for course ID: {$courseid}");
+//     }
+// } catch (Exception $e) {
+//     error_log("CHES Email Exception: " . $e->getMessage());
+// }
 
 // Add course people relationships if specified
 if(!empty($_POST['CourseOwner']) || !empty($_POST['Developer'])) {
