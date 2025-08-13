@@ -40,12 +40,38 @@ class CHESClient {
         curl_setopt($ch, CURLOPT_HTTPHEADER, [
             'Content-Type: application/x-www-form-urlencoded'
         ]);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        
+        // Windows/IIS specific SSL handling
+        if (stripos(PHP_OS, 'WIN') === 0) {
+            // On Windows, check if CA bundle is configured
+            $cainfo = ini_get('curl.cainfo');
+            if (empty($cainfo) || !file_exists($cainfo)) {
+                // If no CA bundle, disable peer verification (less secure but works)
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+                error_log("CHES Warning: SSL verification disabled - no CA bundle found. Consider setting curl.cainfo in php.ini");
+            } else {
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+            }
+        } else {
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        }
+        
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         
         $response = curl_exec($ch);
+        $error = curl_error($ch);
+        $errno = curl_errno($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
+        
+        if ($response === false) {
+            error_log("CHES Token cURL Error: $error (errno: $errno)");
+            return false;
+        }
         
         if ($httpCode !== 200) {
             error_log("CHES Token Error: HTTP $httpCode - $response");
@@ -97,10 +123,28 @@ class CHESClient {
             'Content-Type: application/json',
             'Accept: application/json'
         ]);
-        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+        
+        // Windows/IIS specific SSL handling
+        if (stripos(PHP_OS, 'WIN') === 0) {
+            $cainfo = ini_get('curl.cainfo');
+            if (empty($cainfo) || !file_exists($cainfo)) {
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+            } else {
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+            }
+        } else {
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+        }
+        
         curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
         
         $response = curl_exec($ch);
+        $error = curl_error($ch);
+        $errno = curl_errno($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
         curl_close($ch);
         
