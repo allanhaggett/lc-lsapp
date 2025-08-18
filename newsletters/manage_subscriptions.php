@@ -1,12 +1,15 @@
-#!/usr/bin/env php
 <?php
 /**
  * Script to manage email subscriptions from BC Gov Digital Forms API
  * Stores subscribe/unsubscribe actions in a SQLite database
+ * Can be run via CLI or triggered from web interface
  */
 
 // Set timezone to PST/PDT (America/Vancouver covers BC)
 date_default_timezone_set('America/Vancouver');
+
+// Check if we're running from web or CLI
+$isWeb = (php_sapi_name() !== 'cli');
 
 class SubscriptionManager {
     private $db;
@@ -325,9 +328,15 @@ class SubscriptionManager {
     }
     
     public function displayStatistics() {
-        echo "\n" . str_repeat("=", 80) . "\n";
-        echo "SUBSCRIPTION STATISTICS\n";
-        echo str_repeat("=", 80) . "\n";
+        global $isWeb;
+        
+        if ($isWeb) {
+            echo "\n=== SUBSCRIPTION STATISTICS ===\n";
+        } else {
+            echo "\n" . str_repeat("=", 80) . "\n";
+            echo "SUBSCRIPTION STATISTICS\n";
+            echo str_repeat("=", 80) . "\n";
+        }
         
         // Count by status
         $stmt = $this->db->query("
@@ -341,9 +350,13 @@ class SubscriptionManager {
         }
         
         // Show recent activity
-        echo "\n" . str_repeat("=", 80) . "\n";
-        echo "RECENT ACTIVITY (Last 10)\n";
-        echo str_repeat("=", 80) . "\n";
+        if ($isWeb) {
+            echo "\n=== RECENT ACTIVITY (Last 10) ===\n";
+        } else {
+            echo "\n" . str_repeat("=", 80) . "\n";
+            echo "RECENT ACTIVITY (Last 10)\n";
+            echo str_repeat("=", 80) . "\n";
+        }
         
         $stmt = $this->db->query("
             SELECT email, action, timestamp 
@@ -357,24 +370,20 @@ class SubscriptionManager {
         }
     }
     
-    public function exportActiveEmails($filename = "active_subscribers.txt") {
-        $active = $this->getActiveSubscriptions();
-        
-        $file = fopen($filename, 'w');
-        foreach ($active as $subscriber) {
-            fwrite($file, $subscriber['email'] . "\n");
-        }
-        fclose($file);
-        
-        echo "\nExported " . count($active) . " active email addresses to $filename\n";
-    }
 }
 
 // Main execution
 function main() {
-    echo "BC Gov Digital Forms - Subscription Manager (PHP)\n";
-    echo str_repeat("=", 80) . "\n";
-    echo "Started at: " . date('Y-m-d H:i:s') . "\n\n";
+    global $isWeb;
+    
+    if ($isWeb) {
+        echo "BC Gov Digital Forms - Subscription Manager\n";
+        echo "Started at: " . date('Y-m-d H:i:s') . "\n\n";
+    } else {
+        echo "BC Gov Digital Forms - Subscription Manager (PHP)\n";
+        echo str_repeat("=", 80) . "\n";
+        echo "Started at: " . date('Y-m-d H:i:s') . "\n\n";
+    }
     
     // Initialize manager
     $manager = new SubscriptionManager();
@@ -385,31 +394,26 @@ function main() {
     // Display statistics
     $manager->displayStatistics();
     
-    // Show active subscriptions
-    echo "\n" . str_repeat("=", 80) . "\n";
-    echo "ACTIVE SUBSCRIPTIONS\n";
-    echo str_repeat("=", 80) . "\n";
-    
-    $active = $manager->getActiveSubscriptions();
-    if ($active) {
-        foreach ($active as $subscriber) {
-            echo $subscriber['email'] . " (created: " . $subscriber['created_at'] . 
-                 ", updated: " . $subscriber['updated_at'] . ")\n";
+    // Show active subscriptions (only in CLI mode)
+    if (!$isWeb) {
+        echo "\n" . str_repeat("=", 80) . "\n";
+        echo "ACTIVE SUBSCRIPTIONS\n";
+        echo str_repeat("=", 80) . "\n";
+        
+        $active = $manager->getActiveSubscriptions();
+        if ($active) {
+            foreach ($active as $subscriber) {
+                echo $subscriber['email'] . " (created: " . $subscriber['created_at'] . 
+                     ", updated: " . $subscriber['updated_at'] . ")\n";
+            }
+        } else {
+            echo "No active subscriptions\n";
         }
-    } else {
-        echo "No active subscriptions\n";
-    }
-    
-    // Export to file
-    if ($active) {
-        $manager->exportActiveEmails();
     }
     
     echo "\nCompleted at: " . date('Y-m-d H:i:s') . "\n";
 }
 
-// Run if executed directly
-if (php_sapi_name() === 'cli') {
-    main();
-}
+// Run main function regardless of execution context
+main();
 ?>

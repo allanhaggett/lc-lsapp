@@ -4,6 +4,9 @@
  */
 require('../inc/lsapp.php');
 
+// Check if user is admin
+$isAdminUser = isAdmin();
+
 // Database connection - use the database in data folder
 try {
     $db = new PDO("sqlite:../data/subscriptions.db");
@@ -113,6 +116,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 $message = "Email address unsubscribed successfully";
                 $messageType = 'success';
+                
+            } elseif ($action === 'delete' && $isAdminUser) {
+                // Admin-only delete action
+                $email = trim($_POST['email']);
+                
+                if (empty($email)) {
+                    throw new Exception("Email address is required");
+                }
+                
+                $email = strtolower($email);
+                $now = date('Y-m-d H:i:s');
+                
+                // Check if email exists
+                $checkStmt = $db->prepare("SELECT email FROM subscriptions WHERE email = ?");
+                $checkStmt->execute([$email]);
+                $existing = $checkStmt->fetch(PDO::FETCH_ASSOC);
+                
+                if (!$existing) {
+                    throw new Exception("Email address not found in database");
+                }
+                
+                // Log deletion to history before deleting
+                $historyStmt = $db->prepare("
+                    INSERT INTO subscription_history (email, action, timestamp, submission_id, raw_data)
+                    VALUES (?, 'deleted', ?, 'manual-web-ui-admin', ?)
+                ");
+                $historyStmt->execute([$email, $now, json_encode(['source' => 'admin-delete', 'admin_user' => $_SERVER['REMOTE_USER'] ?? 'unknown', 'user_ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown'])]);
+                
+                // Delete from subscriptions table
+                $deleteStmt = $db->prepare("DELETE FROM subscriptions WHERE email = ?");
+                $deleteStmt->execute([$email]);
+                
+                $message = "Email address permanently deleted from database";
+                $messageType = 'success';
             }
             
         } catch (Exception $e) {
@@ -123,7 +160,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // Get filter from query string
-$statusFilter = $_GET['status'] ?? 'all';
+$statusFilter = $_GET['status'] ?? 'active';
 $searchQuery = $_GET['search'] ?? '';
 
 // Build query based on filters
@@ -179,6 +216,7 @@ $recentActivity = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
             <p class="text-secondary">Last updated: <?php echo date('Y-m-d H:i:s'); ?></p>
             <div class="mb-3">
                 <a href="index.php" class="btn btn-sm btn-outline-primary me-2">Dashboard</a>
+                <a href="sync_subscriptions.php" class="btn btn-sm btn-outline-primary me-2">🔄 Sync Subscriptions</a>
                 <a href="send_newsletter.php" class="btn btn-sm btn-primary">✉️ Send Newsletter</a>
             </div>
         </div>
@@ -239,8 +277,8 @@ $recentActivity = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
                     <div class="col-md-4">
                         <label for="status" class="form-label text-secondary small">Status Filter</label>
                         <select name="status" id="status" class="form-select">
-                            <option value="all" <?php echo $statusFilter === 'all' ? 'selected' : ''; ?>>All Subscriptions</option>
                             <option value="active" <?php echo $statusFilter === 'active' ? 'selected' : ''; ?>>Active Only</option>
+                            <option value="all" <?php echo $statusFilter === 'all' ? 'selected' : ''; ?>>All Subscriptions</option>
                             <option value="unsubscribed" <?php echo $statusFilter === 'unsubscribed' ? 'selected' : ''; ?>>Unsubscribed Only</option>
                         </select>
                     </div>
@@ -250,7 +288,7 @@ $recentActivity = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                     <div class="col-md-4">
                         <button type="submit" class="btn btn-primary">Apply Filters</button>
-                        <?php if ($statusFilter !== 'all' || !empty($searchQuery)): ?>
+                        <?php if ($statusFilter !== 'active' || !empty($searchQuery)): ?>
                             <a href="?" class="btn btn-secondary">Clear Filters</a>
                         <?php endif; ?>
                     </div>
@@ -303,6 +341,16 @@ $recentActivity = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
                                                     <button type="submit" class="btn btn-primary btn-sm">Reactivate</button>
                                                 </form>
                                             <?php endif; ?>
+                                            
+                                            <?php if ($isAdminUser): ?>
+                                                <form method="post" action="" class="d-inline ms-1" onsubmit="return confirm('⚠️ ADMIN ACTION: Are you sure you want to PERMANENTLY DELETE <?php echo htmlspecialchars($sub['email']); ?> from the database? This cannot be undone.')">
+                                                    <input type="hidden" name="action" value="delete">
+                                                    <input type="hidden" name="email" value="<?php echo htmlspecialchars($sub['email']); ?>">
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Permanently delete (Admin only)">
+                                                        🗑️ Delete
+                                                    </button>
+                                                </form>
+                                            <?php endif; ?>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -345,6 +393,31 @@ $recentActivity = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
                         </form>
                     </div>
                 </div>
+                
+                <?php if ($isAdminUser): ?>
+                <div class="row mt-4 border-top pt-4">
+                    <div class="col-12">
+                        <h3 class="h5 text-danger">Admin Actions</h3>
+                        <div class="alert alert-warning" role="alert">
+                            <strong>⚠️ Warning:</strong> These actions are permanent and cannot be undone.
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <h4 class="h6">Permanently Delete Subscriber</h4>
+                        <form method="post" action="" onsubmit="return confirm('⚠️ ADMIN ACTION: Are you sure you want to PERMANENTLY DELETE this email from the database? This action cannot be undone.')">
+                            <input type="hidden" name="action" value="delete">
+                            <div class="mb-3">
+                                <label for="delete-email" class="form-label">Email Address to Delete</label>
+                                <div class="input-group">
+                                    <input type="email" id="delete-email" name="email" class="form-control" placeholder="subscriber@example.com" required>
+                                    <button type="submit" class="btn btn-outline-danger">🗑️ Delete Permanently</button>
+                                </div>
+                                <div class="form-text text-danger">This will completely remove the subscriber from the database.</div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
         </section>
 
