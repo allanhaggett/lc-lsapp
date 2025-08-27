@@ -327,8 +327,8 @@ class SubscriptionManager {
     
     public function processAllSubmissions() {
         // Get last sync time
-        // $lastSync = $this->getLastSyncTime();
-        $lastSync = '2020-01-01T00:00:00Z'; // For testing, always fetch all
+        $lastSync = $this->getLastSyncTime();
+        // $lastSync = '2020-01-01T00:00:00Z'; // For testing, always fetch all
         
         // Fetch submissions (new ones only if we have a last sync time)
         $submissions = $this->fetchSubmissions($lastSync);
