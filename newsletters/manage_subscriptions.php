@@ -8,22 +8,57 @@
 // Set timezone to PST/PDT (America/Vancouver covers BC)
 date_default_timezone_set('America/Vancouver');
 
+// Include encryption helper for decrypting API passwords
+require_once(dirname(__DIR__) . '/inc/encryption_helper.php');
+
 // Check if we're running from web or CLI
 $isWeb = (php_sapi_name() !== 'cli');
 
 class SubscriptionManager {
     private $db;
     private $dbPath;
+    private $newsletter;
+    private $newsletterId;
     
-    public function __construct($dbPath = '../data/subscriptions.db') {
+    public function __construct($newsletterId = 1, $dbPath = '../data/subscriptions.db') {
         $this->dbPath = $dbPath;
+        $this->newsletterId = $newsletterId;
         $this->initDatabase();
+        $this->loadNewsletter();
+    }
+    
+    public function __destruct() {
+        $this->closeDatabase();
+    }
+    
+    public function closeDatabase() {
+        if ($this->db) {
+            $this->db = null;
+        }
+    }
+    
+    private function loadNewsletter() {
+        $stmt = $this->db->prepare("SELECT * FROM newsletters WHERE id = ? AND is_active = 1");
+        $stmt->execute([$this->newsletterId]);
+        $this->newsletter = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if (!$this->newsletter) {
+            die("Newsletter not found or inactive: {$this->newsletterId}\n");
+        }
+        
+        echo "Using newsletter: {$this->newsletter['name']} (ID: {$this->newsletterId})\n";
     }
     
     private function initDatabase() {
         try {
             $this->db = new PDO("sqlite:{$this->dbPath}");
             $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $this->db->setAttribute(PDO::ATTR_TIMEOUT, 30);
+            
+            // Don't enable WAL mode - it requires write permissions on the directory
+            // $this->db->exec("PRAGMA journal_mode=WAL;");
+            $this->db->exec("PRAGMA synchronous=NORMAL;");
+            $this->db->exec("PRAGMA busy_timeout=5000;"); // 5 second timeout for locks
             
             // Create subscriptions table
             $this->db->exec("
@@ -65,7 +100,8 @@ class SubscriptionManager {
     }
     
     private function getLastSyncTime() {
-        $stmt = $this->db->query("SELECT last_sync_timestamp FROM last_sync WHERE sync_type = 'submissions' ORDER BY id DESC LIMIT 1");
+        $stmt = $this->db->prepare("SELECT last_sync_timestamp FROM last_sync WHERE sync_type = 'submissions' AND newsletter_id = ? ORDER BY id DESC LIMIT 1");
+        $stmt->execute([$this->newsletterId]);
         $result = $stmt->fetch(PDO::FETCH_ASSOC);
         return $result ? $result['last_sync_timestamp'] : null;
     }
@@ -74,15 +110,37 @@ class SubscriptionManager {
         $timestamp = date('c'); // ISO 8601 format
         $now = date('Y-m-d H:i:s');
         
-        $stmt = $this->db->prepare("
-            INSERT INTO last_sync (last_sync_timestamp, sync_type, records_processed, created_at)
-            VALUES (?, 'submissions', ?, ?)
-        ");
-        $stmt->execute([$timestamp, $recordsProcessed, $now]);
+        $maxRetries = 5;
+        $retryDelay = 100000; // 100ms in microseconds
+        
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            try {
+                $stmt = $this->db->prepare("
+                    INSERT INTO last_sync (last_sync_timestamp, sync_type, records_processed, created_at, newsletter_id)
+                    VALUES (?, 'submissions', ?, ?, ?)
+                ");
+                $stmt->execute([$timestamp, $recordsProcessed, $now, $this->newsletterId]);
+                return; // Success, exit retry loop
+                
+            } catch (PDOException $e) {
+                if ($e->getCode() == 'HY000' && strpos($e->getMessage(), 'database is locked') !== false) {
+                    if ($attempt < $maxRetries) {
+                        echo "Database locked (attempt $attempt/$maxRetries), retrying in " . ($retryDelay/1000) . "ms...\n";
+                        usleep($retryDelay);
+                        $retryDelay *= 2; // Exponential backoff
+                    } else {
+                        echo "Database remained locked after $maxRetries attempts, skipping sync time update\n";
+                        return;
+                    }
+                } else {
+                    throw $e; // Re-throw if it's not a lock error
+                }
+            }
+        }
     }
     
     public function fetchSubmissions($sinceDate = null) {
-        $url = "https://submit.digital.gov.bc.ca/app/api/v1/forms/fd03b54b-84aa-4a05-b5ff-c5536b733f57/export";
+        $url = $this->newsletter['api_url'] . '/' . $this->newsletter['form_id'] . '/export';
         
         $params = [
             'format' => 'json',
@@ -102,8 +160,17 @@ class SubscriptionManager {
         
         $queryString = http_build_query($params);
         
-        $username = "fd03b54b-84aa-4a05-b5ff-c5536b733f57";
-        $password = "eb907268-25c6-4a3f-b48d-7c7cc93d24e1";
+        $username = $this->newsletter['api_username'];
+        $encryptedPassword = $this->newsletter['api_password'];
+        
+        // Decrypt the password
+        try {
+            $password = EncryptionHelper::decrypt($encryptedPassword);
+        } catch (Exception $e) {
+            // If decryption fails, it might be plaintext (for backward compatibility)
+            $password = $encryptedPassword;
+            echo "Warning: Using potentially unencrypted password. Please re-save newsletter configuration.\n";
+        }
         
         $context = stream_context_create([
             'http' => [
@@ -142,21 +209,12 @@ class SubscriptionManager {
         
         // Extract relevant fields
         $submissionId = $submission['form']['submissionId'] ?? $submission['_id'] ?? 'unknown';
-        $formData = $submission['form'] ?? [];
         
         $email = null;
         $options = null;
         
-        // Check for email and options in form data
-        if (isset($formData['data'])) {
-            $data = $formData['data'];
-            $email = $data['simpleemail'] ?? $data['email'] ?? $data['simpleEmail'] ?? null;
-            $options = $data['options'] ?? $data['action'] ?? $data['subscriptionAction'] ?? null;
-        }
-        
-        // Alternative structure - check top level first
-        if (!$email && isset($submission['simpleemail'])) {
-            $email = $submission['simpleemail'];
+        if (!$email && isset($submission['email'])) {
+            $email = $submission['email'];
         }
         if (!$options && isset($submission['options'])) {
             $options = $submission['options'];
@@ -188,13 +246,13 @@ class SubscriptionManager {
             return false;
         }
         
-        // Check if this submission has already been processed
+        // Check if this submission has already been processed for this newsletter
         $checkStmt = $this->db->prepare("
             SELECT id FROM subscription_history 
-            WHERE submission_id = ? 
+            WHERE submission_id = ? AND newsletter_id = ?
             LIMIT 1
         ");
-        $checkStmt->execute([$submissionId]);
+        $checkStmt->execute([$submissionId, $this->newsletterId]);
         
         if ($checkStmt->fetch()) {
             echo "  Skipping submission $submissionId: Already processed\n";
@@ -208,54 +266,54 @@ class SubscriptionManager {
         try {
             // Record in history
             $stmt = $this->db->prepare("
-                INSERT INTO subscription_history (email, action, timestamp, submission_id, raw_data)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO subscription_history (email, action, timestamp, submission_id, raw_data, newsletter_id)
+                VALUES (?, ?, ?, ?, ?, ?)
             ");
-            $stmt->execute([$email, $action, $now, $submissionId, json_encode($submission)]);
+            $stmt->execute([$email, $action, $now, $submissionId, json_encode($submission), $this->newsletterId]);
             
             // Update subscription status
             if ($action == 'subscribe') {
-                // Check if email exists
-                $checkStmt = $this->db->prepare("SELECT email FROM subscriptions WHERE email = ?");
-                $checkStmt->execute([$email]);
+                // Check if email exists for this newsletter
+                $checkStmt = $this->db->prepare("SELECT email FROM subscriptions WHERE email = ? AND newsletter_id = ?");
+                $checkStmt->execute([$email, $this->newsletterId]);
                 
                 if ($checkStmt->fetch()) {
                     // Update existing
                     $updateStmt = $this->db->prepare("
                         UPDATE subscriptions 
                         SET status = 'active', updated_at = ?
-                        WHERE email = ?
+                        WHERE email = ? AND newsletter_id = ?
                     ");
-                    $updateStmt->execute([$now, $email]);
+                    $updateStmt->execute([$now, $email, $this->newsletterId]);
                 } else {
                     // Insert new
                     $insertStmt = $this->db->prepare("
-                        INSERT INTO subscriptions (email, status, created_at, updated_at)
-                        VALUES (?, 'active', ?, ?)
+                        INSERT INTO subscriptions (email, status, created_at, updated_at, newsletter_id)
+                        VALUES (?, 'active', ?, ?, ?)
                     ");
-                    $insertStmt->execute([$email, $now, $now]);
+                    $insertStmt->execute([$email, $now, $now, $this->newsletterId]);
                 }
                 
             } elseif ($action == 'unsubscribe') {
-                // Check if email exists
-                $checkStmt = $this->db->prepare("SELECT email FROM subscriptions WHERE email = ?");
-                $checkStmt->execute([$email]);
+                // Check if email exists for this newsletter
+                $checkStmt = $this->db->prepare("SELECT email FROM subscriptions WHERE email = ? AND newsletter_id = ?");
+                $checkStmt->execute([$email, $this->newsletterId]);
                 
                 if ($checkStmt->fetch()) {
                     // Update existing
                     $updateStmt = $this->db->prepare("
                         UPDATE subscriptions 
                         SET status = 'unsubscribed', updated_at = ?
-                        WHERE email = ?
+                        WHERE email = ? AND newsletter_id = ?
                     ");
-                    $updateStmt->execute([$now, $email]);
+                    $updateStmt->execute([$now, $email, $this->newsletterId]);
                 } else {
                     // Insert new as unsubscribed
                     $insertStmt = $this->db->prepare("
-                        INSERT INTO subscriptions (email, status, created_at, updated_at)
-                        VALUES (?, 'unsubscribed', ?, ?)
+                        INSERT INTO subscriptions (email, status, created_at, updated_at, newsletter_id)
+                        VALUES (?, 'unsubscribed', ?, ?, ?)
                     ");
-                    $insertStmt->execute([$email, $now, $now]);
+                    $insertStmt->execute([$email, $now, $now, $this->newsletterId]);
                 }
             }
             
@@ -269,13 +327,17 @@ class SubscriptionManager {
     
     public function processAllSubmissions() {
         // Get last sync time
-        $lastSync = $this->getLastSyncTime();
+        // $lastSync = $this->getLastSyncTime();
+        $lastSync = '2020-01-01T00:00:00Z'; // For testing, always fetch all
         
         // Fetch submissions (new ones only if we have a last sync time)
         $submissions = $this->fetchSubmissions($lastSync);
         
         if (!$submissions) {
             echo "No submissions to process\n";
+            // Still update sync time to show sync was attempted
+            $this->updateLastSyncTime(0);
+            echo "Updated last sync timestamp\n";
             return;
         }
         
@@ -301,29 +363,30 @@ class SubscriptionManager {
         
         echo "\nProcessed $processed out of " . count($submissions) . " submissions\n";
         
-        // Update last sync time after successful processing
-        if ($processed > 0 || count($submissions) > 0) {
-            $this->updateLastSyncTime($processed);
-            echo "Updated last sync timestamp\n";
-        }
+        // Always update last sync time after any sync attempt (even if no new submissions)
+        $this->updateLastSyncTime($processed);
+        echo "Updated last sync timestamp\n";
     }
     
     public function getActiveSubscriptions() {
-        $stmt = $this->db->query("
+        $stmt = $this->db->prepare("
             SELECT email, created_at, updated_at 
             FROM subscriptions 
-            WHERE status = 'active'
+            WHERE status = 'active' AND newsletter_id = ?
             ORDER BY email
         ");
+        $stmt->execute([$this->newsletterId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
     public function getAllSubscriptions() {
-        $stmt = $this->db->query("
+        $stmt = $this->db->prepare("
             SELECT email, status, created_at, updated_at 
             FROM subscriptions 
+            WHERE newsletter_id = ?
             ORDER BY status, email
         ");
+        $stmt->execute([$this->newsletterId]);
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
@@ -338,12 +401,14 @@ class SubscriptionManager {
             echo str_repeat("=", 80) . "\n";
         }
         
-        // Count by status
-        $stmt = $this->db->query("
+        // Count by status for this newsletter
+        $stmt = $this->db->prepare("
             SELECT status, COUNT(*) as count 
             FROM subscriptions 
+            WHERE newsletter_id = ?
             GROUP BY status
         ");
+        $stmt->execute([$this->newsletterId]);
         
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             echo ucfirst($row['status']) . ": " . $row['count'] . "\n";
@@ -358,12 +423,14 @@ class SubscriptionManager {
             echo str_repeat("=", 80) . "\n";
         }
         
-        $stmt = $this->db->query("
+        $stmt = $this->db->prepare("
             SELECT email, action, timestamp 
             FROM subscription_history 
+            WHERE newsletter_id = ?
             ORDER BY timestamp DESC 
             LIMIT 10
         ");
+        $stmt->execute([$this->newsletterId]);
         
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             echo $row['timestamp'] . ": " . $row['action'] . " - " . $row['email'] . "\n";
@@ -373,8 +440,20 @@ class SubscriptionManager {
 }
 
 // Main execution
-function main() {
-    global $isWeb;
+function main($newsletterId = null) {
+    global $isWeb, $argv;
+    
+    // Get newsletter ID from parameter, query string, or command line args
+    if ($newsletterId === null) {
+        if ($isWeb && isset($_GET['newsletter_id'])) {
+            $newsletterId = (int)$_GET['newsletter_id'];
+        } elseif (!$isWeb && isset($argv[1])) {
+            $newsletterId = (int)$argv[1];
+        } else {
+            $newsletterId = 1; // Default to first newsletter
+        }
+    }
+    
     
     if ($isWeb) {
         echo "BC Gov Digital Forms - Subscription Manager\n";
@@ -385,8 +464,8 @@ function main() {
         echo "Started at: " . date('Y-m-d H:i:s') . "\n\n";
     }
     
-    // Initialize manager
-    $manager = new SubscriptionManager();
+    // Initialize manager with newsletter ID
+    $manager = new SubscriptionManager($newsletterId);
     
     // Process all submissions
     $manager->processAllSubmissions();
@@ -412,6 +491,9 @@ function main() {
     }
     
     echo "\nCompleted at: " . date('Y-m-d H:i:s') . "\n";
+    
+    // Explicitly close database connection
+    $manager->closeDatabase();
 }
 
 // Run main function regardless of execution context

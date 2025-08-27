@@ -5,6 +5,27 @@
  */
 require('../inc/lsapp.php');
 
+// Get newsletter ID from query string
+$newsletterId = isset($_GET['newsletter_id']) ? (int)$_GET['newsletter_id'] : 1;
+
+// Database connection to get newsletter details
+try {
+    $db = new PDO("sqlite:../data/subscriptions.db");
+    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    // Get newsletter details
+    $stmt = $db->prepare("SELECT * FROM newsletters WHERE id = ?");
+    $stmt->execute([$newsletterId]);
+    $newsletter = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$newsletter) {
+        header('Location: index.php');
+        exit();
+    }
+} catch (PDOException $e) {
+    die("Database connection failed: " . $e->getMessage());
+}
+
 // Check if sync was requested
 $syncOutput = '';
 $syncRequested = false;
@@ -16,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     
     // Simple rate limiting check
     $rateLimitFile = __DIR__ . '/../data/last_sync_time.txt';
-    $rateLimitMinutes = 5;
+    $rateLimitMinutes = 1;
     
     if (file_exists($rateLimitFile)) {
         $lastSyncTime = (int)file_get_contents($rateLimitFile);
@@ -34,46 +55,64 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         // Update last sync time
         file_put_contents($rateLimitFile, time());
         
-        // Capture the output of the sync script
-        ob_start();
+        // CRITICAL: Close database connection completely before running sync
+        // This prevents SQLite database lock errors
+        $db = null;
+        unset($db);
+        
+        // Give SQLite a moment to fully release the lock
+        usleep(100000); // 100ms delay
+        
+        // Run the sync script as a separate process
         $startTime = microtime(true);
         
         try {
-            // Include and run the manage_subscriptions script
-            require_once('manage_subscriptions.php');
+            // Run the sync script as a separate process to avoid database locks
+            $command = "cd " . escapeshellarg(__DIR__) . " && php manage_subscriptions.php " . escapeshellarg($newsletterId) . " 2>&1";
+            $syncOutput = shell_exec($command);
             
-            $syncOutput = ob_get_contents();
+            if ($syncOutput === null) {
+                throw new Exception("Failed to execute sync command");
+            }
+            
             $syncSuccess = true;
+            
         } catch (Exception $e) {
             $syncOutput = "Error during sync: " . $e->getMessage();
             $syncSuccess = false;
         }
         
-        ob_end_clean();
-        
         $executionTime = round(microtime(true) - $startTime, 2);
         $syncOutput .= "\n\nExecution time: {$executionTime} seconds";
+        
+        // Re-establish database connection for the rest of the page
+        $db = new PDO("sqlite:../data/subscriptions.db");
+        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 }
 
-// Get last sync information from database
+// Get last sync information and statistics for this newsletter
 try {
-    $db = new PDO("sqlite:../data/subscriptions.db");
-    $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-    // Get last sync details
-    $lastSyncStmt = $db->query("
+    // Ensure we have a database connection
+    if (!$db) {
+        $db = new PDO("sqlite:../data/subscriptions.db");
+        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    }
+    // Get last sync details for this newsletter
+    $lastSyncStmt = $db->prepare("
         SELECT last_sync_timestamp, records_processed, created_at 
         FROM last_sync 
-        WHERE sync_type = 'submissions' 
+        WHERE sync_type = 'submissions' AND newsletter_id = ?
         ORDER BY id DESC 
         LIMIT 1
     ");
+    $lastSyncStmt->execute([$newsletterId]);
     $lastSync = $lastSyncStmt->fetch(PDO::FETCH_ASSOC);
     
-    // Get statistics
-    $statsQuery = "SELECT status, COUNT(*) as count FROM subscriptions GROUP BY status";
-    $statsStmt = $db->query($statsQuery);
+    // Get statistics for this newsletter
+    $statsQuery = "SELECT status, COUNT(*) as count FROM subscriptions WHERE newsletter_id = ? GROUP BY status";
+    $statsStmt = $db->prepare($statsQuery);
+    $statsStmt->execute([$newsletterId]);
     $stats = [];
     while ($row = $statsStmt->fetch(PDO::FETCH_ASSOC)) {
         $stats[$row['status']] = $row['count'];
@@ -84,7 +123,7 @@ try {
 }
 ?>
 <?php getHeader() ?>
-<title>Sync Subscriptions - Newsletter Management</title>
+<title>Sync <?php echo htmlspecialchars($newsletter['name']); ?> - Newsletter Management</title>
 <style>
     .sync-output {
         background-color: #1e1e1e;
@@ -114,11 +153,12 @@ try {
 <div class="container">
     <div class="row">
         <div class="col-md-12">
-            <h1>Subscription Sync Management</h1>
+            <h1><?php echo htmlspecialchars($newsletter['name']); ?> - Sync Management</h1>
             <p class="text-secondary">Manually trigger synchronization with BC Gov Digital Forms API</p>
             <div class="mb-3">
-                <a href="index.php" class="btn btn-sm btn-outline-primary me-2">← Back to Dashboard</a>
-                <a href="send_newsletter.php" class="btn btn-sm btn-outline-primary">Send Newsletter</a>
+                <a href="index.php" class="btn btn-sm btn-outline-secondary me-2">← All Newsletters</a>
+                <a href="newsletter_dashboard.php?newsletter_id=<?php echo $newsletterId; ?>" class="btn btn-sm btn-outline-primary me-2">Dashboard</a>
+                <a href="send_newsletter.php?newsletter_id=<?php echo $newsletterId; ?>" class="btn btn-sm btn-outline-primary">Send Newsletter</a>
             </div>
         </div>
     </div>
@@ -184,6 +224,7 @@ try {
                     
                     <form method="post" action="" onsubmit="document.getElementById('syncBtn').disabled = true; document.getElementById('syncBtn').innerHTML = 'Syncing... Please wait';">
                         <input type="hidden" name="action" value="sync">
+                        <input type="hidden" name="newsletter_id" value="<?php echo $newsletterId; ?>">
                         <button type="submit" id="syncBtn" class="btn btn-primary btn-lg">
                             🔄 Run Subscription Sync Now
                         </button>
@@ -230,11 +271,14 @@ try {
                     <p class="card-text">
                         For automated synchronization, you can set up a cron job to run the sync script regularly:
                     </p>
-                    <pre class="bg-dark text-light p-3 rounded"><code># Run every hour
-0 * * * * cd /var/www/html/lsapp/newsletters && php manage_subscriptions.php >> sync.log 2>&1
+                    <pre class="bg-dark text-light p-3 rounded"><code># Run every hour for newsletter ID 1
+0 * * * * cd /var/www/html/lsapp/newsletters && php manage_subscriptions.php 1 >> sync.log 2>&1
 
-# Or run every 30 minutes
-*/30 * * * * cd /var/www/html/lsapp/newsletters && php manage_subscriptions.php >> sync.log 2>&1</code></pre>
+# Or run every 30 minutes for newsletter ID 1
+*/30 * * * * cd /var/www/html/lsapp/newsletters && php manage_subscriptions.php 1 >> sync.log 2>&1
+
+# For multiple newsletters, add separate cron entries with different IDs
+# 0 * * * * cd /var/www/html/lsapp/newsletters && php manage_subscriptions.php 2 >> sync.log 2>&1</code></pre>
                 </div>
             </div>
         </div>

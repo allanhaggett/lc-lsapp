@@ -16,9 +16,9 @@ class CHESClient {
     
     public function __construct($clientId = null, $clientSecret = null, $tokenEndpoint = null) {
         // Use provided values or fall back to environment variables
-        $this->clientId = $clientId ?: $_ENV['CHES_CLIENT_ID'] ?? getenv('CHES_CLIENT_ID');
-        $this->clientSecret = $clientSecret ?: $_ENV['CHES_CLIENT_SECRET'] ?? getenv('CHES_CLIENT_SECRET');
-        $this->tokenEndpoint = $tokenEndpoint ?: $_ENV['CHES_TOKEN_ENDPOINT'] ?? getenv('CHES_TOKEN_ENDPOINT');
+        $this->clientId = $clientId ?: $_ENV['CHES_CLIENT_ID'] ?? 'CDACC9DF-F2BE5BC254A';
+        $this->clientSecret = $clientSecret ?: $_ENV['CHES_CLIENT_SECRET'] ?? '337e04f4-e6dd-4507-939d-b9cad486882f';
+        $this->tokenEndpoint = $tokenEndpoint ?: $_ENV['CHES_TOKEN_ENDPOINT'] ?? 'https://dev.loginproxy.gov.bc.ca/auth/realms/comsvcauth/protocol/openid-connect/token';
         
         // Validate required configuration
         if (!$this->clientId || !$this->clientSecret || !$this->tokenEndpoint) {

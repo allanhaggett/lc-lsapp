@@ -6,10 +6,23 @@
 require('../inc/lsapp.php');
 require_once '../inc/ches_client.php';
 
+// Get newsletter ID from query string
+$newsletterId = isset($_GET['newsletter_id']) ? (int)$_GET['newsletter_id'] : 1;
+
 // Database connection - use the database in data folder
 try {
     $db = new PDO("sqlite:../data/subscriptions.db");
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    
+    // Get newsletter details
+    $stmt = $db->prepare("SELECT * FROM newsletters WHERE id = ?");
+    $stmt->execute([$newsletterId]);
+    $newsletter = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    if (!$newsletter) {
+        header('Location: index.php');
+        exit();
+    }
 } catch (PDOException $e) {
     die("Database connection failed: " . $e->getMessage());
 }
@@ -239,10 +252,12 @@ try {
 <div class="container">
     <div class="row">
         <div class="col-md-12">
-            <h1>Send Newsletter</h1>
+            <h1>Send <?php echo htmlspecialchars($newsletter['name']); ?></h1>
             <p class="text-secondary">Compose and send newsletters to your active subscribers</p>
             <div class="mb-3">
-                <a href="index.php" class="btn btn-sm btn-outline-primary">← Back to Dashboard</a>
+                <a href="index.php" class="btn btn-sm btn-outline-secondary me-2">← All Newsletters</a>
+                <a href="newsletter_dashboard.php?newsletter_id=<?php echo $newsletterId; ?>" class="btn btn-sm btn-outline-primary me-2">Dashboard</a>
+                <a href="sync_subscriptions.php?newsletter_id=<?php echo $newsletterId; ?>" class="btn btn-sm btn-outline-primary">🔄 Sync Subscriptions</a>
             </div>
         </div>
     </div>
@@ -314,7 +329,7 @@ try {
                         <button type="submit" class="btn btn-success me-2" onclick="return confirm('Are you sure you want to send this newsletter to <?php echo $previewData['recipient_count']; ?> subscribers via individual emails?')">
                             ✉️ Send Newsletter Now
                         </button>
-                        <a href="send_newsletter.php" class="btn btn-secondary">Cancel</a>
+                        <a href="send_newsletter.php?newsletter_id=<?php echo $newsletterId; ?>" class="btn btn-secondary">Cancel</a>
                     </form>
                 </div>
             </section>
