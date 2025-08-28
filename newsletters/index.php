@@ -185,6 +185,16 @@ $newsletters = $db->query($query)->fetchAll(PDO::FETCH_ASSOC);
                                                 ✉️ Send Newsletter
                                             </a>
                                         </li>
+                                        <?php if (!empty($newsletter['form_id'])): ?>
+                                        <li>
+                                            <a class="dropdown-item" 
+                                               href="https://submit.digital.gov.bc.ca/app/form/submit?f=<?php echo htmlspecialchars($newsletter['form_id']); ?>"
+                                               target="_blank"
+                                               rel="noopener noreferrer">
+                                                📝 Open Subscription Form
+                                            </a>
+                                        </li>
+                                        <?php endif; ?>
                                         <?php if ($isAdminUser): ?>
                                             <li><hr class="dropdown-divider"></li>
                                             <li>
@@ -226,32 +236,19 @@ $newsletters = $db->query($query)->fetchAll(PDO::FETCH_ASSOC);
                             <div class="mb-3" role="group" aria-labelledby="stats-<?php echo $newsletter['id']; ?>">
                                 <div id="stats-<?php echo $newsletter['id']; ?>" class="visually-hidden">Subscription statistics for <?php echo htmlspecialchars($newsletter['name']); ?></div>
                                 
-                                <span class="stats-badge bg-success-subtle text-success" 
+                                <span class="stats-badge bg-secondary-subtle text-white" 
                                       aria-label="<?php echo $newsletter['active_count']; ?> active subscribers">
-                                    <span aria-hidden="true"><?php echo $newsletter['active_count']; ?> active</span>
-                                </span>
-                                <span class="stats-badge bg-danger-subtle text-danger ms-1"
-                                      aria-label="<?php echo $newsletter['unsubscribed_count']; ?> unsubscribed">
-                                    <span aria-hidden="true"><?php echo $newsletter['unsubscribed_count']; ?> unsubscribed</span>
-                                </span>
-                                <span class="stats-badge bg-info-subtle text-info ms-1"
-                                      aria-label="<?php echo $newsletter['total_count']; ?> total subscribers">
-                                    <span aria-hidden="true"><?php echo $newsletter['total_count']; ?> total</span>
+                                    <span aria-hidden="true"><?php echo $newsletter['active_count']; ?> subscribers</span>
                                 </span>
                             </div>
                             
                             <div class="small text-muted">
                                 <div>
-                                    <strong>Form ID:</strong> 
-                                    <code><?php echo htmlspecialchars(substr($newsletter['form_id'], 0, 8)); ?>...</code>
-                                </div>
-                                <div>
-                                    <strong>Last Sync:</strong> 
-                                    <?php echo $newsletter['last_sync'] ? date('Y-m-d H:i', strtotime($newsletter['last_sync'])) : 'Never'; ?>
-                                </div>
-                                <div>
                                     <strong>Created:</strong> 
                                     <?php echo date('Y-m-d', strtotime($newsletter['created_at'])); ?>
+
+                                    <strong>Last Sync:</strong> 
+                                    <?php echo $newsletter['last_sync'] ? date('Y-m-d H:i', strtotime($newsletter['last_sync'])) : 'Never'; ?>
                                 </div>
                             </div>
                         </div>

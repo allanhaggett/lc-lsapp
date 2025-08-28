@@ -158,7 +158,13 @@ try {
             <div class="mb-3">
                 <a href="index.php" class="btn btn-sm btn-outline-secondary me-2">← All Newsletters</a>
                 <a href="newsletter_dashboard.php?newsletter_id=<?php echo $newsletterId; ?>" class="btn btn-sm btn-outline-primary me-2">Dashboard</a>
-                <a href="send_newsletter.php?newsletter_id=<?php echo $newsletterId; ?>" class="btn btn-sm btn-outline-primary">Send Newsletter</a>
+                <a href="send_newsletter.php?newsletter_id=<?php echo $newsletterId; ?>" class="btn btn-sm btn-outline-primary me-2">Send Newsletter</a>
+                <?php if (!empty($newsletter['form_id'])): ?>
+                    <a href="https://submit.digital.gov.bc.ca/app/form/submit?f=<?php echo htmlspecialchars($newsletter['form_id']); ?>" 
+                       class="btn btn-sm btn-success" 
+                       target="_blank" 
+                       rel="noopener noreferrer">📝 Subscription Form</a>
+                <?php endif; ?>
             </div>
         </div>
     </div>

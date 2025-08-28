@@ -267,6 +267,7 @@ $teams = getTeams();
         <?php endforeach; ?>
 				<hr class="dropdown-divider">
 				<span class="dropdown-item-text fw-bold">Miscellaneous</span>
+        <a class="dropdown-item" href="/lsapp/newsletters/">Newsletter Subscriptions</a>
 				<!-- <a class="dropdown-item" href="/lsapp/learning-hub-partners.php">Learning Hub Partners</a> -->
 				<a class="dropdown-item" href="/lsapp/audits.php">Resource Reviews</a>
 				<a class="dropdown-item" href="/lsapp/function-map.php">Functions</a>
@@ -295,10 +296,6 @@ $teams = getTeams();
 				<a class="dropdown-item" href="/lsapp/open-access-code-manager.php">Open Access Code Manager</a>
 				<!-- <a class="dropdown-item" href="/lsapp/ondeck.php">On Deck for Tomorrow</a> -->
 				<a class="dropdown-item" href="/lsapp/external-mailing-list.php">Weekly Stats Update</a>
-				<hr class="dropdown-divider">
-				<span class="dropdown-item-text fw-bold">Newsletter</span>
-				<a class="dropdown-item" href="/lsapp/newsletters/">Newsletter Subscriptions</a>
-				<a class="dropdown-item" href="/lsapp/newsletters/send_newsletter.php">Send Newsletter</a>
 				
 				<a class="dropdown-item" href="/lsapp/export.php">Export</a>
 				
