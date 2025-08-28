@@ -19,6 +19,7 @@ IMPORTANT LIMITATIONS:
     
     <!-- Tracking pixel at the END of email (so it loads last) -->
     <!-- Generate unique tracking_id for each recipient -->
+     <!-- https://learn.bcpublicservice.gov.bc.ca/newsletter-tracker/track.php?id=fffffffffffffffff&e=allan.haggett%40gov.bc.ca&n=2&c=5000 -->
     <img src="https://your-public-server.com/track.php?id=<?php echo $unique_tracking_id; ?>&e=<?php echo urlencode($recipient_email); ?>&n=<?php echo $newsletter_id; ?>&c=<?php echo $campaign_id; ?>" 
          width="1" 
          height="1" 
