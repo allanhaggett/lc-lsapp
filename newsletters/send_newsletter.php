@@ -85,8 +85,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Preview mode - show what will be sent
             $isPreview = true;
             
-            // Get active subscribers
-            $stmt = $db->query("SELECT email FROM subscriptions WHERE status = 'active' ORDER BY email");
+            // Get active subscribers for this specific newsletter
+            $stmt = $db->prepare("SELECT email FROM subscriptions WHERE status = 'active' AND newsletter_id = ? ORDER BY email");
+            $stmt->execute([$newsletterId]);
             $activeSubscribers = $stmt->fetchAll(PDO::FETCH_COLUMN);
             
             $previewData = [
@@ -104,8 +105,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         } elseif ($action === 'send') {
             // Send the email
             
-            // Get active subscribers
-            $stmt = $db->query("SELECT email FROM subscriptions WHERE status = 'active' ORDER BY email");
+            // Get active subscribers for this specific newsletter
+            $stmt = $db->prepare("SELECT email FROM subscriptions WHERE status = 'active' AND newsletter_id = ? ORDER BY email");
+            $stmt->execute([$newsletterId]);
             $activeSubscribers = $stmt->fetchAll(PDO::FETCH_COLUMN);
             
             if (empty($activeSubscribers)) {
@@ -250,10 +252,11 @@ try {
     error_log("Failed to fetch recent campaigns: " . $e->getMessage());
 }
 
-// Get subscriber count
+// Get subscriber count for this specific newsletter
 $subscriberCount = 0;
 try {
-    $stmt = $db->query("SELECT COUNT(*) FROM subscriptions WHERE status = 'active'");
+    $stmt = $db->prepare("SELECT COUNT(*) FROM subscriptions WHERE status = 'active' AND newsletter_id = ?");
+    $stmt->execute([$newsletterId]);
     $subscriberCount = $stmt->fetchColumn();
 } catch (PDOException $e) {
     error_log("Failed to get subscriber count: " . $e->getMessage());

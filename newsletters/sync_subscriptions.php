@@ -60,8 +60,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $db = null;
         unset($db);
         
-        // Give SQLite a moment to fully release the lock
-        usleep(100000); // 100ms delay
+        // With WAL mode, we need less delay but still give time for connection cleanup
+        usleep(50000); // 50ms delay (reduced from 100ms since WAL mode is more concurrent)
         
         // Run the sync script as a separate process
         $startTime = microtime(true);
@@ -263,26 +263,7 @@ try {
     </div>
     <?php endif; ?>
     
-    <div class="row mb-4">
-        <div class="col-md-12">
-            <div class="card bg-light-subtle">
-                <div class="card-body">
-                    <h5 class="card-title">Automated Sync Setup</h5>
-                    <p class="card-text">
-                        For automated synchronization, you can set up a cron job to run the sync script regularly:
-                    </p>
-                    <pre class="bg-dark text-light p-3 rounded"><code># Run every hour for newsletter ID 1
-0 * * * * cd /var/www/html/lsapp/newsletters && php manage_subscriptions.php 1 >> sync.log 2>&1
-
-# Or run every 30 minutes for newsletter ID 1
-*/30 * * * * cd /var/www/html/lsapp/newsletters && php manage_subscriptions.php 1 >> sync.log 2>&1
-
-# For multiple newsletters, add separate cron entries with different IDs
-# 0 * * * * cd /var/www/html/lsapp/newsletters && php manage_subscriptions.php 2 >> sync.log 2>&1</code></pre>
-                </div>
-            </div>
-        </div>
-    </div>
+    
 </div>
 
 <?php include('../templates/footer.php') ?>

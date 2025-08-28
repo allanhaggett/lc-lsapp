@@ -110,7 +110,7 @@ $newsletters = $db->query($query)->fetchAll(PDO::FETCH_ASSOC);
     <main id="main-content">
     <div class="row">
         <div class="col-md-12">
-            <h1>📧 Newsletters Management</h1>
+            <h1>Newsletters</h1>
             <p class="text-secondary">Manage multiple newsletter configurations and subscriptions</p>
             
             <?php if ($isAdminUser): ?>

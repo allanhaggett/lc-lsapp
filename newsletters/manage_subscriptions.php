@@ -33,7 +33,31 @@ class SubscriptionManager {
     
     public function closeDatabase() {
         if ($this->db) {
+            // Ensure any pending transaction is closed
+            if ($this->db->inTransaction()) {
+                $this->db->rollBack();
+            }
             $this->db = null;
+        }
+    }
+    
+    private function reconnectDatabase() {
+        $this->closeDatabase();
+        $this->initDatabase();
+    }
+    
+    private function forceUnlockDatabase() {
+        // Last resort: try to force unlock by connecting with immediate mode
+        try {
+            $tempDb = new PDO("sqlite:{$this->dbPath}");
+            $tempDb->exec("PRAGMA locking_mode=EXCLUSIVE;");
+            $tempDb->exec("BEGIN IMMEDIATE;");
+            $tempDb->exec("ROLLBACK;");
+            $tempDb->exec("PRAGMA locking_mode=NORMAL;");
+            $tempDb = null;
+            echo "  Forced database unlock attempt completed\n";
+        } catch (Exception $e) {
+            echo "  Force unlock failed: " . $e->getMessage() . "\n";
         }
     }
     
@@ -51,31 +75,45 @@ class SubscriptionManager {
     
     private function initDatabase() {
         try {
-            $this->db = new PDO("sqlite:{$this->dbPath}");
-            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            $this->db->setAttribute(PDO::ATTR_TIMEOUT, 30);
+            // Use more aggressive timeout settings for SQLite
+            $dsn = "sqlite:{$this->dbPath}";
+            $options = [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_TIMEOUT => 60, // Increased from 30 seconds
+                PDO::ATTR_PERSISTENT => false, // Don't use persistent connections
+            ];
             
-            // Don't enable WAL mode - it requires write permissions on the directory
-            // $this->db->exec("PRAGMA journal_mode=WAL;");
+            $this->db = new PDO($dsn, '', '', $options);
+            
+            // WAL mode allows for better concurrency - readers don't block writers
+            $this->db->exec("PRAGMA journal_mode=WAL;");
             $this->db->exec("PRAGMA synchronous=NORMAL;");
-            $this->db->exec("PRAGMA busy_timeout=5000;"); // 5 second timeout for locks
+            $this->db->exec("PRAGMA busy_timeout=30000;"); // 30 second timeout for locks
+            $this->db->exec("PRAGMA wal_autocheckpoint=1000;"); // Checkpoint WAL after 1000 pages
+            $this->db->exec("PRAGMA locking_mode=NORMAL;"); // Ensure normal locking mode
+            $this->db->exec("PRAGMA temp_store=MEMORY;"); // Store temp data in memory
+            $this->db->exec("PRAGMA cache_size=10000;"); // Larger cache
             
-            // Create subscriptions table
+            // Create subscriptions table (matches current schema)
             $this->db->exec("
                 CREATE TABLE IF NOT EXISTS subscriptions (
-                    email TEXT PRIMARY KEY,
-                    status TEXT NOT NULL,
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    email TEXT NOT NULL,
+                    newsletter_id INTEGER NOT NULL,
+                    status TEXT NOT NULL DEFAULT 'active',
                     created_at TIMESTAMP NOT NULL,
                     updated_at TIMESTAMP NOT NULL,
-                    source TEXT DEFAULT 'form'
+                    source TEXT DEFAULT 'form',
+                    UNIQUE(email, newsletter_id)
                 )
             ");
             
-            // Create subscription history table
+            // Create subscription history table (matches current schema)
             $this->db->exec("
                 CREATE TABLE IF NOT EXISTS subscription_history (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     email TEXT NOT NULL,
+                    newsletter_id INTEGER NOT NULL,
                     action TEXT NOT NULL,
                     timestamp TIMESTAMP NOT NULL,
                     submission_id TEXT,
@@ -83,10 +121,11 @@ class SubscriptionManager {
                 )
             ");
             
-            // Create last sync tracking table
+            // Create last sync tracking table (matches current schema)
             $this->db->exec("
                 CREATE TABLE IF NOT EXISTS last_sync (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    newsletter_id INTEGER NOT NULL,
                     last_sync_timestamp TEXT NOT NULL,
                     sync_type TEXT DEFAULT 'submissions',
                     records_processed INTEGER DEFAULT 0,
@@ -111,10 +150,16 @@ class SubscriptionManager {
         $now = date('Y-m-d H:i:s');
         
         $maxRetries = 5;
-        $retryDelay = 100000; // 100ms in microseconds
+        $retryDelay = 200000; // 200ms in microseconds (increased from 100ms)
         
         for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
             try {
+                // On retry attempts after the first, reconnect to database
+                if ($attempt > 1) {
+                    echo "Reconnecting to database for sync time update (attempt $attempt)...\n";
+                    $this->reconnectDatabase();
+                }
+                
                 $stmt = $this->db->prepare("
                     INSERT INTO last_sync (last_sync_timestamp, sync_type, records_processed, created_at, newsletter_id)
                     VALUES (?, 'submissions', ?, ?, ?)
@@ -263,66 +308,107 @@ class SubscriptionManager {
         
         $now = date('Y-m-d H:i:s');
         
-        try {
-            // Record in history
-            $stmt = $this->db->prepare("
-                INSERT INTO subscription_history (email, action, timestamp, submission_id, raw_data, newsletter_id)
-                VALUES (?, ?, ?, ?, ?, ?)
-            ");
-            $stmt->execute([$email, $action, $now, $submissionId, json_encode($submission), $this->newsletterId]);
-            
-            // Update subscription status
-            if ($action == 'subscribe') {
-                // Check if email exists for this newsletter
-                $checkStmt = $this->db->prepare("SELECT email FROM subscriptions WHERE email = ? AND newsletter_id = ?");
-                $checkStmt->execute([$email, $this->newsletterId]);
-                
-                if ($checkStmt->fetch()) {
-                    // Update existing
-                    $updateStmt = $this->db->prepare("
-                        UPDATE subscriptions 
-                        SET status = 'active', updated_at = ?
-                        WHERE email = ? AND newsletter_id = ?
-                    ");
-                    $updateStmt->execute([$now, $email, $this->newsletterId]);
-                } else {
-                    // Insert new
-                    $insertStmt = $this->db->prepare("
-                        INSERT INTO subscriptions (email, status, created_at, updated_at, newsletter_id)
-                        VALUES (?, 'active', ?, ?, ?)
-                    ");
-                    $insertStmt->execute([$email, $now, $now, $this->newsletterId]);
+        $maxRetries = 5;
+        $retryDelay = 200000; // 200ms in microseconds (increased from 100ms)
+        
+        for ($attempt = 1; $attempt <= $maxRetries; $attempt++) {
+            try {
+                // On retry attempts after the first, reconnect to database
+                if ($attempt > 1) {
+                    echo "  Reconnecting to database (attempt $attempt)...\n";
+                    $this->reconnectDatabase();
                 }
                 
-            } elseif ($action == 'unsubscribe') {
-                // Check if email exists for this newsletter
-                $checkStmt = $this->db->prepare("SELECT email FROM subscriptions WHERE email = ? AND newsletter_id = ?");
-                $checkStmt->execute([$email, $this->newsletterId]);
+                // Begin transaction for atomicity
+                $this->db->beginTransaction();
                 
-                if ($checkStmt->fetch()) {
-                    // Update existing
-                    $updateStmt = $this->db->prepare("
-                        UPDATE subscriptions 
-                        SET status = 'unsubscribed', updated_at = ?
-                        WHERE email = ? AND newsletter_id = ?
-                    ");
-                    $updateStmt->execute([$now, $email, $this->newsletterId]);
+                // Record in history
+                $stmt = $this->db->prepare("
+                    INSERT INTO subscription_history (email, action, timestamp, submission_id, raw_data, newsletter_id)
+                    VALUES (?, ?, ?, ?, ?, ?)
+                ");
+                $stmt->execute([$email, $action, $now, $submissionId, json_encode($submission), $this->newsletterId]);
+                
+                // Update subscription status
+                if ($action == 'subscribe') {
+                    // Check if email exists for this newsletter
+                    $checkStmt = $this->db->prepare("SELECT email FROM subscriptions WHERE email = ? AND newsletter_id = ?");
+                    $checkStmt->execute([$email, $this->newsletterId]);
+                    
+                    if ($checkStmt->fetch()) {
+                        // Update existing
+                        $updateStmt = $this->db->prepare("
+                            UPDATE subscriptions 
+                            SET status = 'active', updated_at = ?
+                            WHERE email = ? AND newsletter_id = ?
+                        ");
+                        $updateStmt->execute([$now, $email, $this->newsletterId]);
+                    } else {
+                        // Insert new
+                        $insertStmt = $this->db->prepare("
+                            INSERT INTO subscriptions (email, status, created_at, updated_at, newsletter_id)
+                            VALUES (?, 'active', ?, ?, ?)
+                        ");
+                        $insertStmt->execute([$email, $now, $now, $this->newsletterId]);
+                    }
+                    
+                } elseif ($action == 'unsubscribe') {
+                    // Check if email exists for this newsletter
+                    $checkStmt = $this->db->prepare("SELECT email FROM subscriptions WHERE email = ? AND newsletter_id = ?");
+                    $checkStmt->execute([$email, $this->newsletterId]);
+                    
+                    if ($checkStmt->fetch()) {
+                        // Update existing
+                        $updateStmt = $this->db->prepare("
+                            UPDATE subscriptions 
+                            SET status = 'unsubscribed', updated_at = ?
+                            WHERE email = ? AND newsletter_id = ?
+                        ");
+                        $updateStmt->execute([$now, $email, $this->newsletterId]);
+                    } else {
+                        // Insert new as unsubscribed
+                        $insertStmt = $this->db->prepare("
+                            INSERT INTO subscriptions (email, status, created_at, updated_at, newsletter_id)
+                            VALUES (?, 'unsubscribed', ?, ?, ?)
+                        ");
+                        $insertStmt->execute([$email, $now, $now, $this->newsletterId]);
+                    }
+                }
+                
+                // Commit transaction
+                $this->db->commit();
+                return true;
+                
+            } catch (PDOException $e) {
+                // Rollback transaction on any error
+                if ($this->db->inTransaction()) {
+                    $this->db->rollBack();
+                }
+                
+                if ($e->getCode() == 'HY000' && strpos($e->getMessage(), 'database is locked') !== false) {
+                    if ($attempt < $maxRetries) {
+                        echo "  Database locked (attempt $attempt/$maxRetries), retrying in " . ($retryDelay/1000) . "ms...\n";
+                        
+                        // On the 3rd attempt, try force unlock
+                        if ($attempt == 3) {
+                            echo "  Attempting force unlock...\n";
+                            $this->forceUnlockDatabase();
+                        }
+                        
+                        usleep($retryDelay);
+                        $retryDelay *= 2; // Exponential backoff
+                    } else {
+                        echo "  Database remained locked after $maxRetries attempts for $email\n";
+                        return false;
+                    }
                 } else {
-                    // Insert new as unsubscribed
-                    $insertStmt = $this->db->prepare("
-                        INSERT INTO subscriptions (email, status, created_at, updated_at, newsletter_id)
-                        VALUES (?, 'unsubscribed', ?, ?, ?)
-                    ");
-                    $insertStmt->execute([$email, $now, $now, $this->newsletterId]);
+                    echo "  Database error: " . $e->getMessage() . "\n";
+                    return false;
                 }
             }
-            
-            return true;
-            
-        } catch (PDOException $e) {
-            echo "  Database error: " . $e->getMessage() . "\n";
-            return false;
         }
+        
+        return false;
     }
     
     public function processAllSubmissions() {
