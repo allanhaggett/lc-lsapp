@@ -372,7 +372,7 @@ $recentActivity = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
                                                 <form method="post" action="" class="d-inline" onsubmit="return confirm('Are you sure you want to unsubscribe <?php echo htmlspecialchars($sub['email']); ?>?')">
                                                     <input type="hidden" name="action" value="unsubscribe">
                                                     <input type="hidden" name="email" value="<?php echo htmlspecialchars($sub['email']); ?>">
-                                                    <button type="submit" class="btn btn-danger btn-sm">Unsubscribe</button>
+                                                    <button type="submit" class="btn btn-outline-secondary btn-sm">Unsubscribe</button>
                                                 </form>
                                             <?php else: ?>
                                                 <form method="post" action="" class="d-inline" onsubmit="return confirm('Are you sure you want to reactivate <?php echo htmlspecialchars($sub['email']); ?>?')">
@@ -438,4 +438,5 @@ $recentActivity = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
             </div>
         </section>
     </div>
+<?php include('../templates/javascript.php') ?>
 <?php include('../templates/footer.php') ?>

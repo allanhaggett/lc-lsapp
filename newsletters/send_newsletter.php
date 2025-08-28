@@ -424,7 +424,7 @@ try {
                 <form method="post">
                     <div class="mb-3">
                         <label for="from_email" class="form-label">From Email Address</label>
-                        <input type="email" id="from_email" name="from_email" class="form-control" value="<?php echo htmlspecialchars($fromEmail ?? 'LearningHUB.Notification@gov.bc.ca'); ?>" required>
+                        <input type="email" id="from_email" name="from_email" class="form-control" value="<?php echo htmlspecialchars($fromEmail ?? 'donotreply_psa@gov.bc.ca'); ?>" required>
                     </div>
                     
                     <div class="mb-3">
