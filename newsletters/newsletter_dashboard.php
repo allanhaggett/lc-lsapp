@@ -197,7 +197,7 @@ if (!empty($searchQuery)) {
 
 $query .= " WHERE " . implode(" AND ", $conditions);
 
-$query .= " ORDER BY status, email";
+$query .= " ORDER BY created_at DESC";
 
 $stmt = $db->prepare($query);
 $stmt->execute($params);
@@ -434,54 +434,7 @@ $recentActivity = $recentStmt->fetchAll(PDO::FETCH_ASSOC);
                     </div>
                 </div>
                 
-                <?php if ($isAdminUser): ?>
-                    <!--
-                <div class="row mt-4 border-top pt-4">
-                    <div class="col-12">
-                        <h3 class="h5 text-danger">Admin Actions</h3>
-                        <div class="alert alert-warning" role="alert">
-                            <strong>⚠️ Warning:</strong> These actions are permanent and cannot be undone.
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <h4 class="h6">Permanently Delete Subscriber</h4>
-                        <form method="post" action="" onsubmit="return confirm('⚠️ ADMIN ACTION: Are you sure you want to PERMANENTLY DELETE this email from the database? This action cannot be undone.')">
-                            <input type="hidden" name="action" value="delete">
-                            <div class="mb-3">
-                                <label for="delete-email" class="form-label">Email Address to Delete</label>
-                                <div class="input-group">
-                                    <input type="email" id="delete-email" name="email" class="form-control" placeholder="subscriber@example.com" required>
-                                    <button type="submit" class="btn btn-outline-danger">🗑️ Delete Permanently</button>
-                                </div>
-                                <div class="form-text text-danger">This will completely remove the subscriber from the database.</div>
-                            </div>
-                        </form>
-                    </div>
-                </div> -->
-                <?php endif; ?>
-            </div>
-        </section>
 
-        <section class="card bg-light-subtle" role="region" aria-label="Recent Activity">
-            <div class="card-body">
-                <details>
-                    <summary class="h5 mb-3">Recent Activity (Last 10)</summary>
-                    <?php if (empty($recentActivity)): ?>
-                        <p class="text-center text-secondary py-3">No recent activity</p>
-                    <?php else: ?>
-                        <div class="list-group list-group-flush">
-                            <?php foreach ($recentActivity as $activity): ?>
-                                <div class="list-group-item bg-transparent">
-                                    <div class="small text-secondary"><?php echo date('Y-m-d H:i:s', strtotime($activity['timestamp'])); ?></div>
-                                    <div>
-                                        <strong><?php echo htmlspecialchars($activity['email']); ?></strong>
-                                        <span class="badge bg-secondary ms-2"><?php echo $activity['action']; ?></span>
-                                    </div>
-                                </div>
-                            <?php endforeach; ?>
-                        </div>
-                    <?php endif; ?>
-                </details>
             </div>
         </section>
     </div>
