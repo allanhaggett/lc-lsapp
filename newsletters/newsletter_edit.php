@@ -156,6 +156,70 @@ $pageTitle = $newsletterId ? 'Edit Newsletter' : 'Add New Newsletter';
 <?php getHeader() ?>
 <title><?php echo $pageTitle; ?> - Newsletter Management</title>
 <?php getScripts() ?>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const formFeedback = document.getElementById('form-feedback');
+    const testButton = document.getElementById('test-button');
+    const saveButton = document.getElementById('save-button');
+    
+    // Form validation and accessibility enhancements
+    const formIdInput = document.getElementById('form_id');
+    const apiUsernameInput = document.getElementById('api_username');
+    const apiPasswordInput = document.getElementById('api_password');
+    
+    // Real-time validation feedback
+    formIdInput.addEventListener('input', function() {
+        const value = this.value.trim();
+        const pattern = /^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
+        
+        if (value && !pattern.test(value)) {
+            this.setAttribute('aria-invalid', 'true');
+            formFeedback.textContent = 'Form ID format is invalid. Use the format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx';
+        } else {
+            this.setAttribute('aria-invalid', 'false');
+            formFeedback.textContent = '';
+        }
+    });
+    
+    // Form submission handling with announcements
+    form.addEventListener('submit', function(e) {
+        const isTestConnection = document.activeElement === testButton;
+        
+        if (isTestConnection) {
+            formFeedback.textContent = 'Testing API connection... Please wait.';
+            testButton.disabled = true;
+            testButton.textContent = 'Testing...';
+        } else {
+            formFeedback.textContent = 'Saving newsletter configuration... Please wait.';
+            saveButton.disabled = true;
+            saveButton.textContent = '<?php echo $newsletterId ? "Updating..." : "Creating..."; ?>';
+        }
+        
+        // Re-enable buttons after a timeout in case of issues
+        setTimeout(() => {
+            testButton.disabled = false;
+            saveButton.disabled = false;
+            testButton.textContent = 'Test Connection';
+            saveButton.textContent = '<?php echo $newsletterId ? "Update Newsletter" : "Create Newsletter"; ?>';
+        }, 30000);
+    });
+    
+    // Auto-populate API username if Form ID is provided
+    formIdInput.addEventListener('blur', function() {
+        const formId = this.value.trim();
+        const username = apiUsernameInput.value.trim();
+        
+        if (formId && !username) {
+            if (confirm('Copy Form ID to API Username field? (This is often the same value)')) {
+                apiUsernameInput.value = formId;
+                formFeedback.textContent = 'API Username populated from Form ID';
+                setTimeout(() => formFeedback.textContent = '', 3000);
+            }
+        }
+    });
+});
+</script>
 </head>
 <body>
 <?php getNavigation() ?>
@@ -204,29 +268,38 @@ $pageTitle = $newsletterId ? 'Edit Newsletter' : 'Add New Newsletter';
                         <h5>API Configuration</h5>
                         
                         <div class="mb-3">
-                            <label for="form_id" class="form-label">Form ID <span class="text-danger">*</span></label>
+                            <label for="form_id" class="form-label">Form ID <span class="text-danger" aria-label="required">*</span></label>
                             <input type="text" class="form-control font-monospace" id="form_id" name="form_id" 
                                    value="<?php echo htmlspecialchars($_POST['form_id'] ?? $newsletter['form_id'] ?? ''); ?>" 
                                    placeholder="e.g., fd03b54b-84aa-4a05-b5ff-c5536b733f57"
                                    pattern="[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"
+                                   aria-describedby="form-id-help form-id-format"
                                    required>
-                            <div class="form-text">The UUID of the form in BC Gov Digital Forms</div>
+                            <div id="form-id-help" class="form-text">The UUID of the form in BC Gov Digital Forms</div>
+                            <div id="form-id-format" class="form-text">Format: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx (lowercase letters and numbers only)</div>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="api_username" class="form-label">API Username <span class="text-danger">*</span></label>
+                            <label for="api_username" class="form-label">API Username <span class="text-danger" aria-label="required">*</span></label>
                             <input type="text" class="form-control font-monospace" id="api_username" name="api_username" 
                                    value="<?php echo htmlspecialchars($_POST['api_username'] ?? $newsletter['api_username'] ?? ''); ?>" 
+                                   aria-describedby="api-username-help"
+                                   autocomplete="username"
                                    required>
-                            <div class="form-text">Username for Basic Authentication (often same as Form ID)</div>
+                            <div id="api-username-help" class="form-text">Username for Basic Authentication (often same as Form ID)</div>
                         </div>
                         
                         <div class="mb-3">
-                            <label for="api_password" class="form-label">API Password <span class="text-danger">*</span></label>
+                            <label for="api_password" class="form-label">API Password <span class="text-danger" aria-label="required">*</span></label>
                             <input type="password" class="form-control font-monospace" id="api_password" name="api_password" 
                                    value="<?php echo htmlspecialchars($_POST['api_password'] ?? $newsletter['api_password_decrypted'] ?? ''); ?>" 
+                                   aria-describedby="api-password-help api-password-security"
+                                   autocomplete="current-password"
                                    required>
-                            <div class="form-text">Password/API Key for Basic Authentication</div>
+                            <div id="api-password-help" class="form-text">Password/API Key for Basic Authentication</div>
+                            <div id="api-password-security" class="form-text text-info">
+                                <small><span aria-hidden="true">🔒</span> This password is encrypted before storage for security</small>
+                            </div>
                         </div>
                         
                         <div class="mb-3">
@@ -236,13 +309,22 @@ $pageTitle = $newsletterId ? 'Edit Newsletter' : 'Add New Newsletter';
                             <div class="form-text">Leave default unless using a different API endpoint</div>
                         </div>
                         
+                        <!-- Live region for form feedback -->
+                        <div id="form-feedback" aria-live="polite" class="visually-hidden"></div>
+                        
                         <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary" id="save-button"
+                                    aria-describedby="save-button-help">
                                 <?php echo $newsletterId ? 'Update Newsletter' : 'Create Newsletter'; ?>
                             </button>
-                            <button type="submit" name="test_connection" value="1" class="btn btn-outline-secondary">
+                            <div id="save-button-help" class="visually-hidden">Save newsletter configuration and validate settings</div>
+                            
+                            <button type="submit" name="test_connection" value="1" class="btn btn-outline-secondary" id="test-button"
+                                    aria-describedby="test-button-help">
                                 Test Connection
                             </button>
+                            <div id="test-button-help" class="visually-hidden">Test API connection before saving</div>
+                            
                             <a href="index.php" class="btn btn-link">Cancel</a>
                         </div>
                     </form>

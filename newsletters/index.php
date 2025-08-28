@@ -78,7 +78,6 @@ $newsletters = $db->query($query)->fetchAll(PDO::FETCH_ASSOC);
 <title>Newsletters Management Dashboard</title>
 <style>
     .newsletter-card {
-        transition: all 0.3s ease;
         border-left: 4px solid transparent;
     }
     .newsletter-card.active {
@@ -87,10 +86,6 @@ $newsletters = $db->query($query)->fetchAll(PDO::FETCH_ASSOC);
     .newsletter-card.inactive {
         border-left-color: #dc3545;
         opacity: 0.8;
-    }
-    .newsletter-card:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
     .stats-badge {
         display: inline-block;
@@ -105,7 +100,14 @@ $newsletters = $db->query($query)->fetchAll(PDO::FETCH_ASSOC);
 <body>
 <?php getNavigation() ?>
 
+<!-- Skip Links for Accessibility -->
+<div class="visually-hidden-focusable">
+    <a href="#main-content" class="btn btn-primary btn-sm">Skip to main content</a>
+    <a href="#newsletter-list" class="btn btn-secondary btn-sm">Skip to newsletter list</a>
+</div>
+
 <div class="container">
+    <main id="main-content">
     <div class="row">
         <div class="col-md-12">
             <h1>📧 Newsletters Management</h1>
@@ -127,7 +129,10 @@ $newsletters = $db->query($query)->fetchAll(PDO::FETCH_ASSOC);
         </div>
     <?php endif; ?>
     
-    <div class="row">
+    <div class="row" id="newsletter-list">
+        <div class="visually-hidden">
+            <h2>Newsletter List</h2>
+        </div>
         <?php if (empty($newsletters)): ?>
             <div class="col-12">
                 <div class="alert alert-info" role="alert">
@@ -146,16 +151,25 @@ $newsletters = $db->query($query)->fetchAll(PDO::FETCH_ASSOC);
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start mb-2">
                                 <h5 class="card-title">
-                                    <?php echo htmlspecialchars($newsletter['name']); ?>
+                                    <a href="newsletter_dashboard.php?newsletter_id=<?php echo $newsletter['id']; ?>" 
+                                       class="text-decoration-none"
+                                       aria-label="View dashboard for <?php echo htmlspecialchars($newsletter['name']); ?><?php if (!$newsletter['is_active']): ?> (currently inactive)<?php endif; ?>">
+                                        <?php echo htmlspecialchars($newsletter['name']); ?>
+                                    </a>
                                     <?php if (!$newsletter['is_active']): ?>
-                                        <span class="badge bg-danger ms-2">Inactive</span>
+                                        <span class="badge bg-danger ms-2" aria-label="Newsletter status: inactive">Inactive</span>
                                     <?php endif; ?>
                                 </h5>
                                 <div class="dropdown">
-                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" 
+                                            type="button" 
+                                            data-bs-toggle="dropdown"
+                                            aria-expanded="false"
+                                            aria-label="Actions for <?php echo htmlspecialchars($newsletter['name']); ?> newsletter"
+                                            id="actions-<?php echo $newsletter['id']; ?>">
                                         Actions
                                     </button>
-                                    <ul class="dropdown-menu">
+                                    <ul class="dropdown-menu" aria-labelledby="actions-<?php echo $newsletter['id']; ?>">
                                         <li>
                                             <a class="dropdown-item" href="newsletter_dashboard.php?newsletter_id=<?php echo $newsletter['id']; ?>">
                                                 📊 View Dashboard
@@ -209,15 +223,20 @@ $newsletters = $db->query($query)->fetchAll(PDO::FETCH_ASSOC);
                                 </p>
                             <?php endif; ?>
                             
-                            <div class="mb-3">
-                                <span class="stats-badge bg-success-subtle text-success">
-                                    <?php echo $newsletter['active_count']; ?> active
+                            <div class="mb-3" role="group" aria-labelledby="stats-<?php echo $newsletter['id']; ?>">
+                                <div id="stats-<?php echo $newsletter['id']; ?>" class="visually-hidden">Subscription statistics for <?php echo htmlspecialchars($newsletter['name']); ?></div>
+                                
+                                <span class="stats-badge bg-success-subtle text-success" 
+                                      aria-label="<?php echo $newsletter['active_count']; ?> active subscribers">
+                                    <span aria-hidden="true"><?php echo $newsletter['active_count']; ?> active</span>
                                 </span>
-                                <span class="stats-badge bg-danger-subtle text-danger ms-1">
-                                    <?php echo $newsletter['unsubscribed_count']; ?> unsubscribed
+                                <span class="stats-badge bg-danger-subtle text-danger ms-1"
+                                      aria-label="<?php echo $newsletter['unsubscribed_count']; ?> unsubscribed">
+                                    <span aria-hidden="true"><?php echo $newsletter['unsubscribed_count']; ?> unsubscribed</span>
                                 </span>
-                                <span class="stats-badge bg-info-subtle text-info ms-1">
-                                    <?php echo $newsletter['total_count']; ?> total
+                                <span class="stats-badge bg-info-subtle text-info ms-1"
+                                      aria-label="<?php echo $newsletter['total_count']; ?> total subscribers">
+                                    <span aria-hidden="true"><?php echo $newsletter['total_count']; ?> total</span>
                                 </span>
                             </div>
                             
@@ -247,6 +266,7 @@ $newsletters = $db->query($query)->fetchAll(PDO::FETCH_ASSOC);
         <strong>Note:</strong> You have read-only access. Contact an administrator to add or modify newsletter configurations.
     </div>
     <?php endif; ?>
+    </main>
 </div>
 <?php require('../templates/javascript.php') ?>
 <?php include('../templates/footer.php') ?>

@@ -128,10 +128,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             // Create campaign record
             $campaignStmt = $db->prepare("
-                INSERT INTO email_campaigns (subject, html_body, text_body, from_email, sent_to_count, sent_at, status, created_at)
-                VALUES (?, ?, ?, ?, ?, ?, 'sending', ?)
+                INSERT INTO email_campaigns (subject, html_body, text_body, from_email, sent_to_count, sent_at, processing_status, status, created_at, newsletter_id)
+                VALUES (?, ?, ?, ?, ?, ?, 'pending', 'queued', ?, ?)
             ");
-            $campaignStmt->execute([$subject, $htmlBody, $textBody, $fromEmail, count($activeSubscribers), $now, $now]);
+            $campaignStmt->execute([$subject, $htmlBody, $textBody, $fromEmail, count($activeSubscribers), $now, $now, $newsletterId]);
             $campaignId = $db->lastInsertId();
             
             try {
@@ -159,25 +159,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $queuedCount++;
                     }
                     
-                    // Update campaign status to queued
-                    $updateStmt = $db->prepare("
-                        UPDATE email_campaigns 
-                        SET status = 'queued'
-                        WHERE id = ?
-                    ");
-                    $updateStmt->execute([$campaignId]);
-                    
                     $db->commit();
                     
-                    // Calculate estimated sending time
-                    $batchesNeeded = ceil($queuedCount / 30);
-                    $estimatedMinutes = $batchesNeeded;
-                    
-                    $message = "Newsletter queued successfully! $queuedCount emails have been added to the sending queue.";
-                    $message .= " Estimated sending time: ~$estimatedMinutes minute" . ($estimatedMinutes > 1 ? 's' : '');
-                    $message .= " (30 emails/minute rate limit).";
-                    $message .= " The emails will be sent automatically in the background.";
-                    $messageType = 'success';
+                    // Redirect to campaign monitor page
+                    header('Location: campaign_monitor.php?campaign_id=' . $campaignId . '&start=1');
+                    exit();
                 
                     // Clear form data after successful queuing
                     $subject = '';
@@ -210,8 +196,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Get recent campaigns with queue progress
 $recentCampaigns = [];
+$incompleteCampaigns = [];
 try {
-    $stmt = $db->query("
+    // Get incomplete campaigns first
+    $stmt = $db->prepare("
         SELECT 
             c.id, 
             c.subject, 
@@ -219,16 +207,44 @@ try {
             c.sent_to_count, 
             c.sent_at, 
             c.status, 
+            c.processing_status,
             c.ches_transaction_id, 
             c.error_message,
             c.processed_count,
+            (SELECT COUNT(*) FROM email_queue WHERE campaign_id = c.id) as total_count,
             (SELECT COUNT(*) FROM email_queue WHERE campaign_id = c.id AND status = 'sent') as sent_count,
             (SELECT COUNT(*) FROM email_queue WHERE campaign_id = c.id AND status = 'pending') as pending_count,
             (SELECT COUNT(*) FROM email_queue WHERE campaign_id = c.id AND status = 'failed') as failed_count
         FROM email_campaigns c
+        WHERE c.newsletter_id = ? AND c.processing_status IN ('pending', 'processing', 'paused')
+        ORDER BY c.sent_at DESC
+    ");
+    $stmt->execute([$newsletterId]);
+    $incompleteCampaigns = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Get all recent campaigns
+    $stmt = $db->prepare("
+        SELECT 
+            c.id, 
+            c.subject, 
+            c.from_email, 
+            c.sent_to_count, 
+            c.sent_at, 
+            c.status, 
+            c.processing_status,
+            c.ches_transaction_id, 
+            c.error_message,
+            c.processed_count,
+            (SELECT COUNT(*) FROM email_queue WHERE campaign_id = c.id) as total_count,
+            (SELECT COUNT(*) FROM email_queue WHERE campaign_id = c.id AND status = 'sent') as sent_count,
+            (SELECT COUNT(*) FROM email_queue WHERE campaign_id = c.id AND status = 'pending') as pending_count,
+            (SELECT COUNT(*) FROM email_queue WHERE campaign_id = c.id AND status = 'failed') as failed_count
+        FROM email_campaigns c
+        WHERE c.newsletter_id = ?
         ORDER BY c.sent_at DESC 
         LIMIT 10
     ");
+    $stmt->execute([$newsletterId]);
     $recentCampaigns = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     error_log("Failed to fetch recent campaigns: " . $e->getMessage());
@@ -321,16 +337,66 @@ try {
                         </div>
                     </details>
                     
-                    <form method="post" class="mt-4">
+                    <form method="post" class="mt-4" role="group" aria-labelledby="final-send-label">
+                        <div id="final-send-label" class="visually-hidden">Final newsletter sending confirmation</div>
+                        
                         <input type="hidden" name="action" value="send">
                         <input type="hidden" name="subject" value="<?php echo htmlspecialchars($previewData['subject']); ?>">
                         <input type="hidden" name="html_body" value="<?php echo htmlspecialchars($previewData['html_body']); ?>">
                         <input type="hidden" name="from_email" value="<?php echo htmlspecialchars($previewData['from_email']); ?>">
-                        <button type="submit" class="btn btn-success me-2" onclick="return confirm('Are you sure you want to send this newsletter to <?php echo $previewData['recipient_count']; ?> subscribers via individual emails?')">
-                            ✉️ Send Newsletter Now
+                        
+                        <button type="submit" class="btn btn-success me-2" 
+                                onclick="return confirm('Send newsletter to <?php echo $previewData['recipient_count']; ?> subscribers via individual emails? This action cannot be undone.')"
+                                aria-describedby="final-send-description">
+                            <span aria-hidden="true">✉️</span> Send Newsletter Now
+                            <span class="visually-hidden"> to <?php echo $previewData['recipient_count']; ?> subscribers</span>
                         </button>
-                        <a href="send_newsletter.php?newsletter_id=<?php echo $newsletterId; ?>" class="btn btn-secondary">Cancel</a>
+                        
+                        <div id="final-send-description" class="visually-hidden">
+                            Send newsletter "<?php echo htmlspecialchars($previewData['subject']); ?>" to <?php echo $previewData['recipient_count']; ?> active subscribers via individual emails
+                        </div>
+                        
+                        <a href="send_newsletter.php?newsletter_id=<?php echo $newsletterId; ?>" 
+                           class="btn btn-secondary"
+                           aria-label="Cancel sending and return to compose form">Cancel</a>
                     </form>
+                </div>
+            </section>
+        <?php endif; ?>
+
+        <?php if (!empty($incompleteCampaigns)): ?>
+            <section class="alert alert-warning mb-4">
+                <h4 class="alert-heading">⚠️ Incomplete Campaigns</h4>
+                <p>You have campaigns that haven't finished sending. Resume or monitor them below:</p>
+                <div class="list-group">
+                    <?php foreach ($incompleteCampaigns as $campaign): ?>
+                        <?php 
+                            $progress = 0;
+                            if ($campaign['total_count'] > 0) {
+                                $progress = round(($campaign['sent_count'] / $campaign['total_count']) * 100, 1);
+                            }
+                        ?>
+                        <div class="list-group-item">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1"><?php echo htmlspecialchars($campaign['subject']); ?></h6>
+                                    <small class="text-muted">
+                                        Status: <strong><?php echo ucfirst($campaign['processing_status']); ?></strong> | 
+                                        Progress: <?php echo $campaign['sent_count']; ?>/<?php echo $campaign['total_count']; ?> 
+                                        (<?php echo $progress; ?>%)
+                                    </small>
+                                </div>
+                                <a href="campaign_monitor.php?campaign_id=<?php echo $campaign['id']; ?>" 
+                                   class="btn btn-sm btn-primary">
+                                    <?php if ($campaign['processing_status'] === 'paused'): ?>
+                                        ▶️ Resume
+                                    <?php else: ?>
+                                        📊 Monitor
+                                    <?php endif; ?>
+                                </a>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
                 </div>
             </section>
         <?php endif; ?>
@@ -364,24 +430,43 @@ try {
                     </div>
                     
                     <div class="mb-3">
-                        <label for="html_body" class="form-label">HTML Message Content</label>
-                        <textarea id="html_body" name="html_body" class="form-control" style="min-height: 300px; font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;" placeholder="Enter your HTML newsletter content here..." required><?php echo htmlspecialchars($htmlBody ?? ''); ?></textarea>
-                        <div class="form-text text-secondary">
-                            You can use HTML tags for formatting. A plain text version will be automatically generated.
+                        <label for="html_body" class="form-label">
+                            HTML Message Content <span class="text-danger" aria-label="required">*</span>
+                        </label>
+                        <textarea id="html_body" name="html_body" class="form-control" 
+                                  style="min-height: 300px; font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;" 
+                                  placeholder="Enter your HTML newsletter content here..." 
+                                  aria-describedby="html-body-help html-body-tips"
+                                  required><?php echo htmlspecialchars($htmlBody ?? ''); ?></textarea>
+                        <div id="html-body-help" class="form-text text-secondary">
+                            Enter HTML markup for your newsletter. A plain text version will be automatically generated.
+                        </div>
+                        <div id="html-body-tips" class="form-text text-info">
+                            <small>For better accessibility, use semantic HTML: headings (&lt;h1&gt;-&lt;h6&gt;), paragraphs (&lt;p&gt;), lists (&lt;ul&gt;, &lt;ol&gt;), and meaningful alt text for images.</small>
                         </div>
                     </div>
                     
-                    <div class="d-flex gap-2">
-                        <button type="submit" name="action" value="preview" class="btn btn-primary">
-                            👀 Preview Newsletter
+                    <div class="d-flex gap-2" role="group" aria-labelledby="send-actions-label">
+                        <div id="send-actions-label" class="visually-hidden">Newsletter sending options</div>
+                        
+                        <button type="submit" name="action" value="preview" class="btn btn-primary"
+                                aria-describedby="preview-help">
+                            <span aria-hidden="true">👀</span> Preview Newsletter
                         </button>
+                        <div id="preview-help" class="visually-hidden">Review newsletter content and recipient list before sending</div>
+                        
                         <?php if ($subscriberCount > 0): ?>
-                            <button type="submit" name="action" value="send" class="btn btn-success" onclick="return confirm('Are you sure you want to send this newsletter to <?php echo $subscriberCount; ?> subscribers without previewing?')">
-                                ✉️ Send Immediately
+                            <button type="submit" name="action" value="send" class="btn btn-success" 
+                                    onclick="return confirm('Send newsletter to <?php echo $subscriberCount; ?> subscribers without previewing? This action cannot be undone.')"
+                                    aria-describedby="send-immediately-help">
+                                <span aria-hidden="true">✉️</span> Send Immediately
+                                <span class="visually-hidden"> to <?php echo $subscriberCount; ?> subscribers</span>
                             </button>
+                            <div id="send-immediately-help" class="visually-hidden">Send newsletter directly to all <?php echo $subscriberCount; ?> active subscribers without preview</div>
                         <?php else: ?>
-                            <button type="button" class="btn btn-secondary" disabled title="No active subscribers">
-                                ✉️ No Active Subscribers
+                            <button type="button" class="btn btn-secondary" disabled 
+                                    aria-label="Cannot send newsletter - no active subscribers found">
+                                <span aria-hidden="true">✉️</span> No Active Subscribers
                             </button>
                         <?php endif; ?>
                     </div>
@@ -424,31 +509,45 @@ try {
                                         <?php endif; ?>
                                     </small>
                                 </div>
-                                <div>
+                                <div class="text-end">
                                     <?php 
-                                    $statusText = str_replace('_', ' ', $campaign['status']);
+                                    $statusText = str_replace('_', ' ', $campaign['processing_status'] ?? $campaign['status']);
                                     $badgeClass = 'badge ';
-                                    switch($campaign['status']) {
+                                    switch($campaign['processing_status'] ?? $campaign['status']) {
+                                        case 'completed':
                                         case 'sent':
                                             $badgeClass .= 'bg-success';
                                             break;
                                         case 'failed':
+                                        case 'cancelled':
                                             $badgeClass .= 'bg-danger';
                                             break;
+                                        case 'processing':
                                         case 'sending':
-                                        case 'queued':
+                                            $badgeClass .= 'bg-info';
+                                            break;
+                                        case 'paused':
                                             $badgeClass .= 'bg-warning text-dark';
                                             break;
-                                        case 'completed_with_errors':
-                                            $badgeClass .= 'bg-warning text-dark';
+                                        case 'pending':
+                                        case 'queued':
+                                            $badgeClass .= 'bg-secondary';
                                             break;
                                         default:
                                             $badgeClass .= 'bg-secondary';
                                     }
                                     ?>
-                                    <span class="<?php echo $badgeClass; ?>">
+                                    <span class="<?php echo $badgeClass; ?> mb-2">
                                         <?php echo ucfirst($statusText); ?>
                                     </span>
+                                    
+                                    <?php if (in_array($campaign['processing_status'], ['pending', 'processing', 'paused'])): ?>
+                                        <br>
+                                        <a href="campaign_monitor.php?campaign_id=<?php echo $campaign['id']; ?>" 
+                                           class="btn btn-sm btn-outline-primary mt-1">
+                                            📊 View
+                                        </a>
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         <?php endforeach; ?>
