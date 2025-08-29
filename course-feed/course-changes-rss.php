@@ -3,7 +3,37 @@ opcache_reset();
 
 // Set UTF-8 encoding for the script
 mb_internal_encoding('UTF-8');
+define('SLASH', DIRECTORY_SEPARATOR);
+$docroot = $_SERVER['DOCUMENT_ROOT'] . '/lsapp//';
+define('BASE_DIR', $docroot);
+function build_path(...$segments) {
+    return implode(SLASH, $segments);
+}
 
+// Load all courses into memory once
+function loadAllCourses() {
+    $path = build_path(BASE_DIR, 'data', 'courses.csv');
+    $f = fopen($path, 'r');
+    if (!$f) {
+        die("Failed to open courses CSV.");
+    }
+    
+    $header = fgetcsv($f); // Skip header row
+    $courses = [];
+    
+    while ($row = fgetcsv($f)) {
+        // Index by course ID for quick lookup
+        $courses[$row[0]] = $row;
+    }
+    
+    fclose($f);
+    return $courses;
+}
+
+// Get a specific course from the preloaded array
+function getCourse($cid, $coursesArray) {
+    return $coursesArray[$cid] ?? '';
+}
 // Directory containing the change request JSON files
 $directory = "../course-change/requests";
 
