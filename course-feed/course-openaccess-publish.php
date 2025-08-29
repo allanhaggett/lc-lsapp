@@ -1,6 +1,7 @@
 <?php
 opcache_reset();
 
+define('BASE_DIR', $docroot);
 function build_path(...$segments) {
     return implode(SLASH, $segments);
 }
