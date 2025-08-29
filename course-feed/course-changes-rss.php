@@ -10,30 +10,19 @@ function build_path(...$segments) {
     return implode(SLASH, $segments);
 }
 
-// Load all courses into memory once
-function loadAllCourses() {
-    $path = build_path(BASE_DIR, 'data', 'courses.csv');
-    $f = fopen($path, 'r');
-    if (!$f) {
-        die("Failed to open courses CSV.");
-    }
-    
-    $header = fgetcsv($f); // Skip header row
-    $courses = [];
-    
-    while ($row = fgetcsv($f)) {
-        // Index by course ID for quick lookup
-        $courses[$row[0]] = $row;
-    }
-    
-    fclose($f);
-    return $courses;
+function getCourse($cid) {
+	$path = build_path(BASE_DIR, 'data', 'courses.csv');
+	$f = fopen($path, 'r');
+	$course = '';
+	while ($row = fgetcsv($f)) {
+		if($row[0] == $cid) {
+			$course = $row;
+		}
+	}
+	fclose($f);
+	return $course;
 }
 
-// Get a specific course from the preloaded array
-function getCourse($cid, $coursesArray) {
-    return $coursesArray[$cid] ?? '';
-}
 // Directory containing the change request JSON files
 $directory = "../course-change/requests";
 
