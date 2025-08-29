@@ -1,6 +1,8 @@
 <?php
 opcache_reset();
 
+define('SLASH', DIRECTORY_SEPARATOR);
+$docroot = $_SERVER['DOCUMENT_ROOT'] . '/lsapp//';
 define('BASE_DIR', $docroot);
 function build_path(...$segments) {
     return implode(SLASH, $segments);
